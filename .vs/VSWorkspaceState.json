@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\KampusEtkinlik",
+    "\\KampusEtkinlik\\Components"
   ],
-  "SelectedNode": "\\C:\\Users\\yusuf\\Source\\Repos\\YM341",
+  "SelectedNode": "\\KampusEtkinlik\\Components\\Routes.razor",
   "PreviewInSolutionExplorer": false
 }

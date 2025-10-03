@@ -1,14 +1,26 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\yusuf\\Desktop\\denemeler\\KampusEtkinlik\\",
+  "WorkspaceRootPath": "C:\\Users\\yusuf\\source\\repos\\YM341\\KampusEtkinlik\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|c:\\users\\yusuf\\desktop\\denemeler\\kampusetkinlik\\components\\routes.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|solutionrelative:components\\routes.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|c:\\users\\yusuf\\source\\repos\\ym341\\kampusetkinlik\\components\\pages\\homepage.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|solutionrelative:components\\pages\\homepage.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|c:\\users\\yusuf\\desktop\\denemeler\\kampusetkinlik\\components\\pages\\counter.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|c:\\users\\yusuf\\source\\repos\\ym341\\kampusetkinlik\\components\\pages\\login.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|solutionrelative:components\\pages\\login.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|c:\\users\\yusuf\\source\\repos\\ym341\\kampusetkinlik\\components\\layout\\navmenu.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|solutionrelative:components\\layout\\navmenu.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|c:\\users\\yusuf\\source\\repos\\ym341\\kampusetkinlik\\components\\pages\\counter.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|solutionrelative:components\\pages\\counter.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|c:\\users\\yusuf\\source\\repos\\ym341\\kampusetkinlik\\components\\layout\\mainlayout.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|solutionrelative:components\\layout\\mainlayout.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -35,25 +47,63 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Routes.razor",
-              "DocumentMoniker": "C:\\Users\\yusuf\\Desktop\\denemeler\\KampusEtkinlik\\Components\\Routes.razor",
-              "RelativeDocumentMoniker": "Components\\Routes.razor",
-              "ToolTip": "C:\\Users\\yusuf\\Desktop\\denemeler\\KampusEtkinlik\\Components\\Routes.razor",
-              "RelativeToolTip": "Components\\Routes.razor",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
+              "Title": "HomePage.razor",
+              "DocumentMoniker": "C:\\Users\\yusuf\\source\\repos\\YM341\\KampusEtkinlik\\Components\\Pages\\HomePage.razor",
+              "RelativeDocumentMoniker": "Components\\Pages\\HomePage.razor",
+              "ToolTip": "C:\\Users\\yusuf\\source\\repos\\YM341\\KampusEtkinlik\\Components\\Pages\\HomePage.razor",
+              "RelativeToolTip": "Components\\Pages\\HomePage.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-10-03T19:09:30.491Z",
+              "WhenOpened": "2025-10-03T20:14:58.33Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "NavMenu.razor",
+              "DocumentMoniker": "C:\\Users\\yusuf\\source\\repos\\YM341\\KampusEtkinlik\\Components\\Layout\\NavMenu.razor",
+              "RelativeDocumentMoniker": "Components\\Layout\\NavMenu.razor",
+              "ToolTip": "C:\\Users\\yusuf\\source\\repos\\YM341\\KampusEtkinlik\\Components\\Layout\\NavMenu.razor",
+              "RelativeToolTip": "Components\\Layout\\NavMenu.razor",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAowB0AAABZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-03T19:28:51.34Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "MainLayout.razor",
+              "DocumentMoniker": "C:\\Users\\yusuf\\source\\repos\\YM341\\KampusEtkinlik\\Components\\Layout\\MainLayout.razor",
+              "RelativeDocumentMoniker": "Components\\Layout\\MainLayout.razor",
+              "ToolTip": "C:\\Users\\yusuf\\source\\repos\\YM341\\KampusEtkinlik\\Components\\Layout\\MainLayout.razor",
+              "RelativeToolTip": "Components\\Layout\\MainLayout.razor",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-03T19:28:47.65Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "Login.razor",
+              "DocumentMoniker": "C:\\Users\\yusuf\\source\\repos\\YM341\\KampusEtkinlik\\Components\\Pages\\Login.razor",
+              "RelativeDocumentMoniker": "Components\\Pages\\Login.razor",
+              "ToolTip": "C:\\Users\\yusuf\\source\\repos\\YM341\\KampusEtkinlik\\Components\\Pages\\Login.razor",
+              "RelativeToolTip": "Components\\Pages\\Login.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-03T19:25:55.732Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "Counter.razor",
-              "DocumentMoniker": "C:\\Users\\yusuf\\Desktop\\denemeler\\KampusEtkinlik\\Components\\Pages\\Counter.razor",
+              "DocumentMoniker": "C:\\Users\\yusuf\\source\\repos\\YM341\\KampusEtkinlik\\Components\\Pages\\Counter.razor",
               "RelativeDocumentMoniker": "Components\\Pages\\Counter.razor",
-              "ToolTip": "C:\\Users\\yusuf\\Desktop\\denemeler\\KampusEtkinlik\\Components\\Pages\\Counter.razor",
+              "ToolTip": "C:\\Users\\yusuf\\source\\repos\\YM341\\KampusEtkinlik\\Components\\Pages\\Counter.razor",
               "RelativeToolTip": "Components\\Pages\\Counter.razor",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAA5AAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-10-03T19:08:41.603Z",
               "EditorCaption": ""

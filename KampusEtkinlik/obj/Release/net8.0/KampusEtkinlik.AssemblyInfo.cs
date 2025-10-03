@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("KampusEtkinlik")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9bd90fd7a5d2f26dab0c402f31d0233d4bfc49bf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e88c026e4c1da5840178a843887389a278c74ff1")]
 [assembly: System.Reflection.AssemblyProductAttribute("KampusEtkinlik")]
 [assembly: System.Reflection.AssemblyTitleAttribute("KampusEtkinlik")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
