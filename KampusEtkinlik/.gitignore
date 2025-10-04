@@ -53,17 +53,12 @@ secrets.json
 
 # Publish output
 publish/
-wwwroot/dist/
-wwwroot/node_modules/
 
-# Node (if using npm/yarn in wwwroot)
+# Node
 node_modules/
 npm-debug.log
 yarn-debug.log
 yarn-error.log
-
-# JetBrains Rider
-.idea/
 
 # Mac
 .DS_Store
