@@ -1,21 +1,23 @@
 # Build results
 bin/
 obj/
+artifacts/
 
-# User-specific files
-*.rsuser
+# Visual Studio
+.vs/
+*.vcxproj.user
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
 
-# Visual Studio
-.vs/
-*.vcxproj.user
-
 # Rider
 .idea/
 *.sln.iml
+
+# VS Code
+.vscode/
+.history/
 
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
@@ -27,32 +29,27 @@ iisexpress/
 
 # Logs
 *.log
+logs/
 
 # NuGet
 *.nupkg
 *.snupkg
 *.nuspec
-*.dll
-*.pdb
-*.cache
-*.tmp
+packages/
+.nuget/
+packages.lock.json
 project.lock.json
 project.fragment.lock.json
 artifacts/
 
-# Entity Framework
-*.dbmdl
-*.bak
-*.ldf
-*.mdf
-
-# Configs (local secrets)
-appsettings.Development.json
-appsettings.Local.json
-secrets.json
-
 # Publish output
 publish/
+publish-*/
+
+# Blazor / Static assets
+wwwroot/lib/
+wwwroot/dist/
+wwwroot/_content/
 
 # Node
 node_modules/
@@ -60,9 +57,59 @@ npm-debug.log
 yarn-debug.log
 yarn-error.log
 
-# Mac
-.DS_Store
+# Configs (local secrets)
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+secrets.*
+local.settings.json
+launchSettings.json
 
-# Windows
+# Entity Framework / Databases
+*.dbmdl
+*.bak
+*.ldf
+*.mdf
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-wal
+
+# Test results / coverage
+TestResults/
+coverage/
+coverage.opencover.xml
+*.coverage
+*.coveragexml
+*.trx
+
+# Temp / backups
+*.tmp
+*.temp
+tmp/
+temp/
+*.bak
+*.orig
+
+# OS files
+.DS_Store
 Thumbs.db
 desktop.ini
+
+# TFS / Temp artifacts (local temp folders)
+TFSTemp/
+AppData/Local/Temp/
+
+# Misc
+*.rsuser
+*.user
+
+# Do not commit compiled binaries or pdbs
+*.dll
+*.pdb
+
+# Keep package manager lockfiles if you want, otherwise ignore
+# pnpm-lock.yaml
+
+# End of .gitignore

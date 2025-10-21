@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Enes Ercan\\Desktop\\YM341\\KampusEtkinlik\\KampusEtkinlik.csproj": {}
+    "C:\\Users\\yusuf\\Source\\Repos\\YM341\\ClupApi\\ClupApi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Enes Ercan\\Desktop\\YM341\\KampusEtkinlik\\KampusEtkinlik.csproj": {
+    "C:\\Users\\yusuf\\Source\\Repos\\YM341\\ClupApi\\ClupApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Enes Ercan\\Desktop\\YM341\\KampusEtkinlik\\KampusEtkinlik.csproj",
-        "projectName": "KampusEtkinlik",
-        "projectPath": "C:\\Users\\Enes Ercan\\Desktop\\YM341\\KampusEtkinlik\\KampusEtkinlik.csproj",
-        "packagesPath": "C:\\Users\\Enes Ercan\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Enes Ercan\\Desktop\\YM341\\KampusEtkinlik\\obj\\",
+        "projectUniqueName": "C:\\Users\\yusuf\\Source\\Repos\\YM341\\ClupApi\\ClupApi.csproj",
+        "projectName": "ClupApi",
+        "projectPath": "C:\\Users\\yusuf\\Source\\Repos\\YM341\\ClupApi\\ClupApi.csproj",
+        "packagesPath": "C:\\Users\\yusuf\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\yusuf\\Source\\Repos\\YM341\\ClupApi\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Enes Ercan\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\yusuf\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Users\\yusuf\\source\\repos\\SqlSchemaReader\\bin\\Release": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -50,9 +51,9 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
-            "Newtonsoft.Json": {
+            "Swashbuckle.AspNetCore": {
               "target": "Package",
-              "version": "[13.0.4, )"
+              "version": "[6.6.2, )"
             }
           },
           "imports": [
