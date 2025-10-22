@@ -1,12 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\yusuf\\source\\repos\\YM341\\KampusEtkinlik\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|c:\\users\\yusuf\\source\\repos\\ym341\\kampusetkinlik\\components\\pages\\counter.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{23CBFE7C-BEF9-42C8-A992-EE50A43725FB}|KampusEtkinlik.csproj|solutionrelative:components\\pages\\counter.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,

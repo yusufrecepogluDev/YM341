@@ -11,12 +11,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("KampusEtkinlik")]
-[assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("ClupApi")]
+[assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e88c026e4c1da5840178a843887389a278c74ff1")]
-[assembly: System.Reflection.AssemblyProductAttribute("KampusEtkinlik")]
-[assembly: System.Reflection.AssemblyTitleAttribute("KampusEtkinlik")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+125cf15f36483b7bccaef3aa4b5e1c1599e7d419")]
+[assembly: System.Reflection.AssemblyProductAttribute("ClupApi")]
+[assembly: System.Reflection.AssemblyTitleAttribute("ClupApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // MSBuild WriteCodeFragment sınıfı tarafından oluşturuldu.

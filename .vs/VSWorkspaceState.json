@@ -2,9 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\KampusEtkinlik",
-    "\\KampusEtkinlik\\Components",
-    "\\KampusEtkinlik\\Components\\Layout"
+    "\\KampusEtkinlik\\Components"
   ],
-  "SelectedNode": "\\KampusEtkinlik\\Components\\Layout\\MainLayout.razor",
+  "SelectedNode": "\\KampusEtkinlik\\Components\\Routes.razor",
   "PreviewInSolutionExplorer": false
 }
