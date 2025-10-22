@@ -1,7 +1,10 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\KampusEtkinlik",
+    "\\KampusEtkinlik\\Components",
+    "\\KampusEtkinlik\\Components\\Layout"
   ],
-  "SelectedNode": "\\C:\\Users\\yusuf\\Source\\Repos\\YM341",
+  "SelectedNode": "\\KampusEtkinlik\\Components\\Layout\\MainLayout.razor",
   "PreviewInSolutionExplorer": false
 }
