@@ -1,0 +1,138 @@
+﻿@page "/login"
+@using KampusEtkinlik.Components.Layout
+@layout LoginLayout
+@inject NavigationManager NavigationManager
+
+<style>
+    body {
+        display: flex;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        min-width: 100vh;
+        background: linear-gradient(135deg, #c3e0ff, #f0f7ff);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .login-container {
+        width: 100%;
+        max-width: 400px;
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .login-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .login-container h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #0078d4;
+            margin-bottom: 1.8rem;
+            letter-spacing: 0.5px;
+        }
+
+    .form-group {
+        margin-bottom: 1.3rem;
+        text-align: left;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #444;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+            .form-group input:focus {
+                border-color: #0078d4;
+                box-shadow: 0 0 4px rgba(0, 120, 212, 0.4);
+            }
+
+    .buton {
+        width: 100%;
+        padding: 11px;
+        background-color: #0078d4;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.25s, transform 0.1s;
+    }
+
+        .buton:hover {
+            background-color: #005ea2;
+        }
+
+        .buton:active {
+            transform: scale(0.98);
+        }
+</style>
+
+<div class="login-container">
+    <h1>SİSTEME GİRİŞ</h1>
+
+    <form @onsubmit="HandleLogin" @onsubmit:preventdefault="true">
+        <div class="form-group">
+            <label for="Ogrenci_No">Öğrenci Numarası</label>
+            <input @bind="ogrenciNo" type="text" inputmode="numeric" id="Ogrenci_No" name="OgrenciNumarasi" required pattern="[0-9]*" placeholder="Okul Numaranızı Buraya Girin">
+        </div>
+
+        <div class="form-group">
+            <label for="Sifre">Şifre</label>
+            <input @bind="sifre" type="password" id="Sifre" name="Password" required placeholder="Şifrenizi Buraya Girin">
+        </div>
+
+        <div class="form-group">
+            <button class="buton" type="submit">Giriş Yap</button>
+        </div>
+    </form>
+
+    @if (!string.IsNullOrEmpty(testMesaji))
+    {
+        <div style="color:green; background-color:white; padding:10px; margin-top:15px; border-radius:5px;">
+            @testMesaji
+        </div>
+    }
+
+</div>
+
+
+@code {
+    private string ogrenciNo = "";
+    private string sifre = "";
+    private string testMesaji = "";
+
+    private void HandleLogin()
+    {
+        // 1. Önce test mesajını hazırla (çok hızlı olduğu için göremeyebilirsin bile)
+        testMesaji = "Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...";
+
+        // Konsola yazdır (Bunu Visual Studio'nun 'Çıktı' penceresinde görürsün)
+        Console.WriteLine($"Giriş denemesi: {ogrenciNo}. Yönlendiriliyor...");
+
+        // 2. ANA SAYFAYA YÖNLENDİR (YENİ EKLENDİ)
+        // "/" ana sayfa (index) demektir.
+        NavigationManager.NavigateTo("/");
+    }
+}

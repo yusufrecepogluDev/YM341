@@ -1,0 +1,115 @@
+# Build results
+bin/
+obj/
+artifacts/
+
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+.history/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# IIS
+iisexpress/
+*.vspscc
+*.vssscc
+
+# Logs
+*.log
+logs/
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+.nuget/
+packages.lock.json
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Publish output
+publish/
+publish-*/
+
+# Blazor / Static assets
+wwwroot/lib/
+wwwroot/dist/
+wwwroot/_content/
+
+# Node
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Configs (local secrets)
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+secrets.*
+local.settings.json
+launchSettings.json
+
+# Entity Framework / Databases
+*.dbmdl
+*.bak
+*.ldf
+*.mdf
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-wal
+
+# Test results / coverage
+TestResults/
+coverage/
+coverage.opencover.xml
+*.coverage
+*.coveragexml
+*.trx
+
+# Temp / backups
+*.tmp
+*.temp
+tmp/
+temp/
+*.bak
+*.orig
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# TFS / Temp artifacts (local temp folders)
+TFSTemp/
+AppData/Local/Temp/
+
+# Misc
+*.rsuser
+*.user
+
+# Do not commit compiled binaries or pdbs
+*.dll
+*.pdb
+
+# Keep package manager lockfiles if you want, otherwise ignore
+# pnpm-lock.yaml
+
+# End of .gitignore

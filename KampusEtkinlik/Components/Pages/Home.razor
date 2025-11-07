@@ -1,0 +1,75 @@
+﻿@page "/"
+@using KampusEtkinlik.Data.Models
+@using KampusEtkinlik.Services
+@inject ActivityService ActivityService
+@inject AnnouncementService AnnouncementService
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div style="background: #fee; border: 1px solid #c00; padding: 10px; margin: 10px 0; border-radius: 4px;">
+        <strong>⚠️ Hata:</strong> @errorMessage
+    </div>
+}
+
+<h3>Etkinlikler</h3>
+
+@if (activities == null)
+{
+    <p>Yükleniyor...</p>
+}
+else if (activities.Count == 0)
+{
+    <p>Henüz etkinlik yok.</p>
+}
+else
+{
+    <ul>
+        @foreach (var activity in activities)
+        {
+            <li>@activity.Title - @activity.StartDate.ToShortDateString()</li>
+        }
+    </ul>
+}
+
+<hr />
+
+<h3>Duyurular</h3>
+
+@if (announcements == null)
+{
+    <p>Yükleniyor...</p>
+}
+else if (announcements.Count == 0)
+{
+    <p>Henüz duyuru yok.</p>
+}
+else
+{
+    <ul>
+        @foreach (var announcement in announcements)
+        {
+            <li>@announcement.Title - @announcement.CreatedAt.ToShortDateString()</li>
+        }
+    </ul>
+}
+
+@code {
+    private List<Activity>? activities;
+    private List<Announcement>? announcements;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            activities = await ActivityService.GetAllAsync();
+            announcements = await AnnouncementService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"API bağlantı hatası: {ex.Message}";
+            activities = new List<Activity>();
+            announcements = new List<Announcement>();
+        }
+    }
+}
