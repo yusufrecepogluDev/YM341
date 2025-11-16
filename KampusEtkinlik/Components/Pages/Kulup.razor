@@ -1,64 +1,103 @@
 ﻿@page "/kulup"
-@attribute [StreamRendering]
+@inject ActivityService ActivityService
+@using KampusEtkinlik.Data.DTOs
+@using KampusEtkinlik.Services
 
-<PageTitle>Weather</PageTitle>
+<div>
+    <div>
+        <h2>Etkinlik Oluştur</h2>
 
-<h1>Weather</h1>
+        <EditForm FormName="ActivityCreate" Model="@model" OnValidSubmit="@CreateActivity">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-<p>This component demonstrates showing data.</p>
+            <ul>
+                <li>
+                    <label for="title"> Etkinlik Başlığı </label>
+                    <br />
+                    <InputText @bind-Value="model.ActivityName" />
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <label for="content"> Etkinlik Açıklaması </label>
+                    <br />
+                    <InputText @bind-Value="model.ActivityDescription" />
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <label for="title"> Etkinlik Başlangıç Tarihi </label>
+                    <br />
+                    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="model.StartDate" />
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <label for="title"> Etkinlik Bitiş Tarihi </label>
+                    <br />
+                    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="model.EndDate" />
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <label for="title"> Etkinlik Katılımcı Sınırı </label>
+                    <br />
+                    <InputNumber @bind-Value="model.ParticipantLimit" />
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <label for="title"> Etkinlik Oylama Başlangıç Tarihi </label>
+                    <br />
+                    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="model.EvaluationStartDate" />
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <label for="title"> Etkinlik Oylama Bitiş Tarihi </label>
+                    <br />
+                    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="model.EvaluationEndDate" />
+                </li>
+            </ul>
+            <button type="submit" class="alert-info">
+                Etkinlik Oluştur
+            </button>
+        </EditForm>
 
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+        @if (!string.IsNullOrEmpty(mesaj))
+        {
+            <p>@mesaj</p>
+        }
+    </div>
+</div>
 
 @code {
-    private WeatherForecast[]? forecasts;
+    [SupplyParameterFromForm]
+    private ActivityCreateDto model { get; set; } = new();
+    
+    private string mesaj = "";
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        // Simulate asynchronous loading to demonstrate streaming rendering
-        await Task.Delay(500);
-
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
+        model.StartDate = DateTime.Now;
+        model.EndDate = DateTime.Now.AddDays(1);
     }
 
-    private class WeatherForecast
+    private async Task CreateActivity()
     {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        try
+        {
+            var sonuc = await ActivityService.AddAsync(model);
+
+            if (sonuc)
+                mesaj = "Etkinlik başarıyla eklendi.";
+            else
+                mesaj = "API hatası oluştu.";
+        }
+        catch (Exception ex)
+        {
+            mesaj = $"Hata: {ex.Message}";
+        }
     }
 }

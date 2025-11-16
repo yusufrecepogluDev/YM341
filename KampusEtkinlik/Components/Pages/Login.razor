@@ -1,4 +1,5 @@
-﻿@page "/login"
+﻿@page "/"
+@page "/login"
 @using KampusEtkinlik.Components.Layout
 @layout LoginLayout
 @inject NavigationManager NavigationManager
@@ -92,21 +93,21 @@
 <div class="login-container">
     <h1>SİSTEME GİRİŞ</h1>
 
-    <form @onsubmit="HandleLogin" @onsubmit:preventdefault="true">
+    <EditForm Model="@loginModel" OnValidSubmit="@HandleLogin" FormName="LoginForm">
         <div class="form-group">
             <label for="Ogrenci_No">Öğrenci Numarası</label>
-            <input @bind="ogrenciNo" type="text" inputmode="numeric" id="Ogrenci_No" name="OgrenciNumarasi" required pattern="[0-9]*" placeholder="Okul Numaranızı Buraya Girin">
+            <InputText @bind-Value="loginModel.OgrenciNo" type="text" inputmode="numeric" id="Ogrenci_No" required placeholder="Okul Numaranızı Buraya Girin" />
         </div>
 
         <div class="form-group">
             <label for="Sifre">Şifre</label>
-            <input @bind="sifre" type="password" id="Sifre" name="Password" required placeholder="Şifrenizi Buraya Girin">
+            <InputText @bind-Value="loginModel.Sifre" type="password" id="Sifre" required placeholder="Şifrenizi Buraya Girin" />
         </div>
 
         <div class="form-group">
             <button class="buton" type="submit">Giriş Yap</button>
         </div>
-    </form>
+    </EditForm>
 
     @if (!string.IsNullOrEmpty(testMesaji))
     {
@@ -119,20 +120,28 @@
 
 
 @code {
-    private string ogrenciNo = "";
-    private string sifre = "";
+    [SupplyParameterFromForm]
+    private LoginModel loginModel { get; set; } = new();
+    
     private string testMesaji = "";
 
     private void HandleLogin()
     {
-        // 1. Önce test mesajını hazırla (çok hızlı olduğu için göremeyebilirsin bile)
-        testMesaji = "Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...";
+        testMesaji = "Giriş yapılıyor...";
+        
+        if (loginModel.Sifre == "12345" && loginModel.OgrenciNo == "2023001")
+        {
+            NavigationManager.NavigateTo("/home");
+        }
+        else
+        {
+            testMesaji = "Hatalı giriş bilgileri!";
+        }
+    }
 
-        // Konsola yazdır (Bunu Visual Studio'nun 'Çıktı' penceresinde görürsün)
-        Console.WriteLine($"Giriş denemesi: {ogrenciNo}. Yönlendiriliyor...");
-
-        // 2. ANA SAYFAYA YÖNLENDİR (YENİ EKLENDİ)
-        // "/" ana sayfa (index) demektir.
-        NavigationManager.NavigateTo("/");
+    public class LoginModel
+    {
+        public string OgrenciNo { get; set; } = "";
+        public string Sifre { get; set; } = "";
     }
 }

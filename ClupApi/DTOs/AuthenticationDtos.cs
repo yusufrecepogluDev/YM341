@@ -1,0 +1,91 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace ClupApi.DTOs
+{
+
+    public class StudentLoginRequestDto
+    {
+        [Required(ErrorMessage = "Öğrenci numarası zorunludur")]
+        public long StudentNumber { get; set; }
+
+        [Required(ErrorMessage = "Şifre zorunludur")]
+        [MaxLength(20, ErrorMessage = "Şifre en fazla 20 karakter olabilir")]
+        public string StudentPassword { get; set; } = string.Empty;
+    }
+
+    public class StudentLoginResponseDto
+    {
+        public int StudentID { get; set; }
+        public string StudentName { get; set; } = string.Empty;
+        public string StudentSurname { get; set; } = string.Empty;
+        public string StudentMail { get; set; } = string.Empty;
+        public long StudentNumber { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class StudentSinginRequestDto
+    {
+        [Required(ErrorMessage = "Öğrenci adı zorunludur")]
+        [MaxLength(50, ErrorMessage = "Öğrenci adı en fazla 50 karakter olabilir")]
+        public string StudentName { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Öğrenci soyadı zorunludur")]
+        [MaxLength(50, ErrorMessage = "Öğrenci soyadı en fazla 50 karakter olabilir")]
+        public string StudentSurname { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Öğrenci maili zorunludur")]
+        [EmailAddress(ErrorMessage = "Geçersiz mail formatı")]
+        public string StudentMail { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Öğrenci numarası zorunludur")]
+        public long StudentNumber { get; set; }
+        [Required(ErrorMessage = "Şifre zorunludur")]
+        [MaxLength(20, ErrorMessage = "Şifre en fazla 20 karakter olabilir")]
+        public string StudentPassword { get; set; } = string.Empty;
+    }
+
+    public class StudentSinginResponseDto
+    {
+        public int StudentID { get; set; }
+        public string StudentName { get; set; } = string.Empty;
+        public string StudentSurname { get; set; } = string.Empty;
+        public string StudentMail { get; set; } = string.Empty;
+        public long StudentNumber { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class ClubLoginRequestDto
+    {
+        [Required(ErrorMessage = "Kulüp numarası zorunludur")]
+        public long ClubNumber { get; set; }
+
+        [Required(ErrorMessage = "Şifre zorunludur")]
+        [MaxLength(20, ErrorMessage = "Şifre en fazla 20 karakter olabilir")]
+        public string ClubPassword { get; set; } = string.Empty;
+    }
+
+    public class ClubLoginResponseDto
+    {
+        public int ClubID { get; set; }
+        public string ClubName { get; set; } = string.Empty;
+        public long ClubNumber { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class ClubSinginRequestDto
+    {
+        [Required(ErrorMessage = "Kulüp adı zorunludur")]
+        [MaxLength(100, ErrorMessage = "Kulüp adı en fazla 100 karakter olabilir")]
+        public string ClubName { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Kulüp numarası zorunludur")]
+        public long ClubNumber { get; set; }
+        [Required(ErrorMessage = "Şifre zorunludur")]
+        [MaxLength(20, ErrorMessage = "Şifre en fazla 20 karakter olabilir")]
+        public string ClubPassword { get; set; } = string.Empty;
+    }
+
+    public class ClubSinginResponseDto
+    {
+        public int ClubID { get; set; }
+        public string ClubName { get; set; } = string.Empty;
+        public long ClubNumber { get; set; }
+        public bool IsActive { get; set; }
+    }
+}

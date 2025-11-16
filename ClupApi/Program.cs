@@ -1,6 +1,7 @@
 using ClupApi;
-using ClupApi.Models;
 using ClupApi.Repositories;
+using ClupApi.Repositories.Interfaces;
+using ClupApi.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -11,8 +12,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Repository dependency injection
-builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
-builder.Services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
+builder.Services.AddScoped<ClupApi.Repositories.IActivityRepository, ActivityRepository>();
+builder.Services.AddScoped<ClupApi.Repositories.IAnnouncementRepository, AnnouncementRepository>();
+builder.Services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
+
+// Service dependency injection
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 // Controller�lar� JSON format�nda d�zenli ��kt� ile ekle
 builder.Services.AddControllers()
@@ -33,7 +38,6 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 
-    // Swagger testleri i�in geni� izinli profil
     options.AddPolicy("AllowSwagger", policy =>
     {
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
@@ -48,7 +52,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "ClupApi",
         Version = "v1",
-        Description = "Kampus kul�p etkinlik y�netim API'si"
+        Description = "Kampus kulüp etkinlik yönetim API'si"
     });
 });
 
