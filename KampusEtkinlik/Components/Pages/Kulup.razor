@@ -3,83 +3,270 @@
 @using Blazored.LocalStorage
 @using KampusEtkinlik.Data.DTOs
 @using KampusEtkinlik.Services
-@inject ILocalStorageService LocalStorage
+<style>
+    body {
+    }
 
-<div>
-    <div>
-        <h2>Etkinlik Oluştur</h2>
 
-        @if (!string.IsNullOrEmpty(mesaj))
-        {
-            <div style="padding: 10px; margin-bottom: 15px; border-radius: 5px; background-color: #f0f0f0;">
-                @mesaj
-            </div>
+
+    .etk-cont {
+        background-color: white;
+        border: 1px solid black;
+        border-radius: 12px;
+        padding: 30px;
+        max-width: 600px;
+        margin: 0 auto;
+        flex:0 0 600px;
+        flex:1;
+    }
+
+        .etk-cont:hover {
+            transform: translateY(-1.5px);
+            transition: all ease 1.2s;
         }
+
+    .etk-title {
+        text-align: center;
+        color: #333;
+        margin-bottom: 25px;
+        font-weight: 600;
+    }
+
+    .trh-grp {
+        display: flex;
+        gap: 20px;
+    }
+
+    .etk-btn {
+        width: 100%;
+        padding: 12px;
+        background-color: white;
+        color: black;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+        margin-top: 10px;
+        border: 1px solid black;
+    }
+
+        .etk-btn:hover {
+            transform: translateY(-1px);
+            transition: all ease 1.2s;
+            background: black;
+            color: white;
+            box-shadow: rgba(0, 0, 0, 0.4);
+        }
+    .form-control-2 {
+        width: 100%;
+        resize: vertical;
+        min-height: 80px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+
+    .label-1 {
+        display: block;
+    }
+
+    .form-group {
+        margin: 10px;
+    }
+
+    .sayfa-cont{
+        display:flex;
+        gap:20px;
+        padding:20px;
+        align-items:flex-start;
+    }
+    
+    .etkinlikler-cont{
+    flex:1;
+    }
+
+    .etkinlikler-cont {
+        background-color: white;
+        border: 1px solid black;
+        border-radius: 12px;
+        padding: 30px;
+        max-width: 600px;
+        margin: 0 auto;
+        flex: 0 0 600px;
+        flex: 1;
+    }
+    
+    .etkinlik-icerik{
+        border:1px solid black;
+        padding:5px;
+        border-radius:12px;
+        margin-bottom:10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .etkinlik-text {
+        flex: 1;
+    }
+
+    .dropdown {
+        position: relative;
+        display: inline-block;
+        margin-top:19px;
+    }
+
+    .dropdown-btn {
+        background: none;
+        border: 1px solid #ddd;
+        padding: 2px 8px;
+        cursor: pointer;
+        font-size: 1.2rem;
+        border-radius: 7px;
+    }
+
+    .dropdown-btn:hover{
+        background:black;
+        color:white;
+        transition:all 1.2s ease;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: white;
+        min-width: 120px;
+        box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+        z-index: 1;
+        border-radius: 20px;
+        right: 0;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    .dropdown-content a {
+        color: black;
+        padding: 10px;
+        text-decoration: none;
+        display: block;
+    }
+
+    .dropdown-content a:hover {
+        background-color: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .etk-title-2{
+        text-align: center;
+        color: #333;
+        margin-bottom: 25px;
+        font-weight: 600;
+    }
+
+</style>
+
+<div class="sayfa-cont">
+    <div class="etk-cont">
+        <h2 class="etk-title">Etkinlik Oluştur</h2>
 
         <EditForm FormName="ActivityCreate" Model="@model" OnValidSubmit="@CreateActivity">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <ul>
-                <li>
-                    <label for="title"> Etkinlik Başlığı </label>
-                    <br />
-                    <InputText @bind-Value="model.ActivityName" />
-                </li>
-            </ul>
-            <ul>
-                <li>
-                    <label for="content"> Etkinlik Açıklaması </label>
-                    <br />
-                    <InputText @bind-Value="model.ActivityDescription" />
-                </li>
-            </ul>
-            <ul>
-                <li>
-                    <label for="title"> Etkinlik Başlangıç Tarihi </label>
-                    <br />
-                    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="model.StartDate" />
-                </li>
-            </ul>
-            <ul>
-                <li>
-                    <label for="title"> Etkinlik Bitiş Tarihi </label>
-                    <br />
-                    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="model.EndDate" />
-                </li>
-            </ul>
-            <ul>
-                <li>
-                    <label for="title"> Etkinlik Katılımcı Sınırı </label>
-                    <br />
-                    <InputNumber @bind-Value="model.ParticipantLimit" />
-                </li>
-            </ul>
-            <ul>
-                <li>
-                    <label for="title"> Etkinlik Oylama Başlangıç Tarihi </label>
-                    <br />
-                    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="model.EvaluationStartDate" />
-                </li>
-            </ul>
-            <ul>
-                <li>
-                    <label for="title"> Etkinlik Oylama Bitiş Tarihi </label>
-                    <br />
-                    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="model.EvaluationEndDate" />
-                </li>
-            </ul>
-            <ul>
-                <li>
-                    <label for="clubId"> Düzenleyen Kulüp ID (Otomatik) </label>
-                    <br />
-                    <InputNumber @bind-Value="model.OrganizingClubID" readonly style="background-color: #f0f0f0;" />
-                </li>
-            </ul>
-            <button type="submit" class="alert-info">
+            <div class="form-group">
+                <label class="label-1">Etkinlik Başlığı</label>
+                <InputTextArea @bind-Value="model.ActivityName" class="form-control-2"  placeholder="Etkinliği başlığını buraya girin" />
+            </div>
+
+            <div class="form-group">
+                <label class="label-1">Etkinlik Açıklaması</label>
+                <InputTextArea @bind-Value="model.ActivityDescription" class="form-control-2" placeholder="Etkinlik açıklamasını buraya girin"/> 
+            </div>
+
+            <div class="trh-grp">  @* tarihleri gruplandırmak için trh-grp diye class adı ekledim --Enes*@
+                <div class="form-group">
+                    <label>Etkinlik Başlangıç Tarihi</label>
+                    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="model.StartDate" class="form-control"  />
+                </div>
+
+                <div class="form-group">
+                    <label>Etkinlik Bitiş Tarihi</label>
+                    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="model.EndDate" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Etkinlik Katılımcı Sınırı</label>
+                <InputNumber @bind-Value="model.ParticipantLimit" class="form-control" />
+            </div>
+
+            <div class="trh-grp"> @* Yukarıdaki ile aynı tarihler yan yana ekranda güzel dursun diye ekledim. --Enes*@
+            <div class="form-group">
+                <label>Etkinlik Oylama Başlangıç Tarihi</label>
+                <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="model.EvaluationStartDate" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label>Etkinlik Oylama Bitiş Tarihi</label>
+                <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="model.EvaluationEndDate" class="form-control" />
+            </div>
+            </div>
+
+            <button type="submit" class="etk-btn">
                 Etkinlik Oluştur
             </button>
         </EditForm>
+    </div>
+    <div class="etkinlikler-cont">
+        <h2 class="etk-title-2">Etkinlikler</h2>
+
+        <div class="etkinlik-kart">
+            <div class="etkinlik-icerik">
+                <div class="etkinlik-text">
+                    <h5 class="etkinlik-baslik">Mühendis Beyinler</h5>
+                    <p class="etkinlik-ozet">2 Saatlik Garanti BBVA Siber Güvenlik Yöneticisi Semineri</p>
+                </div>
+                <span class="dropdown">
+                    <button class="dropdown-btn">⋮</button>
+                    <div class="dropdown-content">
+                        <a href="#">Düzenle</a>
+                        <a href="#">Sil</a>
+                    </div>
+                </span>
+            </div>
+            <div class="etkinlik-icerik">
+                <div class="etkinlik-text">
+                    <h5 class="etkinlik-baslik">GDG Campus</h5>
+                    <p class="etkinlik-ozet">X Şirketinin yazılım departmanına yapılacak gezi</p>
+                </div>
+                <span class="dropdown">
+                    <button class="dropdown-btn">⋮</button>
+                    <div class="dropdown-content">
+                        <a href="#">Düzenle</a>
+                        <a href="#">Sil</a>
+                    </div>
+                </span>
+            </div>
+            <div class="etkinlik-icerik">
+                <div class="etkinlik-text">
+                    <h5 class="etkinlik-baslik">Doğuş Teknofest Kulübü</h5>
+                    <p class="etkinlik-ozet">X geliştirmesi için buluşma</p>
+                </div>
+                <span class="dropdown">
+                    <button class="dropdown-btn">⋮</button>
+                    <div class="dropdown-content">
+                        <a href="#">Düzenle</a>
+                        <a href="#">Sil</a>
+                    </div>
+                </span>
+            </div>
+        </div>
     </div>
 </div>
 
