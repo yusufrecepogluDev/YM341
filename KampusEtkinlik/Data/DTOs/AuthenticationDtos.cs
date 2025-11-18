@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ClupApi.DTOs
+namespace KampusEtkinlik.DTOs
 {
 
     public class StudentLoginRequestDto
@@ -76,6 +76,10 @@ namespace ClupApi.DTOs
         public string ClubName { get; set; } = string.Empty;
         [Required(ErrorMessage = "Kulüp numarası zorunludur")]
         public long ClubNumber { get; set; }
+        [MaxLength(500, ErrorMessage = "Kulüp açıklaması en fazla 500 karakter olabilir")]
+        public string? ClubDescription { get; set; }
+        [EmailAddress(ErrorMessage = "Geçersiz mail formatı")]
+        public string? ClubEmail { get; set; }
         [Required(ErrorMessage = "Şifre zorunludur")]
         [MaxLength(20, ErrorMessage = "Şifre en fazla 20 karakter olabilir")]
         public string ClubPassword { get; set; } = string.Empty;

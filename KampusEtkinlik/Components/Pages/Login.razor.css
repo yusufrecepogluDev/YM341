@@ -18,10 +18,37 @@
     .login-container h1 {
         font-size: 1.6rem;
         font-weight: 700;
-        color: #0078d4;
+        color: #dc3545;
         margin-bottom: 1.8rem;
         letter-spacing: 0.5px;
     }
+
+.user-type-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+}
+
+    .user-type-selector button {
+        flex: 1;
+        padding: 10px;
+        border: 2px solid #c82333;
+        background-color: white;
+        color: #dc3545;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .user-type-selector button:hover {
+            background-color: #f0f7ff;
+        }
+
+        .user-type-selector button.active {
+            background-color: #dc3545;
+            color: white;
+        }
 
 .form-group {
     margin-bottom: 1.3rem;
@@ -54,7 +81,7 @@
 .buton {
     width: 100%;
     padding: 11px;
-    background-color: #0078d4;
+    background-color: #dc3545;
     border: none;
     border-radius: 6px;
     color: white;
@@ -64,10 +91,64 @@
     transition: background-color 0.25s, transform 0.1s;
 }
 
-    .buton:hover {
-        background-color: #005ea2;
+    .buton:hover:not(:disabled) {
+        background-color: #c82333;
     }
 
-    .buton:active {
+    .buton:active:not(:disabled) {
         transform: scale(0.98);
+    }
+
+    .buton:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+.error-message {
+    color: #d13438;
+    background-color: #fef0f0;
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #d13438;
+}
+
+.success-message {
+    color: #107c10;
+    background-color: #f0f9f0;
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #107c10;
+}
+
+.validation-message {
+    color: #d13438;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+    .remember-me label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        margin-bottom: 0;
+        font-weight: 500;
+    }
+
+    .remember-me input[type="checkbox"] {
+        width: auto;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .remember-me span {
+        user-select: none;
     }

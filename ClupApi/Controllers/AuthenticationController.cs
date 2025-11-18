@@ -59,15 +59,15 @@ namespace ClupApi.Controllers
                 "Giriş başarılı"));
         }
 
-        [HttpPost("student/singin")]
-        public async Task<IActionResult> StudentSingin([FromBody] StudentSinginRequestDto request)
+        [HttpPost("student/register")]
+        public async Task<IActionResult> StudentRegister([FromBody] StudentRegisterRequestDto request)
         {
             if (!ModelState.IsValid)
             {
                 return HandleValidationErrors(ModelState);
             }
 
-            var success = await _authenticationService.SinginStudentAsync(request);
+            var success = await _authenticationService.RegisterStudentAsync(request);
 
             if (!success)
             {
@@ -82,14 +82,14 @@ namespace ClupApi.Controllers
                 "Kayıt başarılı"));
         }
 
-        [HttpPost("club/singin")]
-        public async Task<IActionResult> ClubSingin([FromBody] ClubSinginRequestDto request)
+        [HttpPost("club/register")]
+        public async Task<IActionResult> ClubRegister([FromBody] ClubRegisterRequestDto request)
         {
             if (!ModelState.IsValid)
             {
                 return HandleValidationErrors(ModelState);
             }
-            var success = await _authenticationService.SinginClubAsync(request);
+            var success = await _authenticationService.RegisterClubAsync(request);
             if (!success)
             {
                 return BadRequest(Models.ApiResponse.ErrorResponse(

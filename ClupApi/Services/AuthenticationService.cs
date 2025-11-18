@@ -56,7 +56,7 @@ namespace ClupApi.Services
             };
         }
 
-        public async Task<bool> SinginStudentAsync(StudentSinginRequestDto request)
+        public async Task<bool> RegisterStudentAsync(StudentRegisterRequestDto request)
         {
             // Check if student number already exists
             var existingStudentByNumber = await _repository.GetStudentByNumberAsync(request.StudentNumber);
@@ -85,7 +85,7 @@ namespace ClupApi.Services
             return await _repository.AddStudentAsync(student);
         }
 
-        public async Task<bool> SinginClubAsync(ClubSinginRequestDto request)
+        public async Task<bool> RegisterClubAsync(ClubRegisterRequestDto request)
         {
             // Check if club number already exists
             var existingClub = await _repository.GetClubByNumberAsync(request.ClubNumber);

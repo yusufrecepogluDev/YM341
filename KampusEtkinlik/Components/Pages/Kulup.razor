@@ -1,11 +1,20 @@
 ﻿@page "/kulup"
 @inject ActivityService ActivityService
+@using Blazored.LocalStorage
 @using KampusEtkinlik.Data.DTOs
 @using KampusEtkinlik.Services
+@inject ILocalStorageService LocalStorage
 
 <div>
     <div>
         <h2>Etkinlik Oluştur</h2>
+
+        @if (!string.IsNullOrEmpty(mesaj))
+        {
+            <div style="padding: 10px; margin-bottom: 15px; border-radius: 5px; background-color: #f0f0f0;">
+                @mesaj
+            </div>
+        }
 
         <EditForm FormName="ActivityCreate" Model="@model" OnValidSubmit="@CreateActivity">
             <DataAnnotationsValidator />
@@ -60,44 +69,97 @@
                     <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="model.EvaluationEndDate" />
                 </li>
             </ul>
+            <ul>
+                <li>
+                    <label for="clubId"> Düzenleyen Kulüp ID (Otomatik) </label>
+                    <br />
+                    <InputNumber @bind-Value="model.OrganizingClubID" readonly style="background-color: #f0f0f0;" />
+                </li>
+            </ul>
             <button type="submit" class="alert-info">
                 Etkinlik Oluştur
             </button>
         </EditForm>
-
-        @if (!string.IsNullOrEmpty(mesaj))
-        {
-            <p>@mesaj</p>
-        }
     </div>
 </div>
 
 @code {
     [SupplyParameterFromForm]
     private ActivityCreateDto model { get; set; } = new();
-    
+
     private string mesaj = "";
+    private bool isFirstRender = true;
 
     protected override void OnInitialized()
     {
+        // Sadece tarih değerlerini ayarla (JavaScript gerektirmeyen işlemler)
         model.StartDate = DateTime.Now;
         model.EndDate = DateTime.Now.AddDays(1);
+        model.EvaluationStartDate = DateTime.Now;
+        model.EvaluationEndDate = DateTime.Now.AddDays(7);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // İlk render'dan sonra LocalStorage'a erişebiliriz
+            try
+            {
+                var clubId = await LocalStorage.GetItemAsync<int>("rememberedClubID");
+                System.Diagnostics.Debug.WriteLine($"LocalStorage'dan okunan ClubID: {clubId}");
+                
+                if (clubId > 0)
+                {
+                    model.OrganizingClubID = clubId;
+                    mesaj = $"✅ Kulüp ID yüklendi: {clubId}";
+                }
+                else
+                {
+                    mesaj = $"⚠️ Kulüp bilgisi bulunamadı (ID: {clubId}). Lütfen önce giriş yapın.";
+                }
+                
+                // UI'ı güncelle
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"LocalStorage hatası: {ex.Message}");
+                mesaj = $"⚠️ Kulüp bilgisi yüklenemedi: {ex.Message}. Lütfen önce giriş yapın.";
+                model.OrganizingClubID = 0;
+                StateHasChanged();
+            }
+        }
     }
 
     private async Task CreateActivity()
     {
+        // ClubID kontrolü
+        if (model.OrganizingClubID <= 0)
+        {
+            mesaj = "❌ Hata: Kulüp bilgisi bulunamadı. Lütfen önce giriş yapın.";
+            return;
+        }
+
         try
         {
             var sonuc = await ActivityService.AddAsync(model);
 
             if (sonuc)
-                mesaj = "Etkinlik başarıyla eklendi.";
+                mesaj = "✅ Etkinlik başarıyla eklendi.";
             else
-                mesaj = "API hatası oluştu.";
+                mesaj = "❌ API hatası oluştu.";
         }
         catch (Exception ex)
         {
-            mesaj = $"Hata: {ex.Message}";
+            if (ex.Message.Contains("FOREIGN KEY"))
+            {
+                mesaj = $"❌ Hata: Kulüp ID ({model.OrganizingClubID}) veritabanında bulunamadı. Lütfen tekrar giriş yapın.";
+            }
+            else
+            {
+                mesaj = $"❌ Hata: {ex.Message}";
+            }
         }
     }
 }

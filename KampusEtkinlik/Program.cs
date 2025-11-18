@@ -1,5 +1,6 @@
 using KampusEtkinlik.Components;
-using KampusEtkinlik.Services; // EKLENDÝ
+using KampusEtkinlik.Services;
+using Blazored.LocalStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,9 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// EKLENDÝ: API servislerini DI konteynerine kaydet
+// LocalStorage servisi
+builder.Services.AddBlazoredLocalStorage();
+
+// API servislerini DI konteynerine kaydet
 builder.Services.AddHttpClient<AnnouncementService>();
 builder.Services.AddHttpClient<ActivityService>();
+builder.Services.AddHttpClient<AuthenticationService>();
 
 var app = builder.Build();
 

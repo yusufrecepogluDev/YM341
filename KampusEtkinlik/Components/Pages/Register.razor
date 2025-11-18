@@ -1,0 +1,470 @@
+﻿@page "/register"
+@rendermode InteractiveServer
+@using KampusEtkinlik.Components.Layout
+@using KampusEtkinlik.DTOs
+@using KampusEtkinlik.Services
+@using System.ComponentModel.DataAnnotations
+@layout LoginLayout
+@inject NavigationManager NavigationManager
+@inject AuthenticationService AuthService
+
+<style>
+    body {
+        display: flex;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        min-width: 100vw;
+        background: linear-gradient(rgba(220, 53, 69, 0.7), rgba(139, 0, 0, 0.7)), url('/images/dudullu-yerleskesi.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .login-container {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        width: 100%;
+        max-width: 450px;
+        margin: 20px;
+    }
+
+        .login-container h1 {
+            color: #dc3545;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+    .user-type-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+    }
+
+        .user-type-selector button {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #dc3545;
+            background: white;
+            color: #dc3545;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+            .user-type-selector button:hover {
+                background: #ffe5e8;
+            }
+
+            .user-type-selector button.active {
+                background: #dc3545;
+                color: white;
+            }
+
+    .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+            .form-group input:focus,
+            .form-group textarea:focus {
+                outline: none;
+                border-color: #dc3545;
+            }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+    .buton {
+        width: 100%;
+        padding: 14px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+        .buton:hover:not(:disabled) {
+            background: #c82333;
+        }
+
+        .buton:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+    .error-message {
+        background: #fee;
+        color: #c33;
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 15px;
+        font-size: 14px;
+        border-left: 4px solid #c33;
+    }
+
+    .success-message {
+        background: #efe;
+        color: #3c3;
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 15px;
+        font-size: 14px;
+        border-left: 4px solid #3c3;
+    }
+
+    .validation-message {
+        color: #c33;
+        font-size: 13px;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .remember-me {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .remember-me label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
+        }
+</style>
+
+<div class="login-container">
+    <h1>KAYIT OL</h1>
+
+    <div class="user-type-selector">
+        <button class="@(isStudentRegister ? "active" : "")" @onclick="() => isStudentRegister = true">Öğrenci</button>
+        <button class="@(!isStudentRegister ? "active" : "")" @onclick="() => isStudentRegister = false">Kulüp</button>
+    </div>
+
+    @if (isStudentRegister)
+    {
+        <EditForm Model="@studentRegisterForm" OnValidSubmit="@HandleStudentRegister">
+            <DataAnnotationsValidator />
+            
+            <div class="form-group">
+                <label for="StudentNumber">Öğrenci Numarası</label>
+                <InputText @bind-Value="studentRegisterForm.StudentNumberText" type="text" inputmode="numeric" id="StudentNumber" placeholder="Okul Numaranızı Girin" />
+                <ValidationMessage For="@(() => studentRegisterForm.StudentNumberText)" />
+            </div>
+
+            <div class="form-group">
+                <label for="StudentName">Ad</label>
+                <InputText @bind-Value="studentRegisterForm.StudentName" type="text" id="StudentName" placeholder="Adınızı Girin" />
+                <ValidationMessage For="@(() => studentRegisterForm.StudentName)" />
+            </div>
+
+            <div class="form-group">
+                <label for="StudentSurname">Soyad</label>
+                <InputText @bind-Value="studentRegisterForm.StudentSurname" type="text" id="StudentSurname" placeholder="Soyadınızı Girin" />
+                <ValidationMessage For="@(() => studentRegisterForm.StudentSurname)" />
+            </div>
+
+            <div class="form-group">
+                <label for="StudentEmail">E-posta</label>
+                <InputText @bind-Value="studentRegisterForm.StudentEmail" type="email" id="StudentEmail" placeholder="E-posta Adresinizi Girin" />
+                <ValidationMessage For="@(() => studentRegisterForm.StudentEmail)" />
+            </div>
+
+            <div class="form-group">
+                <label for="StudentPassword">Şifre</label>
+                <InputText @bind-Value="studentRegisterForm.StudentPassword" type="password" id="StudentPassword" placeholder="Şifrenizi Girin" />
+                <ValidationMessage For="@(() => studentRegisterForm.StudentPassword)" />
+            </div>
+
+            <div class="form-group">
+                <label for="StudentPasswordConfirm">Şifre Tekrar</label>
+                <InputText @bind-Value="studentRegisterForm.StudentPasswordConfirm" type="password" id="StudentPasswordConfirm" placeholder="Şifrenizi Tekrar Girin" />
+                <ValidationMessage For="@(() => studentRegisterForm.StudentPasswordConfirm)" />
+            </div>
+
+            <div class="form-group">
+                <button class="buton" type="submit" disabled="@isLoading">
+                    @if (isLoading)
+                    {
+                        <span>Kayıt yapılıyor...</span>
+                    }
+                    else
+                    {
+                        <span>Kayıt Ol</span>
+                    }
+                </button>
+            </div>
+        </EditForm>
+    }
+    else
+    {
+        <EditForm Model="@clubRegisterForm" OnValidSubmit="@HandleClubRegister">
+            <DataAnnotationsValidator />
+            
+            <div class="form-group">
+                <label for="ClubNumber">Kulüp Numarası</label>
+                <InputText @bind-Value="clubRegisterForm.ClubNumberText" type="text" inputmode="numeric" id="ClubNumber" placeholder="Kulüp Numaranızı Girin" />
+                <ValidationMessage For="@(() => clubRegisterForm.ClubNumberText)" />
+            </div>
+
+            <div class="form-group">
+                <label for="ClubName">Kulüp Adı</label>
+                <InputText @bind-Value="clubRegisterForm.ClubName" type="text" id="ClubName" placeholder="Kulüp Adını Girin" />
+                <ValidationMessage For="@(() => clubRegisterForm.ClubName)" />
+            </div>
+
+            <div class="form-group">
+                <label for="ClubDescription">Kulüp Açıklaması</label>
+                <InputTextArea @bind-Value="clubRegisterForm.ClubDescription" id="ClubDescription" placeholder="Kulüp Açıklamasını Girin" rows="3" />
+                <ValidationMessage For="@(() => clubRegisterForm.ClubDescription)" />
+            </div>
+
+            <div class="form-group">
+                <label for="ClubEmail">E-posta</label>
+                <InputText @bind-Value="clubRegisterForm.ClubEmail" type="email" id="ClubEmail" placeholder="E-posta Adresini Girin" />
+                <ValidationMessage For="@(() => clubRegisterForm.ClubEmail)" />
+            </div>
+
+            <div class="form-group">
+                <label for="ClubPassword">Şifre</label>
+                <InputText @bind-Value="clubRegisterForm.ClubPassword" type="password" id="ClubPassword" placeholder="Şifrenizi Girin" />
+                <ValidationMessage For="@(() => clubRegisterForm.ClubPassword)" />
+            </div>
+
+            <div class="form-group">
+                <label for="ClubPasswordConfirm">Şifre Tekrar</label>
+                <InputText @bind-Value="clubRegisterForm.ClubPasswordConfirm" type="password" id="ClubPasswordConfirm" placeholder="Şifrenizi Tekrar Girin" />
+                <ValidationMessage For="@(() => clubRegisterForm.ClubPasswordConfirm)" />
+            </div>
+
+            <div class="form-group">
+                <button class="buton" type="submit" disabled="@isLoading">
+                    @if (isLoading)
+                    {
+                        <span>Kayıt yapılıyor...</span>
+                    }
+                    else
+                    {
+                        <span>Kayıt Ol</span>
+                    }
+                </button>
+            </div>
+        </EditForm>
+    }
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="error-message">
+            @errorMessage
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="success-message">
+            @successMessage
+        </div>
+    }
+
+    <div class="form-group" style="margin-top: 20px; text-align: right;">
+        <a href="/login" style="color: #dc3545; text-decoration: none;">Zaten hesabın var mı? Giriş Yap</a>
+    </div>
+</div>
+
+
+@code {
+    private StudentRegisterForm studentRegisterForm = new();
+    private ClubRegisterForm clubRegisterForm = new();
+    private bool isStudentRegister = true;
+    private bool isLoading = false;
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+
+    private async Task HandleStudentRegister()
+    {
+        isLoading = true;
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+
+        // Şifre kontrolü
+        if (studentRegisterForm.StudentPassword != studentRegisterForm.StudentPasswordConfirm)
+        {
+            errorMessage = "Şifreler eşleşmiyor";
+            isLoading = false;
+            return;
+        }
+
+        // String'i long'a çevir
+        if (!long.TryParse(studentRegisterForm.StudentNumberText, out long studentNumber))
+        {
+            errorMessage = "Geçerli bir öğrenci numarası giriniz";
+            isLoading = false;
+            return;
+        }
+
+        var request = new StudentRegisterRequestDto
+        {
+            StudentNumber = studentNumber,
+            StudentName = studentRegisterForm.StudentName,
+            StudentSurname = studentRegisterForm.StudentSurname,
+            StudentMail = studentRegisterForm.StudentEmail,
+            StudentPassword = studentRegisterForm.StudentPassword
+        };
+
+        var result = await AuthService.StudentRegisterAsync(request);
+
+        if (result.Success)
+        {
+            successMessage = "Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...";
+            await Task.Delay(2000);
+            NavigationManager.NavigateTo("/login");
+        }
+        else
+        {
+            errorMessage = result.Message;
+        }
+
+        isLoading = false;
+    }
+
+    private async Task HandleClubRegister()
+    {
+        isLoading = true;
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+
+        // Şifre kontrolü
+        if (clubRegisterForm.ClubPassword != clubRegisterForm.ClubPasswordConfirm)
+        {
+            errorMessage = "Şifreler eşleşmiyor";
+            isLoading = false;
+            return;
+        }
+
+        // String'i long'a çevir
+        if (!long.TryParse(clubRegisterForm.ClubNumberText, out long clubNumber))
+        {
+            errorMessage = "Geçerli bir kulüp numarası giriniz";
+            isLoading = false;
+            return;
+        }
+
+        var request = new ClubRegisterRequestDto
+        {
+            ClubNumber = clubNumber,
+            ClubName = clubRegisterForm.ClubName,
+            ClubDescription = clubRegisterForm.ClubDescription,
+            ClubEmail = clubRegisterForm.ClubEmail,
+            ClubPassword = clubRegisterForm.ClubPassword
+        };
+
+        var result = await AuthService.ClubRegisterAsync(request);
+
+        if (result.Success)
+        {
+            successMessage = "Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...";
+            await Task.Delay(2000);
+            NavigationManager.NavigateTo("/login");
+        }
+        else
+        {
+            errorMessage = result.Message;
+        }
+
+        isLoading = false;
+    }
+
+    public class StudentRegisterForm
+    {
+        [Required(ErrorMessage = "Öğrenci numarası zorunludur")]
+        [RegularExpression(@"^\d+$", ErrorMessage = "Sadece rakam girebilirsiniz")]
+        public string StudentNumberText { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Ad zorunludur")]
+        [MaxLength(50, ErrorMessage = "Ad en fazla 50 karakter olabilir")]
+        public string StudentName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Soyad zorunludur")]
+        [MaxLength(50, ErrorMessage = "Soyad en fazla 50 karakter olabilir")]
+        public string StudentSurname { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "E-posta zorunludur")]
+        [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz")]
+        public string StudentEmail { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Şifre zorunludur")]
+        [MinLength(6, ErrorMessage = "Şifre en az 6 karakter olmalıdır")]
+        [MaxLength(20, ErrorMessage = "Şifre en fazla 20 karakter olabilir")]
+        public string StudentPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Şifre tekrarı zorunludur")]
+        public string StudentPasswordConfirm { get; set; } = string.Empty;
+    }
+
+    public class ClubRegisterForm
+    {
+        [Required(ErrorMessage = "Kulüp numarası zorunludur")]
+        [RegularExpression(@"^\d+$", ErrorMessage = "Sadece rakam girebilirsiniz")]
+        public string ClubNumberText { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Kulüp adı zorunludur")]
+        [MaxLength(100, ErrorMessage = "Kulüp adı en fazla 100 karakter olabilir")]
+        public string ClubName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Kulüp açıklaması zorunludur")]
+        [MaxLength(500, ErrorMessage = "Açıklama en fazla 500 karakter olabilir")]
+        public string ClubDescription { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "E-posta zorunludur")]
+        [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz")]
+        public string ClubEmail { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Şifre zorunludur")]
+        [MinLength(6, ErrorMessage = "Şifre en az 6 karakter olmalıdır")]
+        [MaxLength(20, ErrorMessage = "Şifre en fazla 20 karakter olabilir")]
+        public string ClubPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Şifre tekrarı zorunludur")]
+        public string ClubPasswordConfirm { get; set; } = string.Empty;
+    }
+}
