@@ -1,0 +1,41 @@
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+
+<div class="account-menu">
+    <button class="account-button" @onclick="ToggleDropdown">
+        <span class="bi bi-account-icon"></span>
+    </button>
+    
+    @if (showDropdown)
+    {
+        <div class="dropdown-menu-account">
+            <a href="#" class="dropdown-item" @onclick="Logout" @onclick:preventDefault>
+                <span class="bi bi-logout-icon"></span>
+                Çıkış Yap
+            </a>
+        </div>
+    }
+</div>
+
+@code {
+    private bool showDropdown = false;
+
+    private void ToggleDropdown()
+    {
+        showDropdown = !showDropdown;
+    }
+
+    private async Task Logout()
+    {
+        showDropdown = false;
+        
+        try 
+        { 
+            await LocalStorage.ClearAsync(); 
+        } 
+        catch { }
+        
+        NavigationManager.NavigateTo("/login", true);
+    }
+}

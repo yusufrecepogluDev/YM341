@@ -1,62 +1,104 @@
 ﻿@page "/home"
+@rendermode InteractiveServer
 @using KampusEtkinlik.Data.Models
 @using KampusEtkinlik.Services
 @inject ActivityService ActivityService
 @inject AnnouncementService AnnouncementService
+@inject IJSRuntime JSRuntime
 
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div style="background: #fee; border: 1px solid #c00; padding: 10px; margin: 10px 0; border-radius: 4px;">
-        <strong>⚠️ Hata:</strong> @errorMessage
-    </div>
-}
+<main class="ana-icerik">
+    <h2 class="baslik">Etkinlikler</h2>
 
-<h3>Etkinlikler</h3>
+    <section class="ust-slider-konteyner">
+        <button class="kaydirma-butonu sol" @onclick="() => ScrollActivityLeft()">←</button>
+        
+        <div class="ust-slider" @ref="etkinlikListesi">
+            @if (activities == null)
+            {
+                <div class="slider-ogesi" style="background: linear-gradient(135deg, #6a0080, #9b59b6);">
+                    <h3>Yükleniyor...</h3>
+                </div>
+            }
+            else if (!activities.Any())
+            {
+                <div class="slider-ogesi" style="background: linear-gradient(135deg, #008cba, #3498db);">
+                    <h3>Henüz etkinlik bulunmamaktadır</h3>
+                </div>
+            }
+            else
+            {
+                @foreach (var activity in activities)
+                {
+                    <div class="slider-ogesi" style="background: @GetRandomGradient();">
+                        <h3>@activity.ActivityName</h3>
+                        <p class="etkinlik-tarih">@activity.StartDate.ToString("dd.MM.yyyy")</p>
+                    </div>
+                }
+            }
+        </div>
+        
+        <button class="kaydirma-butonu sag" @onclick="() => ScrollActivityRight()">→</button>
+    </section>
 
-@if (activities == null)
-{
-    <p>Yükleniyor...</p>
-}
-else if (activities.Count == 0)
-{
-    <p>Henüz etkinlik yok.</p>
-}
-else
-{
-    <ul>
-        @foreach (var activity in activities)
-        {
-            <li>@activity.Title - @activity.StartDate.ToShortDateString()</li>
-        }
-    </ul>
-}
+    <hr>
 
-<hr />
+    <section class="duyurular-alani">
+        <h2 class="baslik">Duyurular</h2>
 
-<h3>Duyurular</h3>
+        <div class="kaydirici-konteyner">
+            <button class="kaydirma-butonu sol" @onclick="() => ScrollLeft()">←</button>
 
-@if (announcements == null)
-{
-    <p>Yükleniyor...</p>
-}
-else if (announcements.Count == 0)
-{
-    <p>Henüz duyuru yok.</p>
-}
-else
-{
-    <ul>
-        @foreach (var announcement in announcements)
-        {
-            <li>@announcement.Title - @announcement.CreatedAt.ToShortDateString()</li>
-        }
-    </ul>
-}
+            <div class="duyuru-listesi" @ref="duyuruListesi">
+                @if (announcements == null)
+                {
+                    <article class="duyuru-karti">
+                        <h3>Yükleniyor...</h3>
+                        <p>Duyurular yükleniyor...</p>
+                    </article>
+                }
+                else if (!announcements.Any())
+                {
+                    <article class="duyuru-karti">
+                        <h3>Duyuru Yok</h3>
+                        <p>Henüz duyuru bulunmamaktadır.</p>
+                    </article>
+                }
+                else
+                {
+                    @foreach (var (announcement, index) in announcements.Select((a, i) => (a, i)))
+                    {
+                        <article class="duyuru-karti @(index % 3 == 0 ? "kirmizi" : "")">
+                            <h3>@announcement.Title</h3>
+                            <p>@announcement.Content</p>
+                            <p><small>@announcement.CreatedAt.ToString("dd.MM.yyyy")</small></p>
+                        </article>
+                    }
+                }
+            </div>
+
+            <button class="kaydirma-butonu sag" @onclick="() => ScrollRight()">→</button>
+        </div>
+
+        <a href="#" class="tum-duyurular-linki">Tüm duyurulara git →</a>
+    </section>
+
+    <hr>
+</main>
 
 @code {
     private List<Activity>? activities;
     private List<Announcement>? announcements;
     private string? errorMessage;
+    private ElementReference etkinlikListesi;
+    private ElementReference duyuruListesi;
+    private string[] gradients = { 
+        "linear-gradient(135deg, #dc3545, #c82333)",
+        "linear-gradient(135deg, #6a0080, #9b59b6)",
+        "linear-gradient(135deg, #008cba, #3498db)",
+        "linear-gradient(135deg, #28a745, #20c997)",
+        "linear-gradient(135deg, #ffc107, #ff9800)"
+    };
+    private Random random = new Random();
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,6 +106,10 @@ else
         {
             activities = await ActivityService.GetAllAsync();
             announcements = await AnnouncementService.GetAllAsync();
+
+            // Sadece aktif ve silinmemiş olanları filtrele
+            activities = activities?.Where(a => a.IsActive && !a.IsDeleted).OrderByDescending(a => a.StartDate).ToList();
+            announcements = announcements?.OrderByDescending(a => a.CreatedAt).ToList();
         }
         catch (Exception ex)
         {
@@ -71,5 +117,30 @@ else
             activities = new List<Activity>();
             announcements = new List<Announcement>();
         }
+    }
+
+    private string GetRandomGradient()
+    {
+        return gradients[random.Next(gradients.Length)];
+    }
+
+    private async Task ScrollActivityLeft()
+    {
+        await JSRuntime.InvokeVoidAsync("scrollElementByWidth", etkinlikListesi);
+    }
+
+    private async Task ScrollActivityRight()
+    {
+        await JSRuntime.InvokeVoidAsync("scrollElementByWidth", etkinlikListesi, true);
+    }
+
+    private async Task ScrollLeft()
+    {
+        await JSRuntime.InvokeVoidAsync("scrollElement", duyuruListesi, -1200);
+    }
+
+    private async Task ScrollRight()
+    {
+        await JSRuntime.InvokeVoidAsync("scrollElement", duyuruListesi, 1200);
     }
 }

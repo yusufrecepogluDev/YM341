@@ -1,178 +1,26 @@
 ﻿@page "/kulup"
+@rendermode InteractiveServer
 @inject ActivityService ActivityService
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavigationManager
 @using Blazored.LocalStorage
 @using KampusEtkinlik.Data.DTOs
+@using KampusEtkinlik.Data.Models
 @using KampusEtkinlik.Services
-<style>
-    body {
-    }
 
 
-
-    .etk-cont {
-        background-color: white;
-        border: 1px solid black;
-        border-radius: 12px;
-        padding: 30px;
-        max-width: 600px;
-        margin: 0 auto;
-        flex:0 0 600px;
-        flex:1;
-    }
-
-        .etk-cont:hover {
-            transform: translateY(-1.5px);
-            transition: all ease 1.2s;
-        }
-
-    .etk-title {
-        text-align: center;
-        color: #333;
-        margin-bottom: 25px;
-        font-weight: 600;
-    }
-
-    .trh-grp {
-        display: flex;
-        gap: 20px;
-    }
-
-    .etk-btn {
-        width: 100%;
-        padding: 12px;
-        background-color: white;
-        color: black;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background 0.3s;
-        margin-top: 10px;
-        border: 1px solid black;
-    }
-
-        .etk-btn:hover {
-            transform: translateY(-1px);
-            transition: all ease 1.2s;
-            background: black;
-            color: white;
-            box-shadow: rgba(0, 0, 0, 0.4);
-        }
-    .form-control-2 {
-        width: 100%;
-        resize: vertical;
-        min-height: 80px;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        font-size: 1rem;
-        box-sizing: border-box;
-    }
-
-    .label-1 {
-        display: block;
-    }
-
-    .form-group {
-        margin: 10px;
-    }
-
-    .sayfa-cont{
-        display:flex;
-        gap:20px;
-        padding:20px;
-        align-items:flex-start;
-    }
-    
-    .etkinlikler-cont{
-    flex:1;
-    }
-
-    .etkinlikler-cont {
-        background-color: white;
-        border: 1px solid black;
-        border-radius: 12px;
-        padding: 30px;
-        max-width: 600px;
-        margin: 0 auto;
-        flex: 0 0 600px;
-        flex: 1;
-    }
-    
-    .etkinlik-icerik{
-        border:1px solid black;
-        padding:5px;
-        border-radius:12px;
-        margin-bottom:10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-    }
-
-    .etkinlik-text {
-        flex: 1;
-    }
-
-    .dropdown {
-        position: relative;
-        display: inline-block;
-        margin-top:19px;
-    }
-
-    .dropdown-btn {
-        background: none;
-        border: 1px solid #ddd;
-        padding: 2px 8px;
-        cursor: pointer;
-        font-size: 1.2rem;
-        border-radius: 7px;
-    }
-
-    .dropdown-btn:hover{
-        background:black;
-        color:white;
-        transition:all 1.2s ease;
-    }
-
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: white;
-        min-width: 120px;
-        box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
-        z-index: 1;
-        border-radius: 20px;
-        right: 0;
-    }
-
-    .dropdown:hover .dropdown-content {
-        display: block;
-    }
-
-    .dropdown-content a {
-        color: black;
-        padding: 10px;
-        text-decoration: none;
-        display: block;
-    }
-
-    .dropdown-content a:hover {
-        background-color: #f1f1f1;
-        border-radius: 4px;
-    }
-
-    .etk-title-2{
-        text-align: center;
-        color: #333;
-        margin-bottom: 25px;
-        font-weight: 600;
-    }
-
-</style>
-
-<div class="sayfa-cont">
-    <div class="etk-cont">
+@if (!isAuthorized)
+{
+    <div class="unauthorized-container">
+        <h2>🔒 Yetkisiz Erişim</h2>
+        <p>Bu sayfaya erişmek için kulüp hesabı ile giriş yapmalısınız.</p>
+        <a href="/login" class="btn-login">Giriş Yap</a>
+    </div>
+}
+else
+{
+    <div class="sayfa-cont" @onclick="() => openDropdownId = null">
+    <div class="etk-cont" @onclick:stopPropagation="true">
         <h2 class="etk-title">Etkinlik Oluştur</h2>
 
         <EditForm FormName="ActivityCreate" Model="@model" OnValidSubmit="@CreateActivity">
@@ -223,63 +71,160 @@
             </button>
         </EditForm>
     </div>
-    <div class="etkinlikler-cont">
+    <div class="etkinlikler-cont" @onclick:stopPropagation="true">
         <h2 class="etk-title-2">Etkinlikler</h2>
 
+        @if (!string.IsNullOrEmpty(mesaj))
+        {
+            <div class="alert-message">@mesaj</div>
+        }
+
         <div class="etkinlik-kart">
-            <div class="etkinlik-icerik">
-                <div class="etkinlik-text">
-                    <h5 class="etkinlik-baslik">Mühendis Beyinler</h5>
-                    <p class="etkinlik-ozet">2 Saatlik Garanti BBVA Siber Güvenlik Yöneticisi Semineri</p>
-                </div>
-                <span class="dropdown">
-                    <button class="dropdown-btn">⋮</button>
-                    <div class="dropdown-content">
-                        <a href="#">Düzenle</a>
-                        <a href="#">Sil</a>
+            @if (activities == null)
+            {
+                <p>Yükleniyor...</p>
+            }
+            else if (!activities.Any())
+            {
+                <p>Henüz etkinlik bulunmamaktadır.</p>
+            }
+            else
+            {
+                @foreach (var activity in activities)
+                {
+                    <div class="etkinlik-icerik">
+                        <div class="etkinlik-text">
+                            <h5 class="etkinlik-baslik">@activity.ActivityName</h5>
+                            <p class="etkinlik-ozet">@activity.ActivityDescription</p>
+                            <small>@activity.StartDate.ToString("dd.MM.yyyy HH:mm") - @activity.EndDate.ToString("dd.MM.yyyy HH:mm")</small>
+                        </div>
+                        <div class="dropdown @(openDropdownId == activity.ActivityID ? "active" : "")">
+                            <button class="dropdown-btn" type="button" @onclick="() => ToggleDropdown(activity.ActivityID)" @onclick:stopPropagation="true">⋮</button>
+                            <div class="dropdown-content @(openDropdownId == activity.ActivityID ? "show" : "")" @onclick:stopPropagation="true">
+                                <button type="button" @onclick="() => { EditActivity(activity.ActivityID); openDropdownId = null; }">Düzenle</button>
+                                <button type="button" @onclick="() => { DeleteActivity(activity.ActivityID); openDropdownId = null; }">Sil</button>
+                            </div>
+                        </div>
                     </div>
-                </span>
-            </div>
-            <div class="etkinlik-icerik">
-                <div class="etkinlik-text">
-                    <h5 class="etkinlik-baslik">GDG Campus</h5>
-                    <p class="etkinlik-ozet">X Şirketinin yazılım departmanına yapılacak gezi</p>
-                </div>
-                <span class="dropdown">
-                    <button class="dropdown-btn">⋮</button>
-                    <div class="dropdown-content">
-                        <a href="#">Düzenle</a>
-                        <a href="#">Sil</a>
-                    </div>
-                </span>
-            </div>
-            <div class="etkinlik-icerik">
-                <div class="etkinlik-text">
-                    <h5 class="etkinlik-baslik">Doğuş Teknofest Kulübü</h5>
-                    <p class="etkinlik-ozet">X geliştirmesi için buluşma</p>
-                </div>
-                <span class="dropdown">
-                    <button class="dropdown-btn">⋮</button>
-                    <div class="dropdown-content">
-                        <a href="#">Düzenle</a>
-                        <a href="#">Sil</a>
-                    </div>
-                </span>
-            </div>
+                }
+            }
         </div>
     </div>
 </div>
 
+    @* Düzenleme Popup *@
+    @if (showEditModal && editingActivity != null)
+    {
+        <div class="modal-overlay" @onclick="CloseEditModal">
+            <div class="modal-content" @onclick:stopPropagation>
+                <h3>Etkinlik Düzenle</h3>
+
+                <EditForm Model="@editModel" OnValidSubmit="@SaveEditActivity">
+                    <DataAnnotationsValidator />
+
+                    <div class="form-group">
+                        <label>Etkinlik Başlığı</label>
+                        <InputTextArea @bind-Value="editModel.ActivityName" class="form-control-2" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Etkinlik Açıklaması</label>
+                        <InputTextArea @bind-Value="editModel.ActivityDescription" class="form-control-2" />
+                    </div>
+
+                    <div class="trh-grp">
+                        <div class="form-group">
+                            <label>Başlangıç Tarihi</label>
+                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="editModel.StartDate" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Bitiş Tarihi</label>
+                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="editModel.EndDate" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Katılımcı Sınırı</label>
+                        <InputNumber @bind-Value="editModel.ParticipantLimit" class="form-control" />
+                    </div>
+
+                    <div class="trh-grp">
+                        <div class="form-group">
+                            <label>Oylama Başlangıç</label>
+                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="editModel.EvaluationStartDate" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Oylama Bitiş</label>
+                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="editModel.EvaluationEndDate" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button type="button" class="btn-cancel" @onclick="CloseEditModal">İptal</button>
+                        <button type="submit" class="btn-save">Kaydet</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+    @* Silme Onay Popup *@
+    @if (showDeleteModal)
+    {
+        <div class="modal-overlay" @onclick="CloseDeleteModal">
+            <div class="modal-content" @onclick:stopPropagation style="max-width: 400px;">
+                <h3>Etkinliği Sil</h3>
+                <p>Bu etkinliği silmek istediğinizden emin misiniz?</p>
+                <p><strong>@deletingActivityName</strong></p>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" @onclick="CloseDeleteModal">İptal</button>
+                    <button type="button" class="btn-confirm-delete" @onclick="ConfirmDelete">Sil</button>
+                </div>
+            </div>
+        </div>
+    }
+}
+
 @code {
+    private bool isAuthorized = false;
     [SupplyParameterFromForm]
     private ActivityCreateDto model { get; set; } = new();
 
     private string mesaj = "";
-    private bool isFirstRender = true;
+    private List<Activity>? activities;
+    private int currentClubId = 0;
+
+    // Düzenleme için
+    private bool showEditModal = false;
+    private Activity? editingActivity = null;
+    private ActivityUpdateDto editModel = new();
+
+    // Silme için
+    private bool showDeleteModal = false;
+    private int deletingActivityId = 0;
+    private string deletingActivityName = "";
+
+    // Dropdown için
+    private int? openDropdownId = null;
+
+    private void ToggleDropdown(int activityId)
+    {
+        if (openDropdownId == activityId)
+        {
+            openDropdownId = null;
+        }
+        else
+        {
+            openDropdownId = activityId;
+        }
+        StateHasChanged();
+    }
 
     protected override void OnInitialized()
     {
-        // Sadece tarih değerlerini ayarla (JavaScript gerektirmeyen işlemler)
         model.StartDate = DateTime.Now;
         model.EndDate = DateTime.Now.AddDays(1);
         model.EvaluationStartDate = DateTime.Now;
@@ -290,7 +235,6 @@
     {
         if (firstRender)
         {
-            // İlk render'dan sonra LocalStorage'a erişebiliriz
             try
             {
                 var clubId = await LocalStorage.GetItemAsync<int>("rememberedClubID");
@@ -298,55 +242,220 @@
                 
                 if (clubId > 0)
                 {
+                    isAuthorized = true;
                     model.OrganizingClubID = clubId;
-                    mesaj = $"✅ Kulüp ID yüklendi: {clubId}";
+                    currentClubId = clubId;
+                    await LoadActivities();
                 }
                 else
                 {
-                    mesaj = $"⚠️ Kulüp bilgisi bulunamadı (ID: {clubId}). Lütfen önce giriş yapın.";
+                    isAuthorized = false;
+                    System.Diagnostics.Debug.WriteLine("Kulüp bilgisi bulunamadı, yetkisiz erişim");
                 }
                 
-                // UI'ı güncelle
                 StateHasChanged();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"LocalStorage hatası: {ex.Message}");
-                mesaj = $"⚠️ Kulüp bilgisi yüklenemedi: {ex.Message}. Lütfen önce giriş yapın.";
+                isAuthorized = false;
                 model.OrganizingClubID = 0;
                 StateHasChanged();
             }
         }
     }
 
+    private async Task LoadActivities()
+    {
+        try
+        {
+            var allActivities = await ActivityService.GetAllAsync();
+            
+            // Silinmemiş ve bu kulübün etkinliklerini filtrele
+            activities = allActivities
+                .Where(a => !a.IsDeleted && a.IsActive)
+                .Where(a => currentClubId <= 0 || a.OrganizingClubID == currentClubId)
+                .OrderByDescending(a => a.CreationDate)
+                .ToList();
+                
+            System.Diagnostics.Debug.WriteLine($"Toplam {allActivities.Count} etkinlik, {activities.Count} aktif etkinlik gösteriliyor");
+        }
+        catch (Exception ex)
+        {
+            mesaj = $"❌ Etkinlikler yüklenirken hata: {ex.Message}";
+            System.Diagnostics.Debug.WriteLine($"LoadActivities hatası: {ex}");
+            activities = new List<Activity>();
+        }
+    }
+
     private async Task CreateActivity()
     {
-        // ClubID kontrolü
-        if (model.OrganizingClubID <= 0)
+        // ClubID'yi tekrar kontrol et
+        if (currentClubId <= 0)
         {
-            mesaj = "❌ Hata: Kulüp bilgisi bulunamadı. Lütfen önce giriş yapın.";
+            try
+            {
+                currentClubId = await LocalStorage.GetItemAsync<int>("rememberedClubID");
+                model.OrganizingClubID = currentClubId;
+            }
+            catch { }
+        }
+        
+        if (model.OrganizingClubID <= 0 || currentClubId <= 0)
+        {
+            mesaj = $"❌ Hata: Kulüp bilgisi bulunamadı (ClubID: {currentClubId}). Lütfen önce giriş yapın.";
+            System.Diagnostics.Debug.WriteLine($"CreateActivity - ClubID: {currentClubId}, model.OrganizingClubID: {model.OrganizingClubID}");
             return;
         }
 
         try
         {
+            System.Diagnostics.Debug.WriteLine($"Etkinlik oluşturuluyor - ClubID: {model.OrganizingClubID}");
             var sonuc = await ActivityService.AddAsync(model);
 
             if (sonuc)
+            {
                 mesaj = "✅ Etkinlik başarıyla eklendi.";
+                
+                // Formu temizle
+                model = new ActivityCreateDto
+                {
+                    OrganizingClubID = currentClubId,
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now.AddDays(1),
+                    EvaluationStartDate = DateTime.Now,
+                    EvaluationEndDate = DateTime.Now.AddDays(7)
+                };
+                
+                // Etkinlikleri yeniden yükle
+                await LoadActivities();
+                StateHasChanged();
+            }
             else
+            {
                 mesaj = "❌ API hatası oluştu.";
+            }
         }
         catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"CreateActivity hatası: {ex}");
             if (ex.Message.Contains("FOREIGN KEY"))
             {
-                mesaj = $"❌ Hata: Kulüp ID ({model.OrganizingClubID}) veritabanında bulunamadı. Lütfen tekrar giriş yapın.";
+                mesaj = $"❌ Hata: Kulüp ID ({model.OrganizingClubID}) veritabanında bulunamadı.";
             }
             else
             {
                 mesaj = $"❌ Hata: {ex.Message}";
             }
         }
+    }
+
+    private async Task EditActivity(int activityId)
+    {
+        try
+        {
+            editingActivity = await ActivityService.GetByIdAsync(activityId);
+            
+            if (editingActivity != null)
+            {
+                editModel = new ActivityUpdateDto
+                {
+                    ActivityName = editingActivity.ActivityName,
+                    ActivityDescription = editingActivity.ActivityDescription,
+                    StartDate = editingActivity.StartDate,
+                    EndDate = editingActivity.EndDate,
+                    ParticipantLimit = editingActivity.ParticipantLimit,
+                    EvaluationStartDate = editingActivity.EvaluationStartDate,
+                    EvaluationEndDate = editingActivity.EvaluationEndDate
+                };
+                
+                showEditModal = true;
+            }
+            else
+            {
+                mesaj = "❌ Etkinlik bulunamadı.";
+            }
+        }
+        catch (Exception ex)
+        {
+            mesaj = $"❌ Hata: {ex.Message}";
+        }
+    }
+
+    private async Task SaveEditActivity()
+    {
+        if (editingActivity == null) return;
+
+        try
+        {
+            var sonuc = await ActivityService.UpdateAsync(editingActivity.ActivityID, editModel);
+            
+            if (sonuc)
+            {
+                mesaj = "✅ Etkinlik başarıyla güncellendi.";
+                showEditModal = false;
+                editingActivity = null;
+                await LoadActivities();
+                StateHasChanged();
+            }
+            else
+            {
+                mesaj = "❌ Etkinlik güncellenirken hata oluştu.";
+            }
+        }
+        catch (Exception ex)
+        {
+            mesaj = $"❌ Hata: {ex.Message}";
+        }
+    }
+
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        editingActivity = null;
+    }
+
+    private void DeleteActivity(int activityId)
+    {
+        var activity = activities?.FirstOrDefault(a => a.ActivityID == activityId);
+        if (activity != null)
+        {
+            deletingActivityId = activityId;
+            deletingActivityName = activity.ActivityName;
+            showDeleteModal = true;
+        }
+    }
+
+    private async Task ConfirmDelete()
+    {
+        try
+        {
+            var sonuc = await ActivityService.DeleteAsync(deletingActivityId);
+            
+            if (sonuc)
+            {
+                mesaj = "✅ Etkinlik başarıyla silindi.";
+                showDeleteModal = false;
+                deletingActivityId = 0;
+                deletingActivityName = "";
+                await LoadActivities();
+                StateHasChanged();
+            }
+            else
+            {
+                mesaj = "❌ Etkinlik silinirken hata oluştu.";
+            }
+        }
+        catch (Exception ex)
+        {
+            mesaj = $"❌ Hata: {ex.Message}";
+        }
+    }
+
+    private void CloseDeleteModal()
+    {
+        showDeleteModal = false;
+        deletingActivityId = 0;
+        deletingActivityName = "";
     }
 }
