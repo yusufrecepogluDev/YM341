@@ -1,154 +1,147 @@
 ﻿
+
 .login-container {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     width: 100%;
-    max-width: 400px;
-    background-color: #ffffff;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    text-align: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    max-width: 450px;
+    margin: 20px;
 }
 
-    .login-container:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    }
-
     .login-container h1 {
-        font-size: 1.6rem;
-        font-weight: 700;
         color: #dc3545;
-        margin-bottom: 1.8rem;
-        letter-spacing: 0.5px;
+        margin-bottom: 30px;
+        font-size: 28px;
+        font-weight: 600;
     }
 
 .user-type-selector {
     display: flex;
     gap: 10px;
-    margin-bottom: 1.5rem;
+    margin-bottom: 30px;
 }
 
     .user-type-selector button {
         flex: 1;
-        padding: 10px;
-        border: 2px solid #c82333;
-        background-color: white;
+        padding: 12px;
+        border: 2px solid #dc3545;
+        background: white;
         color: #dc3545;
-        border-radius: 6px;
-        font-weight: 600;
+        border-radius: 8px;
         cursor: pointer;
-        transition: all 0.2s;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
     }
 
         .user-type-selector button:hover {
-            background-color: #f0f7ff;
+            background: #ffe5e8;
         }
 
         .user-type-selector button.active {
-            background-color: #dc3545;
+            background: #dc3545;
             color: white;
         }
 
 .form-group {
-    margin-bottom: 1.3rem;
+    margin-bottom: 20px;
     text-align: left;
 }
 
     .form-group label {
         display: block;
-        margin-bottom: 6px;
-        color: #444;
-        font-weight: 600;
-        font-size: 0.95rem;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 500;
+        font-size: 14px;
     }
 
     .form-group input {
         width: 100%;
-        padding: 10px 12px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        font-size: 0.95rem;
-        outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 15px;
+        transition: border-color 0.3s ease;
+        box-sizing: border-box;
     }
 
         .form-group input:focus {
-            border-color: #0078d4;
-            box-shadow: 0 0 4px rgba(0, 120, 212, 0.4);
+            outline: none;
+            border-color: #dc3545;
         }
 
 .buton {
     width: 100%;
-    padding: 11px;
-    background-color: #dc3545;
-    border: none;
-    border-radius: 6px;
+    padding: 14px;
+    background: #dc3545;
     color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
     font-weight: 600;
-    font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.25s, transform 0.1s;
+    transition: background 0.3s ease;
 }
 
     .buton:hover:not(:disabled) {
-        background-color: #c82333;
-    }
-
-    .buton:active:not(:disabled) {
-        transform: scale(0.98);
+        background: #c82333;
     }
 
     .buton:disabled {
-        opacity: 0.6;
+        background: #ccc;
         cursor: not-allowed;
     }
 
 .error-message {
-    color: #d13438;
-    background-color: #fef0f0;
-    padding: 10px;
+    background: #fee;
+    color: #c33;
+    padding: 12px;
+    border-radius: 8px;
     margin-top: 15px;
-    border-radius: 5px;
-    border-left: 4px solid #d13438;
+    font-size: 14px;
+    border-left: 4px solid #c33;
 }
 
 .success-message {
-    color: #107c10;
-    background-color: #f0f9f0;
-    padding: 10px;
+    background: #efe;
+    color: #3c3;
+    padding: 12px;
+    border-radius: 8px;
     margin-top: 15px;
-    border-radius: 5px;
-    border-left: 4px solid #107c10;
+    font-size: 14px;
+    border-left: 4px solid #3c3;
 }
 
 .validation-message {
-    color: #d13438;
-    font-size: 0.85rem;
-    margin-top: 4px;
+    color: #c33;
+    font-size: 13px;
+    margin-top: 5px;
+    display: block;
 }
 
 .remember-me {
     display: flex;
     align-items: center;
-    margin-bottom: 1rem;
+    gap: 8px;
+    cursor: pointer;
 }
-
-    .remember-me label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-        margin-bottom: 0;
-        font-weight: 500;
-    }
 
     .remember-me input[type="checkbox"] {
         width: auto;
         cursor: pointer;
-        margin: 0;
     }
 
-    .remember-me span {
-        user-select: none;
+.register-link {
+    color: #dc3545;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+    .register-link:hover {
+        color: #c82333;
+        text-decoration: underline;
     }

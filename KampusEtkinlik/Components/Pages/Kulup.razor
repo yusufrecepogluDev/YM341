@@ -1,24 +1,16 @@
 ﻿@page "/kulup"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject ActivityService ActivityService
 @inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
+@inject TokenService TokenService
 @using Blazored.LocalStorage
 @using KampusEtkinlik.Data.DTOs
 @using KampusEtkinlik.Data.Models
 @using KampusEtkinlik.Services
+@using KampusEtkinlik.Components.Layout
 
-
-@if (!isAuthorized)
-{
-    <div class="unauthorized-container">
-        <h2>🔒 Yetkisiz Erişim</h2>
-        <p>Bu sayfaya erişmek için kulüp hesabı ile giriş yapmalısınız.</p>
-        <a href="/login" class="btn-login">Giriş Yap</a>
-    </div>
-}
-else
-{
+<AuthGuard RequiredUserType="club">
     <div class="sayfa-cont" @onclick="() => openDropdownId = null">
     <div class="etk-cont" @onclick:stopPropagation="true">
         <h2 class="etk-title">Etkinlik Oluştur</h2>
@@ -186,10 +178,9 @@ else
             </div>
         </div>
     }
-}
+</AuthGuard>
 
 @code {
-    private bool isAuthorized = false;
     [SupplyParameterFromForm]
     private ActivityCreateDto model { get; set; } = new();
 
@@ -237,28 +228,25 @@ else
         {
             try
             {
-                var clubId = await LocalStorage.GetItemAsync<int>("rememberedClubID");
-                System.Diagnostics.Debug.WriteLine($"LocalStorage'dan okunan ClubID: {clubId}");
+                var clubId = await TokenService.GetUserIdAsync();
+                System.Diagnostics.Debug.WriteLine($"Token'dan okunan ClubID: {clubId}");
                 
-                if (clubId > 0)
+                if (clubId.HasValue && clubId.Value > 0)
                 {
-                    isAuthorized = true;
-                    model.OrganizingClubID = clubId;
-                    currentClubId = clubId;
+                    model.OrganizingClubID = clubId.Value;
+                    currentClubId = clubId.Value;
                     await LoadActivities();
                 }
                 else
                 {
-                    isAuthorized = false;
-                    System.Diagnostics.Debug.WriteLine("Kulüp bilgisi bulunamadı, yetkisiz erişim");
+                    System.Diagnostics.Debug.WriteLine("Kulüp bilgisi bulunamadı");
                 }
                 
                 StateHasChanged();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"LocalStorage hatası: {ex.Message}");
-                isAuthorized = false;
+                System.Diagnostics.Debug.WriteLine($"Token hatası: {ex.Message}");
                 model.OrganizingClubID = 0;
                 StateHasChanged();
             }
@@ -295,8 +283,12 @@ else
         {
             try
             {
-                currentClubId = await LocalStorage.GetItemAsync<int>("rememberedClubID");
-                model.OrganizingClubID = currentClubId;
+                var clubId = await TokenService.GetUserIdAsync();
+                if (clubId.HasValue)
+                {
+                    currentClubId = clubId.Value;
+                    model.OrganizingClubID = currentClubId;
+                }
             }
             catch { }
         }

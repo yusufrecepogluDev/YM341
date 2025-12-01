@@ -8,8 +8,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// LocalStorage servisi
+// LocalStorage servisi (sadece "Beni Hatırla" özelliği için)
 builder.Services.AddBlazoredLocalStorage();
+
+// Token servisi (ProtectedSessionStorage built-in olarak gelir)
+builder.Services.AddScoped<TokenService>();
 
 // API servislerini DI konteynerine kaydet
 builder.Services.AddHttpClient<AnnouncementService>();

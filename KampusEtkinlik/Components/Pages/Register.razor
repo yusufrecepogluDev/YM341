@@ -1,5 +1,6 @@
 ﻿@page "/register"
 @rendermode InteractiveServer
+@using System.Security.Cryptography
 @using KampusEtkinlik.Components.Layout
 @using KampusEtkinlik.DTOs
 @using KampusEtkinlik.Services
@@ -201,7 +202,7 @@
             StudentName = studentRegisterForm.StudentName,
             StudentSurname = studentRegisterForm.StudentSurname,
             StudentMail = studentRegisterForm.StudentEmail,
-            StudentPassword = studentRegisterForm.StudentPassword
+            StudentPassword = HashPassword(studentRegisterForm.StudentPassword)
         };
 
         var result = await AuthService.StudentRegisterAsync(request);
@@ -248,7 +249,7 @@
             ClubName = clubRegisterForm.ClubName,
             ClubDescription = clubRegisterForm.ClubDescription,
             ClubEmail = clubRegisterForm.ClubEmail,
-            ClubPassword = clubRegisterForm.ClubPassword
+            ClubPassword = HashPassword(clubRegisterForm.ClubPassword)
         };
 
         var result = await AuthService.ClubRegisterAsync(request);
@@ -265,6 +266,15 @@
         }
 
         isLoading = false;
+    }
+
+    private string HashPassword(string password)
+    {
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(bytes);
+        }
     }
 
     public class StudentRegisterForm

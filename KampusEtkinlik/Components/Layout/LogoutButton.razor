@@ -1,0 +1,15 @@
+@using KampusEtkinlik.Services
+@inject TokenService TokenService
+@inject NavigationManager NavigationManager
+
+<button class="logout-btn" @onclick="HandleLogout">
+    Çıkış Yap
+</button>
+
+@code {
+    private async Task HandleLogout()
+    {
+        await TokenService.ClearTokenAsync();
+        NavigationManager.NavigateTo("/login", forceLoad: true);
+    }
+}

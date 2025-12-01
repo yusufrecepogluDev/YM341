@@ -1,6 +1,7 @@
 ﻿@page "/"
 @page "/login"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Security.Cryptography
 @using KampusEtkinlik.Components.Layout
 @using KampusEtkinlik.DTOs
 @using KampusEtkinlik.Services
@@ -10,171 +11,25 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationService AuthService
 @inject ILocalStorageService LocalStorage
+@inject TokenService TokenService
 
 <style>
-    /* Kırmızı-Beyaz Tema - Güncellenmiş */
-    body {
-        display: flex;
-        text-align: center;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        min-width: 100vw;
-        background: linear-gradient(rgba(220, 53, 69, 0.7), rgba(139, 0, 0, 0.7)), url('/images/dudullu-yerleskesi.png');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .login-container {
-        background: white;
-        padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        width: 100%;
-        max-width: 450px;
-        margin: 20px;
-    }
-
-        .login-container h1 {
-            color: #dc3545;
-            margin-bottom: 30px;
-            font-size: 28px;
-            font-weight: 600;
-        }
-
-    .user-type-selector {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 30px;
-    }
-
-        .user-type-selector button {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #dc3545;
-            background: white;
-            color: #dc3545;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-            .user-type-selector button:hover {
-                background: #ffe5e8;
-            }
-
-            .user-type-selector button.active {
-                background: #dc3545;
-                color: white;
-            }
-
-    .form-group {
-        margin-bottom: 20px;
-        text-align: left;
-    }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: border-color 0.3s ease;
-            box-sizing: border-box;
-        }
-
-            .form-group input:focus {
-                outline: none;
-                border-color: #dc3545;
-            }
-
-    .buton {
-        width: 100%;
-        padding: 14px;
-        background: #dc3545;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.3s ease;
-    }
-
-        .buton:hover:not(:disabled) {
-            background: #c82333;
-        }
-
-        .buton:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-    .error-message {
-        background: #fee;
-        color: #c33;
-        padding: 12px;
-        border-radius: 8px;
-        margin-top: 15px;
-        font-size: 14px;
-        border-left: 4px solid #c33;
-    }
-
-    .success-message {
-        background: #efe;
-        color: #3c3;
-        padding: 12px;
-        border-radius: 8px;
-        margin-top: 15px;
-        font-size: 14px;
-        border-left: 4px solid #3c3;
-    }
-
-    .validation-message {
-        color: #c33;
-        font-size: 13px;
-        margin-top: 5px;
-        display: block;
-    }
-
-    .remember-me {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-    }
-
-        .remember-me input[type="checkbox"] {
-            width: auto;
-            cursor: pointer;
-        }
-
-    .register-link {
-        color: #dc3545;
-        text-decoration: none;
-        font-weight: 500;
-        transition: color 0.3s ease;
-    }
-
-        .register-link:hover {
-            color: #c82333;
-            text-decoration: underline;
-        }
+/* Kırmızı-Beyaz Tema */
+body {
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    min-width: 100vw;
+    background: linear-gradient(rgba(220, 53, 69, 0.7), rgba(139, 0, 0, 0.7)), url('/images/dudullu-yerleskesi.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
 </style>
-
 <div class="login-container">
     <img style="max-height: 150px; max-width: 150px" src="images/dogus_universitesi_yeni_logo.png" />
     <h1>SİSTEME GİRİŞ</h1>
@@ -296,6 +151,23 @@
     {
         if (firstRender)
         {
+            // Eğer zaten login olmuşsa ilgili sayfaya yönlendir
+            var isAuthenticated = await TokenService.IsAuthenticatedAsync();
+            if (isAuthenticated)
+            {
+                var userType = await TokenService.GetUserTypeAsync();
+                if (userType == "student")
+                {
+                    NavigationManager.NavigateTo("/home");
+                    return;
+                }
+                else if (userType == "club")
+                {
+                    NavigationManager.NavigateTo("/kulup");
+                    return;
+                }
+            }
+            
             // İlk render'dan sonra kaydedilmiş bilgileri yükle
             await LoadRememberedCredentials();
         }
@@ -305,28 +177,22 @@
     {
         try
         {
-            // Öğrenci bilgilerini yükle
+            // Öğrenci numarasını yükle (sadece numara, şifre değil)
             var savedStudentNumber = await LocalStorage.GetItemAsync<string>("rememberedStudentNumber");
-            var savedStudentPassword = await LocalStorage.GetItemAsync<string>("rememberedStudentPassword");
-
-            if (!string.IsNullOrEmpty(savedStudentNumber) && !string.IsNullOrEmpty(savedStudentPassword))
+            if (!string.IsNullOrEmpty(savedStudentNumber))
             {
                 studentLoginForm.StudentNumberText = savedStudentNumber;
-                studentLoginForm.StudentPassword = savedStudentPassword;
                 rememberMeStudent = true;
-                StateHasChanged(); // UI'ı güncelle
+                StateHasChanged();
             }
 
-            // Kulüp bilgilerini yükle
+            // Kulüp numarasını yükle (sadece numara, şifre değil)
             var savedClubNumber = await LocalStorage.GetItemAsync<string>("rememberedClubNumber");
-            var savedClubPassword = await LocalStorage.GetItemAsync<string>("rememberedClubPassword");
-
-            if (!string.IsNullOrEmpty(savedClubNumber) && !string.IsNullOrEmpty(savedClubPassword))
+            if (!string.IsNullOrEmpty(savedClubNumber))
             {
                 clubLoginForm.ClubNumberText = savedClubNumber;
-                clubLoginForm.ClubPassword = savedClubPassword;
                 rememberMeClub = true;
-                StateHasChanged(); // UI'ı güncelle
+                StateHasChanged();
             }
         }
         catch
@@ -352,27 +218,24 @@
         var request = new StudentLoginRequestDto
         {
             StudentNumber = studentNumber,
-            StudentPassword = studentLoginForm.StudentPassword
+            StudentPassword = HashPassword(studentLoginForm.StudentPassword)
         };
 
         var result = await AuthService.StudentLoginAsync(request);
 
         if (result.Success && result.Data != null)
         {
-            // StudentID'yi her zaman kaydet (session için gerekli)
-            await LocalStorage.SetItemAsync("rememberedStudentID", result.Data.StudentID);
+            // Token'ı kaydet
+            await TokenService.SaveTokenAsync(result.Data.Token, "student", result.Data.StudentID);
             
-            // Beni hatırla seçiliyse kullanıcı adı ve şifreyi de kaydet
+            // Beni hatırla seçiliyse sadece kullanıcı numarasını kaydet (şifre değil!)
             if (rememberMeStudent)
             {
                 await LocalStorage.SetItemAsync("rememberedStudentNumber", studentLoginForm.StudentNumberText);
-                await LocalStorage.SetItemAsync("rememberedStudentPassword", studentLoginForm.StudentPassword);
             }
             else
             {
-                // Seçili değilse sadece kullanıcı adı ve şifreyi sil (StudentID kalır)
                 await LocalStorage.RemoveItemAsync("rememberedStudentNumber");
-                await LocalStorage.RemoveItemAsync("rememberedStudentPassword");
             }
 
             successMessage = $"Hoş geldin {result.Data.StudentName} {result.Data.StudentSurname}!";
@@ -404,34 +267,36 @@
         var request = new ClubLoginRequestDto
         {
             ClubNumber = clubNumber,
-            ClubPassword = clubLoginForm.ClubPassword
+            ClubPassword = HashPassword(clubLoginForm.ClubPassword)
         };
 
         var result = await AuthService.ClubLoginAsync(request);
 
         if (result.Success && result.Data != null)
         {
-            // Debug: ClubID'yi kontrol et
-            System.Diagnostics.Debug.WriteLine($"ClubID: {result.Data.ClubID}, ClubName: {result.Data.ClubName}");
+            // Token'ı kaydet
+            await TokenService.SaveTokenAsync(result.Data.Token, "club", result.Data.ClubID);
             
-            // ClubID'yi her zaman kaydet (session için gerekli)
-            await LocalStorage.SetItemAsync("rememberedClubID", result.Data.ClubID);
-            
-            // Beni hatırla seçiliyse kullanıcı adı ve şifreyi de kaydet
+            // Beni hatırla seçiliyse sadece kulüp numarasını kaydet (şifre değil!)
             if (rememberMeClub)
             {
                 await LocalStorage.SetItemAsync("rememberedClubNumber", clubLoginForm.ClubNumberText);
-                await LocalStorage.SetItemAsync("rememberedClubPassword", clubLoginForm.ClubPassword);
             }
             else
             {
-                // Seçili değilse sadece kullanıcı adı ve şifreyi sil (ClubID kalır)
                 await LocalStorage.RemoveItemAsync("rememberedClubNumber");
-                await LocalStorage.RemoveItemAsync("rememberedClubPassword");
             }
 
-            successMessage = $"Hoş geldin {result.Data.ClubName}!)";
-            await Task.Delay(1500);
+            successMessage = $"Hoş geldin {result.Data.ClubName}!";
+            
+            // Token'ın kaydedildiğinden emin olmak için kısa bir bekleme
+            await Task.Delay(500);
+            
+            // Yönlendirmeden önce token'ı doğrula
+            var savedUserType = await TokenService.GetUserTypeAsync();
+            System.Diagnostics.Debug.WriteLine($"Login - Saved userType: '{savedUserType}'");
+            
+            await Task.Delay(500);
             NavigationManager.NavigateTo("/kulup");
         }
         else
@@ -440,6 +305,15 @@
         }
 
         isLoading = false;
+    }
+
+    private string HashPassword(string password)
+    {
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(bytes);
+        }
     }
 
     public class StudentLoginForm

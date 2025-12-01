@@ -2,28 +2,37 @@ using ClupApi.DTOs;
 using ClupApi.Models;
 using ClupApi.Repositories;
 using ClupApi.Repositories.Interfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace ClupApi.Services
 {
     public class AuthenticationService : IAuthenticationService
     {
         private readonly IAuthenticationRepository _repository;
+        private readonly IConfiguration _config;
 
-        public AuthenticationService(IAuthenticationRepository repository)
+        public AuthenticationService(IAuthenticationRepository repository, IConfiguration config)
         {
             _repository = repository;
+            _config = config;
         }
 
         public async Task<StudentLoginResponseDto?> AuthenticateStudentAsync(StudentLoginRequestDto request)
         {
             var student = await _repository.GetStudentByNumberAsync(request.StudentNumber);
 
-            if (student == null || 
-                student.StudentPassword != request.StudentPassword || 
+            if (student == null ||
+                student.StudentPassword != request.StudentPassword ||
                 !student.IsActive)
             {
                 return null;
             }
+
+            var token = GenerateToken(student.StudentNumber, "student");
 
             return new StudentLoginResponseDto
             {
@@ -32,7 +41,8 @@ namespace ClupApi.Services
                 StudentSurname = student.StudentSurname,
                 StudentMail = student.StudentMail,
                 StudentNumber = student.StudentNumber,
-                IsActive = student.IsActive
+                IsActive = student.IsActive,
+                Token = token
             };
         }
 
@@ -40,19 +50,22 @@ namespace ClupApi.Services
         {
             var club = await _repository.GetClubByNumberAsync(request.ClubNumber);
 
-            if (club == null || 
-                club.ClubPassword != request.ClubPassword || 
+            if (club == null ||
+                club.ClubPassword != request.ClubPassword ||
                 !club.IsActive)
             {
                 return null;
             }
+
+            var token = GenerateToken(club.ClubNumber, "club");
 
             return new ClubLoginResponseDto
             {
                 ClubID = club.ClubID,
                 ClubName = club.ClubName,
                 ClubNumber = club.ClubNumber,
-                IsActive = club.IsActive
+                IsActive = club.IsActive,
+                Token = token
             };
         }
 
@@ -103,6 +116,28 @@ namespace ClupApi.Services
             };
 
             return await _repository.AddClubAsync(club);
+        }
+        public string GenerateToken(long userId, string userType)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:SecretKey"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[] {
+        new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+        new Claim("userType", userType), // "student" veya "club"
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+    };
+
+            var expirationMinutes = Convert.ToDouble(_config["JwtSettings:ExpiryInMinutes"] ?? "60");
+            var token = new JwtSecurityToken(
+                issuer: _config["JwtSettings:Issuer"],
+                audience: _config["JwtSettings:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(expirationMinutes),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

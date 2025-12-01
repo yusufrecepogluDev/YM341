@@ -5,13 +5,15 @@ namespace KampusEtkinlik.Data.Models
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
         public T? Data { get; set; }
-        public List<string>? Errors { get; set; }
+        public string[]? Errors { get; set; }
+        public DateTime Timestamp { get; set; }
     }
 
     public class ApiResponse
     {
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
-        public List<string>? Errors { get; set; }
+        public string[]? Errors { get; set; }
+        public DateTime Timestamp { get; set; }
     }
 }

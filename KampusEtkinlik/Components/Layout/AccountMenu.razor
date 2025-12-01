@@ -1,6 +1,7 @@
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject KampusEtkinlik.Services.TokenService TokenService
 
 <div class="account-menu">
     <button class="account-button" @onclick="ToggleDropdown">
@@ -32,7 +33,10 @@
         
         try 
         { 
-            await LocalStorage.ClearAsync(); 
+            await TokenService.ClearTokenAsync();
+            // Beni hatırla bilgilerini de temizle
+            await LocalStorage.RemoveItemAsync("rememberedStudentNumber");
+            await LocalStorage.RemoveItemAsync("rememberedClubNumber");
         } 
         catch { }
         
