@@ -1,0 +1,388 @@
+﻿/* Renk Değişkenleri */
+:root {
+    --primary-color: #4f46e5;
+    --activity-color: #10b981;
+    --announcement-color: #f59e0b;
+    --academic-color: #ef4444;
+    --today-color: #3b82f6;
+    --border-color: #e5e7eb;
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --bg-hover: #f3f4f6;
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Container */
+.calendar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Header */
+.calendar-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.calendar-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+}
+
+.calendar-subtitle {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Ay Navigasyonu */
+.month-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+.current-month {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 2px solid #9ca3af;
+    background: #ffffff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #374151;
+    position: relative;
+    z-index: 10;
+}
+
+.nav-btn svg {
+    position: relative;
+    z-index: 11;
+}
+
+.nav-btn:hover {
+    background: #4f46e5;
+    color: #ffffff;
+    border-color: #4f46e5;
+    transform: scale(1.05);
+}
+
+.nav-btn:hover svg path {
+    stroke: #ffffff;
+}
+
+.nav-btn:active {
+    transform: scale(0.95);
+}
+
+/* Legend (Renk Açıklaması) */
+.legend {
+    display: flex;
+    gap: 2.5rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.legend-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.legend-dot.activity {
+    background-color: #10b981 !important;
+}
+
+.legend-dot.announcement {
+    background-color: #f59e0b !important;
+}
+
+.legend-dot.academic {
+    background-color: #ef4444 !important;
+}
+
+.legend-text {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Takvim Wrapper */
+.calendar-wrapper {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-lg);
+}
+
+/* Gün İsimleri */
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.weekday {
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    padding: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Takvim Grid */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+}
+
+/* Gün Hücresi */
+.day {
+    aspect-ratio: 1;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+    position: relative;
+    min-height: 80px;
+}
+
+.day:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.day-number {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+/* Bugün */
+.day.today {
+    background: #f0f9ff;
+    border: 3px solid #3b82f6;
+    border-color: #3b82f6;
+}
+
+.day.today .day-number {
+    color: #1e40af;
+    font-weight: 700;
+}
+
+.day.today:hover {
+    background: #dbeafe;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+/* Diğer Ay Günleri */
+.day.other-month {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.day.other-month:hover {
+    background: white;
+    border-color: var(--border-color);
+    transform: none;
+    box-shadow: none;
+}
+
+/* Olay Göstergeleri */
+.event-indicators {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: auto;
+}
+
+.event-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+}
+
+.day:hover .event-dot {
+    transform: scale(1.3);
+}
+
+.event-dot.activity {
+    background-color: var(--activity-color);
+}
+
+.event-dot.announcement {
+    background-color: var(--announcement-color);
+}
+
+.event-dot.academic {
+    background-color: var(--academic-color);
+}
+
+/* Responsive Tasarım */
+@media (max-width: 1024px) {
+    .calendar-container {
+        padding: 1.5rem;
+    }
+
+    .calendar-title {
+        font-size: 2rem;
+    }
+
+    .day {
+        min-height: 70px;
+    }
+}
+
+@media (max-width: 768px) {
+    .calendar-container {
+        padding: 1rem;
+    }
+
+    .calendar-title {
+        font-size: 1.75rem;
+    }
+
+    .calendar-subtitle {
+        font-size: 1rem;
+    }
+
+    .current-month {
+        font-size: 1.25rem;
+    }
+
+    .weekday {
+        font-size: 0.75rem;
+        padding: 0.5rem;
+    }
+
+    .day {
+        min-height: 60px;
+        padding: 0.25rem;
+    }
+
+    .day-number {
+        font-size: 0.875rem;
+    }
+
+    .legend {
+        gap: 1rem;
+    }
+
+    .legend-text {
+        font-size: 0.75rem;
+    }
+
+    .calendar-wrapper {
+        padding: 1rem;
+    }
+
+    .calendar-grid {
+        gap: 0.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-title {
+        font-size: 1.5rem;
+    }
+
+    .day {
+        min-height: 50px;
+    }
+
+    .day-number {
+        font-size: 0.75rem;
+    }
+
+    .event-dot {
+        width: 6px;
+        height: 6px;
+    }
+
+    .legend-dot {
+        width: 10px;
+        height: 10px;
+    }
+}
+
+/* Animasyonlar */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.calendar-wrapper {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Print Stilleri */
+@media print {
+    .calendar-container {
+        max-width: 100%;
+    }
+
+    .nav-btn {
+        display: none;
+    }
+
+    .day:hover {
+        transform: none;
+        box-shadow: none;
+    }
+}

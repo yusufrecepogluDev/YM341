@@ -1,0 +1,203 @@
+﻿@page "/takvim"
+
+<div class="calendar-container">
+    <div class="calendar-header">
+        <h1 class="calendar-title">Etkinlik Takvimi</h1>
+        <p class="calendar-subtitle">Tüm kulüp etkinliklerini ve duyuruları görüntüleyin</p>
+    </div>
+
+    <!-- Ay Navigasyonu -->
+    <div class="month-navigation">
+        <button class="nav-btn prev-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        
+        <h2 class="current-month">Kasım 2025</h2>
+        
+        <button class="nav-btn next-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Renk Açıklaması -->
+    <div class="legend">
+        <div class="legend-item">
+            <span class="legend-dot activity"></span>
+            <span class="legend-text">Kulüp Etkinlikleri</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-dot announcement"></span>
+            <span class="legend-text">Duyurular</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-dot academic"></span>
+            <span class="legend-text">Akademik Olaylar</span>
+        </div>
+    </div>
+
+    <!-- Takvim Grid -->
+    <div class="calendar-wrapper">
+        <!-- Gün İsimleri -->
+        <div class="weekdays">
+            <div class="weekday">Pzt</div>
+            <div class="weekday">Sal</div>
+            <div class="weekday">Çar</div>
+            <div class="weekday">Per</div>
+            <div class="weekday">Cum</div>
+            <div class="weekday">Cmt</div>
+            <div class="weekday">Paz</div>
+        </div>
+
+        <!-- Takvim Günleri (5 satır x 7 gün = 35 gün) -->
+        <div class="calendar-grid">
+            <!-- Satır 1: Ekim'den 4 gün + Kasım'dan 3 gün -->
+            <div class="day other-month">
+                <span class="day-number">28</span>
+            </div>
+            <div class="day other-month">
+                <span class="day-number">29</span>
+            </div>
+            <div class="day other-month">
+                <span class="day-number">30</span>
+            </div>
+            <div class="day other-month">
+                <span class="day-number">31</span>
+            </div>
+            <div class="day">
+                <span class="day-number">1</span>
+                <div class="event-indicators">
+                    <span class="event-dot activity"></span>
+                </div>
+            </div>
+            <div class="day">
+                <span class="day-number">2</span>
+            </div>
+            <div class="day">
+                <span class="day-number">3</span>
+                <div class="event-indicators">
+                    <span class="event-dot announcement"></span>
+                    <span class="event-dot activity"></span>
+                </div>
+            </div>
+
+            <!-- Satır 2: Kasım 4-10 -->
+            <div class="day">
+                <span class="day-number">4</span>
+            </div>
+            <div class="day">
+                <span class="day-number">5</span>
+                <div class="event-indicators">
+                    <span class="event-dot activity"></span>
+                </div>
+            </div>
+            <div class="day">
+                <span class="day-number">6</span>
+            </div>
+            <div class="day">
+                <span class="day-number">7</span>
+            </div>
+            <div class="day">
+                <span class="day-number">8</span>
+                <div class="event-indicators">
+                    <span class="event-dot academic"></span>
+                </div>
+            </div>
+            <div class="day">
+                <span class="day-number">9</span>
+            </div>
+            <div class="day">
+                <span class="day-number">10</span>
+            </div>
+
+            <!-- Satır 3: Kasım 11-17 -->
+            <div class="day">
+                <span class="day-number">11</span>
+            </div>
+            <div class="day">
+                <span class="day-number">12</span>
+                <div class="event-indicators">
+                    <span class="event-dot activity"></span>
+                    <span class="event-dot announcement"></span>
+                </div>
+            </div>
+            <div class="day">
+                <span class="day-number">13</span>
+            </div>
+            <div class="day">
+                <span class="day-number">14</span>
+            </div>
+            <div class="day">
+                <span class="day-number">15</span>
+                <div class="event-indicators">
+                    <span class="event-dot activity"></span>
+                </div>
+            </div>
+            <div class="day">
+                <span class="day-number">16</span>
+            </div>
+            <div class="day">
+                <span class="day-number">17</span>
+            </div>
+
+            <!-- Satır 4: Kasım 18-24 -->
+            <div class="day">
+                <span class="day-number">18</span>
+            </div>
+            <div class="day">
+                <span class="day-number">19</span>
+            </div>
+            <div class="day">
+                <span class="day-number">20</span>
+                <div class="event-indicators">
+                    <span class="event-dot announcement"></span>
+                </div>
+            </div>
+            <div class="day">
+                <span class="day-number">21</span>
+            </div>
+            <div class="day">
+                <span class="day-number">22</span>
+            </div>
+            <div class="day">
+                <span class="day-number">23</span>
+            </div>
+            <div class="day">
+                <span class="day-number">24</span>
+            </div>
+
+            <!-- Satır 5: Kasım 25-30 + Aralık'tan 1 gün -->
+            <div class="day">
+                <span class="day-number">25</span>
+            </div>
+            <div class="day">
+                <span class="day-number">26</span>
+            </div>
+            <div class="day">
+                <span class="day-number">27</span>
+            </div>
+            <div class="day today">
+                <span class="day-number">28</span>
+                <div class="event-indicators">
+                    <span class="event-dot activity"></span>
+                </div>
+            </div>
+            <div class="day">
+                <span class="day-number">29</span>
+                <div class="event-indicators">
+                    <span class="event-dot academic"></span>
+                    <span class="event-dot activity"></span>
+                </div>
+            </div>
+            <div class="day">
+                <span class="day-number">30</span>
+            </div>
+            <div class="day other-month">
+                <span class="day-number">1</span>
+            </div>
+        </div>
+    </div>
+</div>
