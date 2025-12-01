@@ -1,0 +1,71 @@
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using KampusEtkinlik.Services
+@inject TokenService TokenService
+@inject NavigationManager NavigationManager
+
+@if (isAuthenticated)
+{
+    @ChildContent
+}
+else if (isChecking)
+{
+    <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+        <p>Yükleniyor...</p>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string? RequiredUserType { get; set; }
+
+    private bool isAuthenticated = false;
+    private bool isChecking = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // Küçük bir gecikme ekle - localStorage'ın hazır olmasını bekle
+                await Task.Delay(100);
+                
+                isAuthenticated = await TokenService.IsAuthenticatedAsync();
+                System.Diagnostics.Debug.WriteLine($"AuthGuard - isAuthenticated: {isAuthenticated}");
+
+                if (!isAuthenticated)
+                {
+                    System.Diagnostics.Debug.WriteLine("AuthGuard - Not authenticated, redirecting to login");
+                    NavigationManager.NavigateTo("/login", forceLoad: true);
+                    return;
+                }
+
+                // Eğer belirli bir user type gerekiyorsa kontrol et
+                if (!string.IsNullOrEmpty(RequiredUserType))
+                {
+                    var userType = await TokenService.GetUserTypeAsync();
+                    System.Diagnostics.Debug.WriteLine($"AuthGuard - RequiredUserType: '{RequiredUserType}', ActualUserType: '{userType ?? "null"}'");
+                    
+                    if (string.IsNullOrEmpty(userType) || userType != RequiredUserType)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"AuthGuard - User type mismatch, redirecting to login");
+                        NavigationManager.NavigateTo("/login", forceLoad: true);
+                        return;
+                    }
+                }
+
+                isChecking = false;
+                StateHasChanged();
+                System.Diagnostics.Debug.WriteLine("AuthGuard - Authentication successful");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"AuthGuard - Error: {ex.Message}");
+                NavigationManager.NavigateTo("/login", forceLoad: true);
+            }
+        }
+    }
+}

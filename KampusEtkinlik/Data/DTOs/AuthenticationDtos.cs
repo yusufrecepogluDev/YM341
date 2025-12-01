@@ -9,7 +9,7 @@ namespace KampusEtkinlik.DTOs
         public long StudentNumber { get; set; }
 
         [Required(ErrorMessage = "Şifre zorunludur")]
-        [MaxLength(20, ErrorMessage = "Şifre en fazla 20 karakter olabilir")]
+        [MaxLength(64)]
         public string StudentPassword { get; set; } = string.Empty;
     }
 
@@ -21,6 +21,7 @@ namespace KampusEtkinlik.DTOs
         public string StudentMail { get; set; } = string.Empty;
         public long StudentNumber { get; set; }
         public bool IsActive { get; set; }
+        public string Token { get; set; } = string.Empty;
     }
 
     public class StudentRegisterRequestDto
@@ -37,7 +38,7 @@ namespace KampusEtkinlik.DTOs
         [Required(ErrorMessage = "Öğrenci numarası zorunludur")]
         public long StudentNumber { get; set; }
         [Required(ErrorMessage = "Şifre zorunludur")]
-        [MaxLength(20, ErrorMessage = "Şifre en fazla 20 karakter olabilir")]
+        [MaxLength(64)]
         public string StudentPassword { get; set; } = string.Empty;
     }
 
@@ -57,7 +58,7 @@ namespace KampusEtkinlik.DTOs
         public long ClubNumber { get; set; }
 
         [Required(ErrorMessage = "Şifre zorunludur")]
-        [MaxLength(20, ErrorMessage = "Şifre en fazla 20 karakter olabilir")]
+        [MaxLength(64)]
         public string ClubPassword { get; set; } = string.Empty;
     }
 
@@ -67,6 +68,7 @@ namespace KampusEtkinlik.DTOs
         public string ClubName { get; set; } = string.Empty;
         public long ClubNumber { get; set; }
         public bool IsActive { get; set; }
+        public string Token { get; set; } = string.Empty;
     }
 
     public class ClubRegisterRequestDto
@@ -81,7 +83,7 @@ namespace KampusEtkinlik.DTOs
         [EmailAddress(ErrorMessage = "Geçersiz mail formatı")]
         public string? ClubEmail { get; set; }
         [Required(ErrorMessage = "Şifre zorunludur")]
-        [MaxLength(20, ErrorMessage = "Şifre en fazla 20 karakter olabilir")]
+        [MaxLength(64)]
         public string ClubPassword { get; set; } = string.Empty;
     }
 

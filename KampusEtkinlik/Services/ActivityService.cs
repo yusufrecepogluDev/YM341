@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Net.Http.Headers;
 using KampusEtkinlik.Data.Models;
 using KampusEtkinlik.Data.DTOs;
 
@@ -7,17 +8,29 @@ namespace KampusEtkinlik.Services
     public class ActivityService
     {
         private readonly HttpClient _httpClient;
+        private readonly TokenService _tokenService;
         private readonly string _baseUrl = "http://localhost:5245/api/Activities";
 
-        public ActivityService(HttpClient httpClient)
+        public ActivityService(HttpClient httpClient, TokenService tokenService)
         {
             _httpClient = httpClient;
+            _tokenService = tokenService;
+        }
+
+        private async Task SetAuthorizationHeaderAsync()
+        {
+            var token = await _tokenService.GetTokenAsync();
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
         }
 
         public async Task<List<Activity>> GetAllAsync()
         {
             try
             {
+                await SetAuthorizationHeaderAsync();
                 var result = await _httpClient.GetFromJsonAsync<List<Activity>>(_baseUrl);
                 return result ?? new List<Activity>();
             }
@@ -35,6 +48,7 @@ namespace KampusEtkinlik.Services
 
         public async Task<Activity?> GetByIdAsync(int id)
         {
+            await SetAuthorizationHeaderAsync();
             return await _httpClient.GetFromJsonAsync<Activity>($"{_baseUrl}/{id}");
         }
 
@@ -42,6 +56,7 @@ namespace KampusEtkinlik.Services
         {
             try
             {
+                await SetAuthorizationHeaderAsync();
                 var response = await _httpClient.PostAsJsonAsync(_baseUrl, createDto);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -61,6 +76,7 @@ namespace KampusEtkinlik.Services
         {
             try
             {
+                await SetAuthorizationHeaderAsync();
                 var response = await _httpClient.PutAsJsonAsync($"{_baseUrl}/{id}", updateDto);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -78,6 +94,7 @@ namespace KampusEtkinlik.Services
 
         public async Task<bool> DeleteAsync(int id)
         {
+            await SetAuthorizationHeaderAsync();
             var response = await _httpClient.DeleteAsync($"{_baseUrl}/{id}");
             return response.IsSuccessStatusCode;
         }

@@ -1,6 +1,7 @@
 ﻿using KampusEtkinlik.DTOs;
 using KampusEtkinlik.Data.Models;
 using System.Net.Http.Json;
+using System.Net.Http.Headers;
 
 namespace KampusEtkinlik.Services
 {
@@ -8,14 +9,25 @@ namespace KampusEtkinlik.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
+        private readonly TokenService _tokenService;
 
-        public AuthenticationService(HttpClient httpClient, IConfiguration configuration)
+        public AuthenticationService(HttpClient httpClient, IConfiguration configuration, TokenService tokenService)
         {
             _httpClient = httpClient;
             _configuration = configuration;
+            _tokenService = tokenService;
             
             var baseUrl = _configuration["ApiSettings:BaseUrl"];
             _httpClient.BaseAddress = new Uri(baseUrl ?? "https://localhost:7077");
+        }
+
+        public async Task SetAuthorizationHeaderAsync()
+        {
+            var token = await _tokenService.GetTokenAsync();
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
         }
 
         public async Task<(bool Success, StudentLoginResponseDto? Data, string Message)> StudentLoginAsync(StudentLoginRequestDto request)
