@@ -8,15 +8,15 @@
 
     <!-- Ay Navigasyonu -->
     <div class="month-navigation">
-        <button class="nav-btn prev-btn">
+        <button class="nav-btn prev-btn" @onclick="PreviousMonth">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </button>
         
-        <h2 class="current-month">Kasım 2025</h2>
+        <h2 class="current-month">@currentDate.ToString("MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</h2>
         
-        <button class="nav-btn next-btn">
+        <button class="nav-btn next-btn" @onclick="NextMonth">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -52,152 +52,125 @@
             <div class="weekday">Paz</div>
         </div>
 
-        <!-- Takvim Günleri (5 satır x 7 gün = 35 gün) -->
+        <!-- Takvim Günleri (Dinamik) -->
         <div class="calendar-grid">
-            <!-- Satır 1: Ekim'den 4 gün + Kasım'dan 3 gün -->
-            <div class="day other-month">
-                <span class="day-number">28</span>
-            </div>
-            <div class="day other-month">
-                <span class="day-number">29</span>
-            </div>
-            <div class="day other-month">
-                <span class="day-number">30</span>
-            </div>
-            <div class="day other-month">
-                <span class="day-number">31</span>
-            </div>
-            <div class="day">
-                <span class="day-number">1</span>
-                <div class="event-indicators">
-                    <span class="event-dot activity"></span>
+            @foreach (var day in calendarDays)
+            {
+                <div class="day @(day.IsOtherMonth ? "other-month" : "") @(day.IsToday ? "today" : "")">
+                    <span class="day-number">@day.Day</span>
+                    @if (day.HasEvents)
+                    {
+                        <div class="event-indicators">
+                            @if (day.HasActivity)
+                            {
+                                <span class="event-dot activity"></span>
+                            }
+                            @if (day.HasAnnouncement)
+                            {
+                                <span class="event-dot announcement"></span>
+                            }
+                            @if (day.HasAcademic)
+                            {
+                                <span class="event-dot academic"></span>
+                            }
+                        </div>
+                    }
                 </div>
-            </div>
-            <div class="day">
-                <span class="day-number">2</span>
-            </div>
-            <div class="day">
-                <span class="day-number">3</span>
-                <div class="event-indicators">
-                    <span class="event-dot announcement"></span>
-                    <span class="event-dot activity"></span>
-                </div>
-            </div>
-
-            <!-- Satır 2: Kasım 4-10 -->
-            <div class="day">
-                <span class="day-number">4</span>
-            </div>
-            <div class="day">
-                <span class="day-number">5</span>
-                <div class="event-indicators">
-                    <span class="event-dot activity"></span>
-                </div>
-            </div>
-            <div class="day">
-                <span class="day-number">6</span>
-            </div>
-            <div class="day">
-                <span class="day-number">7</span>
-            </div>
-            <div class="day">
-                <span class="day-number">8</span>
-                <div class="event-indicators">
-                    <span class="event-dot academic"></span>
-                </div>
-            </div>
-            <div class="day">
-                <span class="day-number">9</span>
-            </div>
-            <div class="day">
-                <span class="day-number">10</span>
-            </div>
-
-            <!-- Satır 3: Kasım 11-17 -->
-            <div class="day">
-                <span class="day-number">11</span>
-            </div>
-            <div class="day">
-                <span class="day-number">12</span>
-                <div class="event-indicators">
-                    <span class="event-dot activity"></span>
-                    <span class="event-dot announcement"></span>
-                </div>
-            </div>
-            <div class="day">
-                <span class="day-number">13</span>
-            </div>
-            <div class="day">
-                <span class="day-number">14</span>
-            </div>
-            <div class="day">
-                <span class="day-number">15</span>
-                <div class="event-indicators">
-                    <span class="event-dot activity"></span>
-                </div>
-            </div>
-            <div class="day">
-                <span class="day-number">16</span>
-            </div>
-            <div class="day">
-                <span class="day-number">17</span>
-            </div>
-
-            <!-- Satır 4: Kasım 18-24 -->
-            <div class="day">
-                <span class="day-number">18</span>
-            </div>
-            <div class="day">
-                <span class="day-number">19</span>
-            </div>
-            <div class="day">
-                <span class="day-number">20</span>
-                <div class="event-indicators">
-                    <span class="event-dot announcement"></span>
-                </div>
-            </div>
-            <div class="day">
-                <span class="day-number">21</span>
-            </div>
-            <div class="day">
-                <span class="day-number">22</span>
-            </div>
-            <div class="day">
-                <span class="day-number">23</span>
-            </div>
-            <div class="day">
-                <span class="day-number">24</span>
-            </div>
-
-            <!-- Satır 5: Kasım 25-30 + Aralık'tan 1 gün -->
-            <div class="day">
-                <span class="day-number">25</span>
-            </div>
-            <div class="day">
-                <span class="day-number">26</span>
-            </div>
-            <div class="day">
-                <span class="day-number">27</span>
-            </div>
-            <div class="day today">
-                <span class="day-number">28</span>
-                <div class="event-indicators">
-                    <span class="event-dot activity"></span>
-                </div>
-            </div>
-            <div class="day">
-                <span class="day-number">29</span>
-                <div class="event-indicators">
-                    <span class="event-dot academic"></span>
-                    <span class="event-dot activity"></span>
-                </div>
-            </div>
-            <div class="day">
-                <span class="day-number">30</span>
-            </div>
-            <div class="day other-month">
-                <span class="day-number">1</span>
-            </div>
+            }
         </div>
     </div>
 </div>
+
+@code {
+    private DateTime currentDate = DateTime.Now;
+    private List<CalendarDay> calendarDays = new();
+
+    protected override void OnInitialized()
+    {
+        GenerateCalendar();
+    }
+
+    private void PreviousMonth()
+    {
+        currentDate = currentDate.AddMonths(-1);
+        GenerateCalendar();
+    }
+
+    private void NextMonth()
+    {
+        currentDate = currentDate.AddMonths(1);
+        GenerateCalendar();
+    }
+
+    private void GenerateCalendar()
+    {
+        calendarDays.Clear();
+        
+        var firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+        var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+        
+        // Pazartesi = 1, Pazar = 0 (DayOfWeek enum'unda Pazar = 0)
+        int firstDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
+        if (firstDayOfWeek == 0) firstDayOfWeek = 7; // Pazar'ı 7 yap
+        
+        // Önceki aydan kaç gün göstereceğiz
+        int daysFromPrevMonth = firstDayOfWeek - 1;
+        
+        // Önceki ayın günlerini ekle
+        var prevMonthStart = firstDayOfMonth.AddDays(-daysFromPrevMonth);
+        for (int i = 0; i < daysFromPrevMonth; i++)
+        {
+            var date = prevMonthStart.AddDays(i);
+            calendarDays.Add(new CalendarDay
+            {
+                Date = date,
+                Day = date.Day,
+                IsOtherMonth = true,
+                IsToday = false
+            });
+        }
+        
+        // Bu ayın günlerini ekle
+        for (int day = 1; day <= lastDayOfMonth.Day; day++)
+        {
+            var date = new DateTime(currentDate.Year, currentDate.Month, day);
+            calendarDays.Add(new CalendarDay
+            {
+                Date = date,
+                Day = day,
+                IsOtherMonth = false,
+                IsToday = date.Date == DateTime.Today
+            });
+        }
+        
+        // Sonraki aydan günler ekle (toplam 35 veya 42 gün olacak şekilde)
+        int totalDays = calendarDays.Count;
+        int daysToAdd = totalDays <= 35 ? 35 - totalDays : 42 - totalDays;
+        
+        for (int i = 1; i <= daysToAdd; i++)
+        {
+            var date = lastDayOfMonth.AddDays(i);
+            calendarDays.Add(new CalendarDay
+            {
+                Date = date,
+                Day = date.Day,
+                IsOtherMonth = true,
+                IsToday = false
+            });
+        }
+    }
+
+    private class CalendarDay
+    {
+        public DateTime Date { get; set; }
+        public int Day { get; set; }
+        public bool IsOtherMonth { get; set; }
+        public bool IsToday { get; set; }
+        
+        // Etkinlik göstergeleri (şimdilik örnek, ileride API'den gelecek)
+        public bool HasActivity => false;
+        public bool HasAnnouncement => false;
+        public bool HasAcademic => false;
+        public bool HasEvents => HasActivity || HasAnnouncement || HasAcademic;
+    }
+}
