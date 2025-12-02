@@ -11,6 +11,12 @@
 @using KampusEtkinlik.Components.Layout
 
 <AuthGuard RequiredUserType="club">
+    <div class="tab-menu">
+        <button type="button" class="@(aktifSekme == 1 ? "active-tab" : "")" @onclick="() => aktifSekme = 1">Etkinlik Yönetimi</button>
+        <button type="button" class="@(aktifSekme == 2 ? "active-tab" : "")" @onclick="() => aktifSekme = 2">Duyuru Yönetimi</button>
+    </div>
+    @if (aktifSekme == 1)
+    {
     <div class="sayfa-cont" @onclick="() => openDropdownId = null">
     <div class="etk-cont" @onclick:stopPropagation="true">
         <h2 class="etk-title">Etkinlik Oluştur</h2>
@@ -103,6 +109,34 @@
         </div>
     </div>
 </div>
+}
+@if (aktifSekme == 2)
+    {
+        <div class="sayfa-cont">
+            <div class="etk-cont">
+                <h2 class="etk-title">Duyuru Oluştur</h2>
+                
+                <div class="form-group">
+                    <label class="label-1">Duyuru Başlığı</label>
+                    <input class="form-control" placeholder="Başlık giriniz..." />
+                </div>
+
+                <div class="form-group">
+                    <label class="label-1">Duyuru İçeriği</label>
+                    <textarea class="form-control-2" placeholder="Duyuru detaylarını yazın..."></textarea>
+                </div>
+
+                <button class="etk-btn">Duyuru Yayınla</button>
+            </div>
+
+            <div class="etkinlikler-cont">
+                <h2 class="etk-title-2">Duyurular</h2>
+                <div class="etkinlik-kart">
+                    <p style="text-align:center; color:#666;">Henüz duyuru yok.</p>
+                </div>
+            </div>
+        </div>
+    }
 
     @* Düzenleme Popup *@
     @if (showEditModal && editingActivity != null)
@@ -185,6 +219,10 @@
     private ActivityCreateDto model { get; set; } = new();
 
     private string mesaj = "";
+    private int aktifSekme = 1;
+
+
+
     private List<Activity>? activities;
     private int currentClubId = 0;
 
