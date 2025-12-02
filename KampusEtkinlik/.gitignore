@@ -60,6 +60,7 @@ yarn-error.log
 # Configs (local secrets)
 appsettings.Development.json
 appsettings.Local.json
+appsettings.json
 secrets.json
 secrets.*
 local.settings.json

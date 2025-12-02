@@ -36,6 +36,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddScoped<ClupApi.Repositories.IActivityRepository, ActivityRepository>();
 builder.Services.AddScoped<ClupApi.Repositories.IAnnouncementRepository, AnnouncementRepository>();
 builder.Services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
+builder.Services.AddScoped<ICalendarRepository, CalendarRepository>();
 
 // Service dependency injection
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();

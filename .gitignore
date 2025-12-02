@@ -16,6 +16,7 @@
 <<<<<<< HEAD
 =======
 *.env
+appsettings.json
 >>>>>>> 07ee508e112205cd3d995b6ead96b274a822c8e8
 
 # User-specific files (MonoDevelop/Xamarin Studio)

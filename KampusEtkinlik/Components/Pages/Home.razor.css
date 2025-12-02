@@ -4,6 +4,8 @@
     padding: 1.5rem;
     background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
     min-height: calc(100vh - 70px);
+    max-width: 90vw;
+    max-height: 95vh;
 }
 
 /* Başlık */

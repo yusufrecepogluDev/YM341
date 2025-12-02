@@ -1,21 +1,32 @@
-﻿namespace ClupApi.Repositories
+﻿using ClupApi.DTOs;
+using ClupApi.Models;
+using ClupApi.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace ClupApi.Repositories
 {
-    public class CalendarRepository
+    public class CalendarRepository : BaseRepository<CalendarEventDto>, ICalendarRepository
     {
-
-        public void GetEventsByDateRangeAsync(DateTime startDate, DateTime endDate)
+        public CalendarRepository(AppDbContext context) : base(context)
         {
-
         }
 
-        public void GetEventsByDateAsync(DateTime date)
+        public async Task<List<CalendarEventDto>> GetEventsByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
-
+            // TODO: Implement
+            return new List<CalendarEventDto>();
         }
 
-        public void GetCategoriesAsync()
+        public async Task<List<CalendarEventDto>> GetEventsByDateAsync(DateTime date)
         {
+            // TODO: Implement
+            return new List<CalendarEventDto>();
+        }
 
+        public async Task<List<CategoryDto>> GetCategoriesAsync()
+        {
+            // TODO: Implement
+            return new List<CategoryDto>();
         }
     }
 }

@@ -64,10 +64,16 @@
 }
 
     .navbar-brand::before {
-        content: '🎓';
-        font-size: 2rem;
+        content: "";
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        background-image: url('images/dogus_universitesi_yeni_logo.png');
+        background-size: contain;
+        background-repeat: no-repeat;
         animation: bounce 2s infinite;
     }
+
 
     .navbar-brand::after {
         content: '';
