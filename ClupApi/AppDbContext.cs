@@ -19,6 +19,8 @@ namespace ClupApi
 
         public DbSet<ActivityParticipation> ActivityParticipations { get; set; }
 
+        public DbSet<AcademicEvents> AcademicEvents { get; set; }
+
     
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

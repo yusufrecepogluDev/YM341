@@ -1,233 +1,209 @@
-/* Ana İçerik */
+/* --- 1. ANA SAYFA YAPISI --- */
 .ana-icerik {
     flex-grow: 1;
-    padding: 1.5rem;
+    padding: 1.5rem 0;
     background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
     min-height: calc(100vh - 70px);
-    max-width: 90vw;
-    max-height: 95vh;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-/* Başlık */
+/* Başlıklar */
 .baslik {
     font-size: 1.5rem;
     font-weight: 700;
     color: #2c3e50;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     text-align: center;
     position: relative;
-    padding-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
 }
 
-.baslik::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 3px;
-    background: linear-gradient(90deg, #dc3545, #6a0080);
-    border-radius: 2px;
+    .baslik::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, #dc3545, #6a0080);
+        border-radius: 2px;
+    }
+
+/* Bölüm Kutuları */
+.bolum-konteyner {
+    margin-bottom: 2rem;
+    padding: 0 1.5rem;
+    position: relative;
 }
 
-/* Slider ve Tarihler Bölümü */
-.ust-slider-konteyner {
+/* --- 2. SLIDER YAPISI --- */
+.slider-wrapper {
     position: relative;
     background: white;
-    padding: 0.5rem 2.5rem;
+    padding: 1.5rem 3.5rem;
     border-radius: 12px;
     box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
-    margin-bottom: 2rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     overflow: hidden;
 }
 
-.ust-slider-konteyner:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-}
+    .slider-wrapper:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
 
-.ust-slider {
+.slider-track {
     display: flex;
-    gap: 0.4rem;
-    overflow-x: hidden;
+    gap: 1rem;
+    overflow-x: auto;
     scroll-behavior: smooth;
-    padding: 0.4rem 0;
-    -ms-overflow-style: none;
+    padding: 1rem 0;
     scrollbar-width: none;
+    align-items: stretch;
 }
 
-.ust-slider::-webkit-scrollbar {
-    display: none;
-}
+    .slider-track::-webkit-scrollbar {
+        display: none;
+    }
 
-.slider-ogesi {
-    width: calc(25% - 0.3rem);
-    min-width: calc(25% - 0.3rem);
-    max-width: calc(25% - 0.3rem);
-    height: 200px;
+/* --- 3. ETKİNLİK KARTLARI --- */
+.slider-card {
+    width: calc(25% - 0.75rem);
+    min-width: calc(25% - 0.75rem);
+    max-width: calc(25% - 0.75rem);
+    height: 160px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 0.85rem;
+    padding: 1.2rem;
     box-sizing: border-box;
     color: white;
     font-weight: 600;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
     flex-shrink: 0;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    position: relative;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
     transition: transform 0.3s ease;
     cursor: pointer;
-}
-
-.slider-ogesi:hover {
-    transform: scale(1.02);
-}
-
-.slider-ogesi::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.7) 100%);
-    z-index: 0;
-    border-radius: inherit;
-    transition: background 0.3s ease;
-}
-
-.slider-ogesi:hover::before {
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%);
-}
-
-.slider-ogesi h3 {
     position: relative;
-    z-index: 2;
-    margin: 0 0 0.3rem 0;
-    font-size: 0.95rem;
-    line-height: 1.2;
 }
 
-.etkinlik-tarih {
+    .slider-card:hover {
+        transform: scale(1.02);
+    }
+
+    .slider-card h3 {
+        position: relative;
+        z-index: 2;
+        margin: 0 0 0.4rem 0;
+        font-size: 1rem;
+        line-height: 1.3;
+    }
+
+.date-badge {
     position: relative;
     z-index: 2;
     margin: 0;
-    font-size: 0.75rem;
-    opacity: 0.9;
+    font-size: 0.85rem;
+    opacity: 0.95;
     font-weight: 400;
 }
 
-/* Duyurular Alanı */
-.duyurular-alani {
-    margin: 2rem 0;
-}
-
-hr {
-    border: none;
-    border-top: 2px solid #e0e0e0;
-    margin: 2rem 0;
-    opacity: 0.5;
-}
-
-/* Kaydırıcı Konteyner */
-.kaydirici-konteyner {
-    position: relative;
-    max-width: 100%;
-    margin: 0 auto;
-    overflow: hidden;
-    padding: 0 3rem;
-}
-
-.duyuru-listesi {
-    display: flex;
-    gap: 1rem;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    padding: 0.75rem 0;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-.duyuru-listesi::-webkit-scrollbar {
-    display: none;
-}
-
-/* Duyuru Kartları */
+/* --- 4. DUYURU KARTLARI --- */
 .duyuru-karti {
     background: white;
-    min-width: 240px;
-    max-width: 240px;
-    padding: 1.35rem;
-    border-radius: 10px;
+    min-width: calc(25% - 0.75rem);
+    max-width: calc(25% - 0.75rem);
+    width: calc(25% - 0.75rem);
+    padding: 1.2rem;
+    border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     text-align: left;
     flex-shrink: 0;
-    border-top: 3px solid #e0e0e0;
+    border-top: 4px solid #e0e0e0;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
 }
 
-.duyuru-karti::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, transparent 0%, rgba(0, 0, 0, 0.02) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    .duyuru-karti:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .duyuru-karti.highlight {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        border-top-color: #ffc107;
+    }
+
+        .duyuru-karti.highlight h3,
+        .duyuru-karti.highlight p,
+        .duyuru-karti.highlight span,
+        .duyuru-karti.highlight .tarih-etiketi,
+        .duyuru-karti.highlight .duyuru-footer {
+            color: white !important;
+        }
+
+.duyuru-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.8rem;
 }
 
-.duyuru-karti:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-.duyuru-karti:hover::before {
-    opacity: 1;
-}
-
-.duyuru-karti.kirmizi {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-    color: white;
-    border-top-color: #ffc107;
-}
-
-.duyuru-karti.kirmizi h3,
-.duyuru-karti.kirmizi p {
-    color: white;
-}
-
-.duyuru-karti h3 {
-    font-size: 1.05rem;
+.duyuru-header h3 {
+    font-size: 1rem;
     font-weight: 600;
-    margin: 0 0 0.6rem 0;
+    margin: 0;
     color: #2c3e50;
     line-height: 1.3;
+    flex: 1;
 }
 
-.duyuru-karti p {
-    font-size: 0.85rem;
+.tarih-etiketi {
+    font-size: 0.8rem;
+    color: #888;
+    white-space: nowrap;
+    margin-left: 0.5rem;
+}
+
+.duyuru-ozet {
+    font-size: 0.9rem;
     color: #666;
-    margin: 0.45rem 0;
+    margin: 0.5rem 0;
     line-height: 1.5;
+    flex-grow: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
 }
 
-.duyuru-karti small {
+.duyuru-ust-bilgi {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
     font-size: 0.75rem;
-    opacity: 0.8;
+    color: #888;
 }
 
-/* Kaydırma Butonları */
+.duyuru-footer {
+    margin-top: auto;
+    padding-top: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: right;
+    color: #dc3545;
+}
+
+/* --- 5. BUTONLAR --- */
 .kaydirma-butonu {
     position: absolute;
     top: 50%;
@@ -238,10 +214,10 @@ hr {
     padding: 0;
     cursor: pointer;
     z-index: 10;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -249,101 +225,292 @@ hr {
     box-shadow: 0 3px 10px rgba(220, 53, 69, 0.3);
 }
 
-.kaydirma-butonu:hover {
+    .kaydirma-butonu:hover {
+        background: #dc3545;
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 5px 14px rgba(220, 53, 69, 0.4);
+    }
+
+    .kaydirma-butonu.sol {
+        left: 1rem;
+    }
+
+    .kaydirma-butonu.sag {
+        right: 1rem;
+    }
+
+/* --- 6. POPUP MODAL --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
     background: #dc3545;
-    transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 5px 14px rgba(220, 53, 69, 0.4);
+    padding: 1.5rem;
+    position: relative;
 }
 
-.kaydirma-butonu:active {
-    transform: translateY(-50%) scale(0.95);
+.modal-close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
 }
 
-.kaydirma-butonu.sol {
-    left: 0.4rem;
+    .modal-close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+.modal-title {
+    margin: 0 0 0.5rem 0;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding-right: 2rem;
 }
 
-.kaydirma-butonu.sag {
-    right: 0.4rem;
+.modal-type-badge {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
 }
 
-/* Tüm Duyurular Linki */
-.tum-duyurular-linki {
-    display: inline-flex;
+.modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+.modal-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-item {
+    padding: 0.8rem;
+    background: #f3f4f6;
+    border-radius: 8px;
+    text-align: center;
+}
+
+    .info-item strong {
+        display: block;
+        color: #dc3545;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        margin-bottom: 0.3rem;
+    }
+
+    .info-item span {
+        display: block;
+        color: #333;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+.modal-date-box {
+    display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 1.5rem;
-    color: #dc3545;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.95rem;
-    float: right;
-    padding: 0.5rem 1rem;
+    padding: 0.8rem;
+    background: #f3f4f6;
     border-radius: 8px;
-    transition: all 0.3s ease;
+    margin-bottom: 1rem;
 }
 
-.tum-duyurular-linki:hover {
-    background: rgba(220, 53, 69, 0.1);
-    transform: translateX(4px);
+    .modal-date-box p {
+        margin: 0;
+        color: #555;
+        font-size: 0.85rem;
+    }
+
+.modal-description {
+    line-height: 1.6;
+    color: #444;
+    font-size: 0.9rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
 }
 
-/* Responsive Tasarım */
-@media (max-width: 1024px) {
-    .slider-ogesi {
-        min-width: calc(50% - 0.5rem);
-        height: 240px;
+.extended-text {
+    white-space: pre-wrap;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 5px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #dc3545;
+    border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #c82333;
+}
+
+/* Ayırıcı Çizgi */
+.ayirici-cizgi {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #dc3545, transparent);
+    margin: 2rem 1.5rem;
+    opacity: 0.3;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .ana-icerik {
+        padding: 1.5rem 0;
+    }
+
+    .bolum-konteyner {
+        padding: 0 1.5rem;
+    }
+
+    .ayirici-cizgi {
+        margin: 3rem 1.5rem;
+    }
+
+    .slider-card {
+        width: calc(33.333% - 0.67rem);
+        min-width: calc(33.333% - 0.67rem);
+        max-width: calc(33.333% - 0.67rem);
     }
 
     .duyuru-karti {
-        min-width: 240px;
-        max-width: 240px;
+        min-width: calc(33.333% - 0.67rem);
+        max-width: calc(33.333% - 0.67rem);
+        width: calc(33.333% - 0.67rem);
     }
 }
 
 @media (max-width: 768px) {
     .ana-icerik {
-        padding: 1rem;
+        padding: 1rem 0;
+    }
+
+    .bolum-konteyner {
+        padding: 0 1rem;
+    }
+
+    .ayirici-cizgi {
+        margin: 2rem 1rem;
     }
 
     .baslik {
         font-size: 1.5rem;
     }
 
-    .ust-slider-konteyner {
-        flex-direction: column;
-        padding: 1rem;
+    .slider-wrapper {
+        padding: 1rem 2.5rem;
     }
 
-    .slider-ogesi {
-        min-width: 100%;
-        height: 200px;
+    .slider-card {
+        width: calc(50% - 0.5rem);
+        min-width: calc(50% - 0.5rem);
+        max-width: calc(50% - 0.5rem);
+        height: 180px;
     }
 
-    .kaydirici-konteyner {
-        padding: 0 2.5rem;
+    .slider-card h3 {
+        font-size: 1rem;
+    }
+
+    .duyuru-karti {
+        min-width: calc(50% - 0.5rem);
+        max-width: calc(50% - 0.5rem);
+        width: calc(50% - 0.5rem);
+    }
+
+    .modal-content {
+        width: 95%;
+    }
+
+    .modal-header {
+        padding: 1.2rem;
+    }
+
+    .modal-title {
+        font-size: 1rem;
+    }
+
+    .modal-type-badge {
+        font-size: 2rem;
+    }
+
+    .modal-body {
+        padding: 1.2rem;
+    }
+
+    .modal-info-grid {
+        grid-template-columns: 1fr;
     }
 
     .kaydirma-butonu {
         width: 40px;
         height: 40px;
-        font-size: 1.25rem;
-    }
-
-    .duyuru-karti {
-        min-width: 220px;
-        max-width: 220px;
-        padding: 1.25rem;
+        font-size: 1.3rem;
     }
 }
 
 @media (max-width: 480px) {
-    .kaydirici-konteyner {
-        padding: 0 1.5rem;
+    .bolum-konteyner {
+        padding: 0 0.5rem;
+    }
+
+    .ayirici-cizgi {
+        margin: 2rem 0.5rem;
+    }
+
+    .slider-card {
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
     }
 
     .duyuru-karti {
-        min-width: 200px;
-        max-width: 200px;
+        min-width: 100%;
+        max-width: 100%;
+        width: 100%;
     }
 }

@@ -18,6 +18,7 @@ builder.Services.AddScoped<TokenService>();
 builder.Services.AddHttpClient<AnnouncementService>();
 builder.Services.AddHttpClient<ActivityService>();
 builder.Services.AddHttpClient<AuthenticationService>();
+builder.Services.AddHttpClient<CalendarApiService>();
 
 var app = builder.Build();
 

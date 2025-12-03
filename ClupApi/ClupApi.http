@@ -4,3 +4,41 @@ GET {{ClupApi_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+# Calendar API Tests
+
+### Get all categories
+GET {{ClupApi_HostAddress}}/api/calendar/categories
+Accept: application/json
+
+###
+
+### Get events by date range (December 2024)
+GET {{ClupApi_HostAddress}}/api/calendar/events?startDate=2024-12-01&endDate=2024-12-31
+Accept: application/json
+
+###
+
+### Get events by date range (January 2025)
+GET {{ClupApi_HostAddress}}/api/calendar/events?startDate=2025-01-01&endDate=2025-01-31
+Accept: application/json
+
+###
+
+### Get daily events (today)
+GET {{ClupApi_HostAddress}}/api/calendar/events/daily?date=2024-12-03
+Accept: application/json
+
+###
+
+### Test validation - Invalid date range (startDate > endDate)
+GET {{ClupApi_HostAddress}}/api/calendar/events?startDate=2024-12-31&endDate=2024-12-01
+Accept: application/json
+
+###
+
+### Test validation - Too large date range (> 3 months)
+GET {{ClupApi_HostAddress}}/api/calendar/events?startDate=2024-01-01&endDate=2024-12-31
+Accept: application/json
+
+###

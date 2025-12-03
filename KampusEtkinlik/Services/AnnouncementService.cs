@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using KampusEtkinlik.Data.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace KampusEtkinlik.Services
 {
@@ -8,12 +9,13 @@ namespace KampusEtkinlik.Services
     {
         private readonly HttpClient _httpClient;
         private readonly TokenService _tokenService;
-        private readonly string _baseUrl = "http://localhost:5245/api/Announcements";
+        private readonly string _baseUrl;
 
-        public AnnouncementService(HttpClient httpClient, TokenService tokenService)
+        public AnnouncementService(HttpClient httpClient, TokenService tokenService, IConfiguration configuration)
         {
             _httpClient = httpClient;
             _tokenService = tokenService;
+            _baseUrl = $"{configuration["ApiSettings:BaseUrl"]}/api/Announcements";
         }
 
         private async Task SetAuthorizationHeaderAsync()

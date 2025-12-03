@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 using KampusEtkinlik.Data.Models;
 using KampusEtkinlik.Data.DTOs;
+using Microsoft.Extensions.Configuration;
 
 namespace KampusEtkinlik.Services
 {
@@ -9,12 +10,13 @@ namespace KampusEtkinlik.Services
     {
         private readonly HttpClient _httpClient;
         private readonly TokenService _tokenService;
-        private readonly string _baseUrl = "http://localhost:5245/api/Activities";
+        private readonly string _baseUrl;
 
-        public ActivityService(HttpClient httpClient, TokenService tokenService)
+        public ActivityService(HttpClient httpClient, TokenService tokenService, IConfiguration configuration)
         {
             _httpClient = httpClient;
             _tokenService = tokenService;
+            _baseUrl = $"{configuration["ApiSettings:BaseUrl"]}/api/Activities";
         }
 
         private async Task SetAuthorizationHeaderAsync()

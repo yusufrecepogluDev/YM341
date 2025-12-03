@@ -7,70 +7,84 @@
 @inject IJSRuntime JSRuntime
 
 <main class="ana-icerik">
-    <h2 class="baslik">Etkinlikler</h2>
 
-    <section class="ust-slider-konteyner">
-        <button class="kaydirma-butonu sol" @onclick="() => ScrollActivityLeft()">←</button>
-        
-        <div class="ust-slider" @ref="etkinlikListesi">
-            @if (activities == null)
-            {
-                <div class="slider-ogesi" style="background: linear-gradient(135deg, #6a0080, #9b59b6);">
-                    <h3>Yükleniyor...</h3>
-                </div>
-            }
-            else if (!activities.Any())
-            {
-                <div class="slider-ogesi" style="background: linear-gradient(135deg, #008cba, #3498db);">
-                    <h3>Henüz etkinlik bulunmamaktadır</h3>
-                </div>
-            }
-            else
-            {
-                @foreach (var activity in activities)
+    <section class="bolum-konteyner etkinlik-bolumu">
+        <h2 class="baslik">Etkinlikler</h2>
+
+        <div class="slider-wrapper">
+            <button class="kaydirma-butonu sol" @onclick="() => ScrollActivityLeft()">←</button>
+
+            <div class="slider-track" @ref="etkinlikListesi">
+                @if (activities == null)
                 {
-                    <div class="slider-ogesi" style="background: @GetRandomGradient();">
-                        <h3>@activity.ActivityName</h3>
-                        <p class="etkinlik-tarih">@activity.StartDate.ToString("dd.MM.yyyy")</p>
+                    <div class="slider-card loading-card">
+                        <h3>Yükleniyor...</h3>
                     </div>
                 }
-            }
+                else if (!activities.Any())
+                {
+                    <div class="slider-card empty-card">
+                        <h3>Etkinlik Yok</h3>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var activity in activities)
+                    {
+                        <div class="slider-card content-card"
+                             style="background: @GetRandomGradient();"
+                             @onclick="() => OpenActivityPopup(activity)">
+                            <div class="card-content">
+                                <h3>@activity.ActivityName</h3>
+                                <div class="date-badge">
+                                    📅 @activity.StartDate.ToString("dd.MM")
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <button class="kaydirma-butonu sag" @onclick="() => ScrollActivityRight()">→</button>
         </div>
-        
-        <button class="kaydirma-butonu sag" @onclick="() => ScrollActivityRight()">→</button>
     </section>
 
-    <hr>
+    <div class="ayirici-cizgi"></div>
 
-    <section class="duyurular-alani">
+    <section class="bolum-konteyner duyuru-bolumu">
         <h2 class="baslik">Duyurular</h2>
 
-        <div class="kaydirici-konteyner">
+        <div class="slider-wrapper">
             <button class="kaydirma-butonu sol" @onclick="() => ScrollLeft()">←</button>
 
-            <div class="duyuru-listesi" @ref="duyuruListesi">
+            <div class="slider-track" @ref="duyuruListesi">
                 @if (announcements == null)
                 {
-                    <article class="duyuru-karti">
+                    <article class="duyuru-karti loading">
                         <h3>Yükleniyor...</h3>
-                        <p>Duyurular yükleniyor...</p>
                     </article>
                 }
                 else if (!announcements.Any())
                 {
-                    <article class="duyuru-karti">
+                    <article class="duyuru-karti empty">
                         <h3>Duyuru Yok</h3>
-                        <p>Henüz duyuru bulunmamaktadır.</p>
+                        <p>Güncel duyuru bulunmamaktadır.</p>
                     </article>
                 }
                 else
                 {
                     @foreach (var (announcement, index) in announcements.Select((a, i) => (a, i)))
                     {
-                        <article class="duyuru-karti @(index % 3 == 0 ? "kirmizi" : "")">
-                            <h3>@announcement.Title</h3>
-                            <p>@announcement.Content</p>
-                            <p><small>@announcement.CreatedAt.ToString("dd.MM.yyyy")</small></p>
+                        <article class="duyuru-karti @(index % 3 == 0 ? "highlight" : "")"
+                                 @onclick="() => OpenAnnouncementPopup(announcement)">
+                            <div class="duyuru-header">
+                                <h3>@announcement.Title</h3>
+                                <span class="tarih-etiketi">@announcement.CreatedAt.ToString("dd.MM")</span>
+                            </div>
+                            <p class="duyuru-ozet">@announcement.Content</p>
+                            <div class="duyuru-footer">
+                                <span>Devamını Oku →</span>
+                            </div>
                         </article>
                     }
                 }
@@ -79,19 +93,71 @@
             <button class="kaydirma-butonu sag" @onclick="() => ScrollRight()">→</button>
         </div>
 
-        <a href="#" class="tum-duyurular-linki">Tüm duyurulara git →</a>
     </section>
 
-    <hr>
 </main>
+
+@* --- POP-UP MODAL ALANI --- *@
+@if (isPopupVisible)
+{
+    <div class="modal-overlay" @onclick="ClosePopup">
+        <div class="modal-content" @onclick:stopPropagation>
+            
+            @if (selectedActivity != null)
+            {
+                <div class="modal-header">
+                    <button class="modal-close-btn" @onclick="ClosePopup">×</button>
+                    <h2 class="modal-title">@selectedActivity.ActivityName</h2>
+                    <div class="modal-type-badge"></div>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-info-grid">
+                        <div class="info-item">
+                            <strong>Başlangıç</strong>
+                            <span>@selectedActivity.StartDate.ToString("dd.MM.yyyy")</span>
+                            <span>@selectedActivity.StartDate.ToString("HH:mm")</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Bitiş</strong>
+                            <span>@selectedActivity.EndDate.ToString("dd.MM.yyyy")</span>
+                            <span>@selectedActivity.EndDate.ToString("HH:mm")</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Kontenjan</strong>
+                            <span>@selectedActivity.ParticipantLimit</span>
+                        </div>
+                    </div>
+                    <div class="modal-description">@selectedActivity.ActivityDescription</div>
+                </div>
+            }
+            else if (selectedAnnouncement != null)
+            {
+                <div class="modal-header">
+                    <button class="modal-close-btn" @onclick="ClosePopup">×</button>
+                    <h2 class="modal-title">@selectedAnnouncement.Title</h2>
+                    <div class="modal-type-badge"></div>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-date-box">
+                        <span>🕒</span>
+                        <p>Yayınlanma: @selectedAnnouncement.CreatedAt.ToString("dd MMMM yyyy")</p>
+                    </div>
+                    <div class="modal-description extended-text">@selectedAnnouncement.Content</div>
+                </div>
+            }
+        </div>
+    </div>
+}
 
 @code {
     private List<Activity>? activities;
     private List<Announcement>? announcements;
-    private string? errorMessage;
     private ElementReference etkinlikListesi;
     private ElementReference duyuruListesi;
-    private string[] gradients = { 
+    private bool isPopupVisible = false;
+    private Activity? selectedActivity;
+    private Announcement? selectedAnnouncement;
+    private string[] gradients = {
         "linear-gradient(135deg, #dc3545, #c82333)",
         "linear-gradient(135deg, #6a0080, #9b59b6)",
         "linear-gradient(135deg, #008cba, #3498db)",
@@ -106,41 +172,19 @@
         {
             activities = await ActivityService.GetAllAsync();
             announcements = await AnnouncementService.GetAllAsync();
-
-            // Sadece aktif ve silinmemiş olanları filtrele
             activities = activities?.Where(a => a.IsActive && !a.IsDeleted).OrderByDescending(a => a.StartDate).ToList();
             announcements = announcements?.OrderByDescending(a => a.CreatedAt).ToList();
         }
-        catch (Exception ex)
-        {
-            errorMessage = $"API bağlantı hatası: {ex.Message}";
-            activities = new List<Activity>();
-            announcements = new List<Announcement>();
-        }
+        catch (Exception) { activities = new(); announcements = new(); }
     }
 
-    private string GetRandomGradient()
-    {
-        return gradients[random.Next(gradients.Length)];
-    }
+    private void OpenActivityPopup(Activity activity) { selectedActivity = activity; selectedAnnouncement = null; isPopupVisible = true; }
+    private void OpenAnnouncementPopup(Announcement announcement) { selectedAnnouncement = announcement; selectedActivity = null; isPopupVisible = true; }
+    private void ClosePopup() { isPopupVisible = false; selectedActivity = null; selectedAnnouncement = null; }
+    private string GetRandomGradient() => gradients[random.Next(gradients.Length)];
 
-    private async Task ScrollActivityLeft()
-    {
-        await JSRuntime.InvokeVoidAsync("scrollElementByWidth", etkinlikListesi);
-    }
-
-    private async Task ScrollActivityRight()
-    {
-        await JSRuntime.InvokeVoidAsync("scrollElementByWidth", etkinlikListesi, true);
-    }
-
-    private async Task ScrollLeft()
-    {
-        await JSRuntime.InvokeVoidAsync("scrollElement", duyuruListesi, -1200);
-    }
-
-    private async Task ScrollRight()
-    {
-        await JSRuntime.InvokeVoidAsync("scrollElement", duyuruListesi, 1200);
-    }
+    private async Task ScrollActivityLeft() => await JSRuntime.InvokeVoidAsync("scrollElementByWidth", etkinlikListesi);
+    private async Task ScrollActivityRight() => await JSRuntime.InvokeVoidAsync("scrollElementByWidth", etkinlikListesi, true);
+    private async Task ScrollLeft() => await JSRuntime.InvokeVoidAsync("scrollElement", duyuruListesi, -400);
+    private async Task ScrollRight() => await JSRuntime.InvokeVoidAsync("scrollElement", duyuruListesi, 400);
 }

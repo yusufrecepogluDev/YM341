@@ -1,4 +1,7 @@
 ﻿@page "/takvim"
+@using KampusEtkinlik.Services
+@using KampusEtkinlik.Data.Models
+@inject CalendarApiService CalendarService
 
 <div class="calendar-container">
     <div class="calendar-header">
@@ -8,15 +11,21 @@
 
     <!-- Ay Navigasyonu -->
     <div class="month-navigation">
-        <button class="nav-btn prev-btn" @onclick="PreviousMonth">
+        <button class="nav-btn prev-btn" @onclick="PreviousMonth" disabled="@isLoading">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </button>
         
-        <h2 class="current-month">@currentDate.ToString("MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</h2>
+        <h2 class="current-month">
+            @currentDate.ToString("MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))
+            @if (isLoading)
+            {
+                <span class="loading-spinner">⏳</span>
+            }
+        </h2>
         
-        <button class="nav-btn next-btn" @onclick="NextMonth">
+        <button class="nav-btn next-btn" @onclick="NextMonth" disabled="@isLoading">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -56,22 +65,36 @@
         <div class="calendar-grid">
             @foreach (var day in calendarDays)
             {
-                <div class="day @(day.IsOtherMonth ? "other-month" : "") @(day.IsToday ? "today" : "")">
+                <div class="day @(day.IsOtherMonth ? "other-month" : "") @(day.IsToday ? "today" : "")" 
+                     title="@($"{day.Date:dd/MM/yyyy} - {day.Events.Count} etkinlik")"
+                     @onclick="() => OpenDayModal(day)">
                     <span class="day-number">@day.Day</span>
                     @if (day.HasEvents)
                     {
-                        <div class="event-indicators">
-                            @if (day.HasActivity)
-                            {
-                                <span class="event-dot activity"></span>
+                        <div class="event-list">
+                            @{
+                                var displayEvents = day.Events.Take(3).ToList();
+                                var remainingCount = day.Events.Count - displayEvents.Count;
                             }
-                            @if (day.HasAnnouncement)
+                            @foreach (var evt in displayEvents)
                             {
-                                <span class="event-dot announcement"></span>
+                                var categoryClass = evt.Categories switch
+                                {
+                                    "KulupEtkinligi" => "activity",
+                                    "Duyuru" => "announcement",
+                                    "AkademikOlay" => "academic",
+                                    _ => "activity"
+                                };
+                                var shortTitle = evt.Title.Length > 15 ? evt.Title.Substring(0, 15) + "..." : evt.Title;
+                                
+                                <div class="event-item @categoryClass" title="@evt.Title">
+                                    <span class="event-dot"></span>
+                                    <span class="event-title">@shortTitle</span>
+                                </div>
                             }
-                            @if (day.HasAcademic)
+                            @if (remainingCount > 0)
                             {
-                                <span class="event-dot academic"></span>
+                                <div class="more-events">+@remainingCount daha</div>
                             }
                         </div>
                     }
@@ -81,25 +104,232 @@
     </div>
 </div>
 
+<!-- Modal -->
+@if (showModal && selectedDay != null)
+{
+    <div class="modal-overlay" @onclick="CloseModal">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    @selectedDay.Date.ToString("dd MMMM yyyy, dddd", new System.Globalization.CultureInfo("tr-TR"))
+                </h2>
+                <button class="modal-close" @onclick="CloseModal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                @if (!selectedDay.HasEvents)
+                {
+                    <p class="no-events">Bu günde etkinlik bulunmamaktadır.</p>
+                }
+                else
+                {
+                    @* Akademik Olaylar *@
+                    @if (selectedDay.Events.Any(e => e.Categories == "AkademikOlay"))
+                    {
+                        <div class="modal-category">
+                            <h3 class="category-title academic">
+                                <span class="category-dot"></span>
+                                Akademik Olaylar
+                            </h3>
+                            @foreach (var evt in selectedDay.Events.Where(e => e.Categories == "AkademikOlay"))
+                            {
+                                <div class="modal-event academic">
+                                    <h4 class="event-name">@evt.Title</h4>
+                                    <p class="event-description">@evt.Description</p>
+                                    <div class="event-meta">
+                                        @if (!evt.IsAllDay)
+                                        {
+                                            <span class="meta-item">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                </svg>
+                                                @evt.StartDate.ToString("HH:mm")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="meta-item">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                </svg>
+                                                Tüm gün
+                                            </span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(evt.Location))
+                                        {
+                                            <span class="meta-item">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 5.02944 7.02944 1 12 1C16.9706 1 21 5.02944 21 10Z" stroke="currentColor" stroke-width="2"/>
+                                                    <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                                                </svg>
+                                                @evt.Location
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @* Kulüp Etkinlikleri *@
+                    @if (selectedDay.Events.Any(e => e.Categories == "KulupEtkinligi"))
+                    {
+                        <div class="modal-category">
+                            <h3 class="category-title activity">
+                                <span class="category-dot"></span>
+                                Kulüp Etkinlikleri
+                            </h3>
+                            @foreach (var evt in selectedDay.Events.Where(e => e.Categories == "KulupEtkinligi"))
+                            {
+                                <div class="modal-event activity">
+                                    <h4 class="event-name">@evt.Title</h4>
+                                    <p class="event-description">@evt.Description</p>
+                                    <div class="event-meta">
+                                        @if (!evt.IsAllDay)
+                                        {
+                                            <span class="meta-item">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                </svg>
+                                                @evt.StartDate.ToString("HH:mm") - @evt.EndDate.ToString("HH:mm")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="meta-item">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                </svg>
+                                                Tüm gün
+                                            </span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(evt.Location))
+                                        {
+                                            <span class="meta-item">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 5.02944 7.02944 1 12 1C16.9706 1 21 5.02944 21 10Z" stroke="currentColor" stroke-width="2"/>
+                                                    <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                                                </svg>
+                                                @evt.Location
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @* Duyurular *@
+                    @if (selectedDay.Events.Any(e => e.Categories == "Duyuru"))
+                    {
+                        <div class="modal-category">
+                            <h3 class="category-title announcement">
+                                <span class="category-dot"></span>
+                                Duyurular
+                            </h3>
+                            @foreach (var evt in selectedDay.Events.Where(e => e.Categories == "Duyuru"))
+                            {
+                                <div class="modal-event announcement">
+                                    <h4 class="event-name">@evt.Title</h4>
+                                    <p class="event-description">@evt.Description</p>
+                                    <div class="event-meta">
+                                        @if (!string.IsNullOrEmpty(evt.Location))
+                                        {
+                                            <span class="meta-item">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 5.02944 7.02944 1 12 1C16.9706 1 21 5.02944 21 10Z" stroke="currentColor" stroke-width="2"/>
+                                                    <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                                                </svg>
+                                                @evt.Location
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private DateTime currentDate = DateTime.Now;
     private List<CalendarDay> calendarDays = new();
+    private List<CalendarEvent> monthEvents = new();
+    private bool isLoading = false;
+    private bool showModal = false;
+    private CalendarDay? selectedDay = null;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        await LoadMonthEvents();
         GenerateCalendar();
     }
 
-    private void PreviousMonth()
+    private async Task PreviousMonth()
     {
         currentDate = currentDate.AddMonths(-1);
+        await LoadMonthEvents();
         GenerateCalendar();
     }
 
-    private void NextMonth()
+    private async Task NextMonth()
     {
         currentDate = currentDate.AddMonths(1);
+        await LoadMonthEvents();
         GenerateCalendar();
+    }
+
+    private async Task LoadMonthEvents()
+    {
+        isLoading = true;
+        try
+        {
+            var firstDay = new DateTime(currentDate.Year, currentDate.Month, 1);
+            var lastDay = firstDay.AddMonths(1).AddDays(-1);
+            
+            monthEvents = await CalendarService.GetEventsByDateRangeAsync(firstDay, lastDay);
+            Console.WriteLine($"Yüklenen etkinlik sayısı: {monthEvents.Count}");
+            
+            // Kategorilere göre say
+            var activities = monthEvents.Count(e => e.Categories == "KulupEtkinligi");
+            var announcements = monthEvents.Count(e => e.Categories == "Duyuru");
+            var academic = monthEvents.Count(e => e.Categories == "AkademikOlay");
+            Console.WriteLine($"Kulüp: {activities}, Duyuru: {announcements}, Akademik: {academic}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Etkinlikler yüklenirken hata: {ex.Message}");
+            monthEvents = new List<CalendarEvent>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void OpenDayModal(CalendarDay day)
+    {
+        if (day.IsOtherMonth) return; // Diğer ayın günlerine tıklanmasın
+        
+        selectedDay = day;
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        selectedDay = null;
     }
 
     private void GenerateCalendar()
@@ -126,7 +356,8 @@
                 Date = date,
                 Day = date.Day,
                 IsOtherMonth = true,
-                IsToday = false
+                IsToday = false,
+                Events = new List<CalendarEvent>()
             });
         }
         
@@ -134,12 +365,15 @@
         for (int day = 1; day <= lastDayOfMonth.Day; day++)
         {
             var date = new DateTime(currentDate.Year, currentDate.Month, day);
+            var dayEvents = monthEvents.Where(e => e.StartDate.Date == date.Date).ToList();
+            
             calendarDays.Add(new CalendarDay
             {
                 Date = date,
                 Day = day,
                 IsOtherMonth = false,
-                IsToday = date.Date == DateTime.Today
+                IsToday = date.Date == DateTime.Today,
+                Events = dayEvents
             });
         }
         
@@ -155,7 +389,8 @@
                 Date = date,
                 Day = date.Day,
                 IsOtherMonth = true,
-                IsToday = false
+                IsToday = false,
+                Events = new List<CalendarEvent>()
             });
         }
     }
@@ -166,11 +401,12 @@
         public int Day { get; set; }
         public bool IsOtherMonth { get; set; }
         public bool IsToday { get; set; }
+        public List<CalendarEvent> Events { get; set; } = new();
         
-        // Etkinlik göstergeleri (şimdilik örnek, ileride API'den gelecek)
-        public bool HasActivity => false;
-        public bool HasAnnouncement => false;
-        public bool HasAcademic => false;
-        public bool HasEvents => HasActivity || HasAnnouncement || HasAcademic;
+        // Etkinlik göstergeleri
+        public bool HasActivity => Events.Any(e => e.Categories == "KulupEtkinligi");
+        public bool HasAnnouncement => Events.Any(e => e.Categories == "Duyuru");
+        public bool HasAcademic => Events.Any(e => e.Categories == "AkademikOlay");
+        public bool HasEvents => Events.Any();
     }
 }
