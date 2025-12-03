@@ -605,3 +605,42 @@
         width: 100%;
     }
 }
+
+/* Tab Menü Tasarımı */
+.tab-menu {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    width: fit-content; /* Sadece içeriği kadar yer kaplasın */
+    margin-left: auto; /* Ortalamak için */
+    margin-right: auto; /* Ortalamak için */
+}
+
+    .tab-menu button {
+        padding: 10px 24px;
+        border: 2px solid transparent;
+        background: transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #666;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+        .tab-menu button:hover {
+            color: #dc3545;
+            background: #f8f9fa;
+        }
+
+        /* Seçili olan butonun stili */
+        .tab-menu button.active-tab {
+            background: linear-gradient(135deg, #dc3545 0%, #6a0080 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
