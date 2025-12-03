@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using KampusEtkinlik.Data.Models;
+using KampusEtkinlik.Data.DTOs;
 using Microsoft.Extensions.Configuration;
 
 namespace KampusEtkinlik.Services
@@ -53,25 +54,57 @@ namespace KampusEtkinlik.Services
             return await _httpClient.GetFromJsonAsync<Announcement>($"{_baseUrl}/{id}");
         }
 
-        public async Task<bool> AddAsync(Announcement announcement)
+        public async Task<bool> AddAsync(AnnouncementCreateDto createDto)
         {
-            await SetAuthorizationHeaderAsync();
-            var response = await _httpClient.PostAsJsonAsync(_baseUrl, announcement);
-            return response.IsSuccessStatusCode;
+            try
+            {
+                await SetAuthorizationHeaderAsync();
+                var response = await _httpClient.PostAsJsonAsync(_baseUrl, createDto);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Duyuru oluşturma hatası: {ex.Message}");
+                return false;
+            }
         }
 
-        public async Task<bool> UpdateAsync(Announcement announcement)
+        public async Task<bool> UpdateAsync(int id, Announcement announcement)
         {
-            await SetAuthorizationHeaderAsync();
-            var response = await _httpClient.PutAsJsonAsync($"{_baseUrl}/{announcement.AnnouncementID}", announcement);
-            return response.IsSuccessStatusCode;
+            try
+            {
+                await SetAuthorizationHeaderAsync();
+                
+                var updateDto = new
+                {
+                    AnnouncementTitle = announcement.AnnouncementTitle,
+                    AnnouncementContent = announcement.AnnouncementContent,
+                    StartDate = announcement.StartDate
+                };
+                
+                var response = await _httpClient.PutAsJsonAsync($"{_baseUrl}/{id}", updateDto);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Duyuru güncelleme hatası: {ex.Message}");
+                return false;
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            await SetAuthorizationHeaderAsync();
-            var response = await _httpClient.DeleteAsync($"{_baseUrl}/{id}");
-            return response.IsSuccessStatusCode;
+            try
+            {
+                await SetAuthorizationHeaderAsync();
+                var response = await _httpClient.DeleteAsync($"{_baseUrl}/{id}");
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Duyuru silme hatası: {ex.Message}");
+                return false;
+            }
         }
     }
 }

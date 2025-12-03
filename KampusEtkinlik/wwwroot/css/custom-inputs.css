@@ -1,0 +1,88 @@
+/* Modern Minimal Input Design */
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+input[type="datetime-local"],
+textarea,
+.form-control,
+.form-control-2 {
+    width: 100% !important;
+    padding: 13px 16px !important;
+    border: 1px solid #64748b !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    color: #1e293b !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-sizing: border-box !important;
+    line-height: 1.5 !important;
+}
+
+textarea,
+.form-control-2 {
+    min-height: 60px !important;
+    resize: vertical !important;
+}
+
+/* Register sayfası kulüp açıklaması için özel */
+#ClubDescription {
+    min-height: 50px !important;
+    max-height: 80px !important;
+}
+
+input[type="text"]:hover,
+input[type="password"]:hover,
+input[type="email"]:hover,
+input[type="number"]:hover,
+input[type="date"]:hover,
+input[type="datetime-local"]:hover,
+textarea:hover,
+.form-control:hover,
+.form-control-2:hover {
+    border-color: #475569 !important;
+    background: #fafafa !important;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="datetime-local"]:focus,
+textarea:focus,
+.form-control:focus,
+.form-control-2:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+input[type="text"]::placeholder,
+input[type="password"]::placeholder,
+input[type="email"]::placeholder,
+input[type="number"]::placeholder,
+textarea::placeholder,
+.form-control::placeholder,
+.form-control-2::placeholder {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+}
+
+input[type="text"]:disabled,
+input[type="password"]:disabled,
+input[type="email"]:disabled,
+input[type="number"]:disabled,
+textarea:disabled,
+.form-control:disabled,
+.form-control-2:disabled {
+    background: #f1f5f9 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed !important;
+    border-color: #e2e8f0 !important;
+}

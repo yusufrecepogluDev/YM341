@@ -2,7 +2,7 @@
     background: white;
     border: none;
     border-radius: 16px;
-    padding: 2rem;
+    padding: 2.5rem;
     max-width: 650px;
     flex: 1;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -38,11 +38,18 @@
 
 .trh-grp {
     display: flex;
-    gap: 1rem;
+    gap: 1.25rem;
 }
 
     .trh-grp .form-group {
         flex: 1;
+    }
+
+    @media (max-width: 768px) {
+        .trh-grp {
+            flex-direction: column;
+            gap: 0;
+        }
     }
 
 .etk-btn {
@@ -73,55 +80,165 @@
 .form-control-2 {
     width: 100%;
     resize: vertical;
-    min-height: 100px;
-    padding: 12px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    min-height: 120px;
+    padding: 14px 16px;
+    border: 2px solid #dc3545;
+    border-radius: 10px;
     font-size: 0.95rem;
     box-sizing: border-box;
     transition: all 0.3s ease;
-    font-family: inherit;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: white;
+    color: #dc3545;
+    font-weight: 500;
+    line-height: 1.6;
 }
+
+    .form-control-2:hover {
+        background: #fff5f7;
+    }
 
     .form-control-2:focus {
         outline: none;
+        background: #dc3545;
+        color: white;
         border-color: #dc3545;
-        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+    }
+
+    .form-control-2::placeholder {
+        color: #dc3545;
+        opacity: 0.7;
+    }
+
+    .form-control-2:focus::placeholder {
+        color: white;
+        opacity: 0.8;
     }
 
 .form-control {
     width: 100%;
-    padding: 10px 12px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    padding: 12px 16px;
+    border: 2px solid #dc3545;
+    border-radius: 10px;
     font-size: 0.95rem;
     transition: all 0.3s ease;
+    background: white;
+    color: #dc3545;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 500;
 }
+
+    .form-control:hover {
+        background: #fff5f7;
+    }
 
     .form-control:focus {
         outline: none;
+        background: #dc3545;
+        color: white;
         border-color: #dc3545;
-        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: #dc3545;
+        opacity: 0.7;
+    }
+
+    .form-control:focus::placeholder {
+        color: white;
+        opacity: 0.8;
+    }
+
+/* Date input özel stilleri */
+input[type="datetime-local"].form-control,
+input[type="date"].form-control,
+input[type="number"].form-control {
+    cursor: pointer;
+    font-weight: 500;
+}
+
+    input[type="datetime-local"].form-control::-webkit-calendar-picker-indicator,
+    input[type="date"].form-control::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    input[type="datetime-local"].form-control::-webkit-calendar-picker-indicator:hover,
+    input[type="date"].form-control::-webkit-calendar-picker-indicator:hover {
+        background: rgba(220, 53, 69, 0.1);
+    }
+
+/* Number input spinner stilleri */
+input[type="number"].form-control::-webkit-inner-spin-button,
+input[type="number"].form-control::-webkit-outer-spin-button {
+    opacity: 1;
+    cursor: pointer;
+}
+
+/* Disabled input stilleri */
+.form-control:disabled,
+.form-control-2:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+    border-color: #e5e7eb;
+}
+
+    .form-control:disabled:hover,
+    .form-control-2:disabled:hover {
+        border-color: #e5e7eb;
+        background: #f3f4f6;
+        transform: none;
+    }
+
+/* Validation error stilleri */
+.form-control.invalid,
+.form-control-2.invalid {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+    .form-control.invalid:focus,
+    .form-control-2.invalid:focus {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+    }
+
+/* Validation success stilleri */
+.form-control.valid,
+.form-control-2.valid {
+    border-color: #10b981;
+}
+
+    .form-control.valid:focus,
+    .form-control-2.valid:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
     }
 
 .label-1 {
     display: block;
     font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 0.5rem;
+    color: #1f2937;
+    margin-bottom: 0.6rem;
     font-size: 0.95rem;
+    letter-spacing: 0.01em;
 }
 
 .form-group {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
 }
 
     .form-group label {
         display: block;
         font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 0.5rem;
+        color: #1f2937;
+        margin-bottom: 0.6rem;
         font-size: 0.95rem;
+        letter-spacing: 0.01em;
     }
 
 .sayfa-cont {

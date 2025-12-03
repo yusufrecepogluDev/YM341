@@ -365,7 +365,28 @@
         for (int day = 1; day <= lastDayOfMonth.Day; day++)
         {
             var date = new DateTime(currentDate.Year, currentDate.Month, day);
-            var dayEvents = monthEvents.Where(e => e.StartDate.Date == date.Date).ToList();
+            
+            // Başlangıç tarihi bu gün olan etkinlikler
+            var startEvents = monthEvents.Where(e => e.StartDate.Date == date.Date).ToList();
+            
+            // Bitiş tarihi bu gün olan çok günlük etkinlikler (başlangıç tarihi farklı)
+            var endEvents = monthEvents
+                .Where(e => e.EndDate.Date == date.Date && e.StartDate.Date != e.EndDate.Date)
+                .Select(e => new CalendarEvent
+                {
+                    Id = e.Id,
+                    Title = e.Title + " (Bitiş Günü)",
+                    Description = e.Description,
+                    StartDate = e.StartDate,
+                    EndDate = e.EndDate,
+                    Categories = e.Categories,
+                    CategoriesColor = e.CategoriesColor,
+                    IsAllDay = e.IsAllDay,
+                    Location = e.Location
+                })
+                .ToList();
+            
+            var dayEvents = startEvents.Concat(endEvents).ToList();
             
             calendarDays.Add(new CalendarDay
             {

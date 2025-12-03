@@ -42,37 +42,37 @@
             
             <div class="form-group">
                 <label for="StudentNumber">Öğrenci Numarası</label>
-                <InputText @bind-Value="studentRegisterForm.StudentNumberText" type="text" inputmode="numeric" id="StudentNumber" placeholder="Okul Numaranızı Girin" />
+                <InputText @bind-Value="studentRegisterForm.StudentNumberText" type="text" inputmode="numeric" id="StudentNumber" placeholder="Örn: 2021010001" />
                 <ValidationMessage For="@(() => studentRegisterForm.StudentNumberText)" />
             </div>
 
             <div class="form-group">
                 <label for="StudentName">Ad</label>
-                <InputText @bind-Value="studentRegisterForm.StudentName" type="text" id="StudentName" placeholder="Adınızı Girin" />
+                <InputText @bind-Value="studentRegisterForm.StudentName" type="text" id="StudentName" placeholder="Adınız" />
                 <ValidationMessage For="@(() => studentRegisterForm.StudentName)" />
             </div>
 
             <div class="form-group">
                 <label for="StudentSurname">Soyad</label>
-                <InputText @bind-Value="studentRegisterForm.StudentSurname" type="text" id="StudentSurname" placeholder="Soyadınızı Girin" />
+                <InputText @bind-Value="studentRegisterForm.StudentSurname" type="text" id="StudentSurname" placeholder="Soyadınız" />
                 <ValidationMessage For="@(() => studentRegisterForm.StudentSurname)" />
             </div>
 
             <div class="form-group">
                 <label for="StudentEmail">E-posta</label>
-                <InputText @bind-Value="studentRegisterForm.StudentEmail" type="email" id="StudentEmail" placeholder="E-posta Adresinizi Girin" />
+                <InputText @bind-Value="studentRegisterForm.StudentEmail" type="email" id="StudentEmail" placeholder="ornek@ogr.dogus.edu.tr" />
                 <ValidationMessage For="@(() => studentRegisterForm.StudentEmail)" />
             </div>
 
             <div class="form-group">
                 <label for="StudentPassword">Şifre</label>
-                <InputText @bind-Value="studentRegisterForm.StudentPassword" type="password" id="StudentPassword" placeholder="Şifrenizi Girin" />
+                <InputText @bind-Value="studentRegisterForm.StudentPassword" type="password" id="StudentPassword" placeholder="En az 6 karakter" />
                 <ValidationMessage For="@(() => studentRegisterForm.StudentPassword)" />
             </div>
 
             <div class="form-group">
                 <label for="StudentPasswordConfirm">Şifre Tekrar</label>
-                <InputText @bind-Value="studentRegisterForm.StudentPasswordConfirm" type="password" id="StudentPasswordConfirm" placeholder="Şifrenizi Tekrar Girin" />
+                <InputText @bind-Value="studentRegisterForm.StudentPasswordConfirm" type="password" id="StudentPasswordConfirm" placeholder="Şifrenizi tekrar giriniz" />
                 <ValidationMessage For="@(() => studentRegisterForm.StudentPasswordConfirm)" />
             </div>
 
@@ -97,37 +97,37 @@
             
             <div class="form-group">
                 <label for="ClubNumber">Kulüp Numarası</label>
-                <InputText @bind-Value="clubRegisterForm.ClubNumberText" type="text" inputmode="numeric" id="ClubNumber" placeholder="Kulüp Numaranızı Girin" />
+                <InputText @bind-Value="clubRegisterForm.ClubNumberText" type="text" inputmode="numeric" id="ClubNumber" placeholder="Örn: 1001" />
                 <ValidationMessage For="@(() => clubRegisterForm.ClubNumberText)" />
             </div>
 
             <div class="form-group">
                 <label for="ClubName">Kulüp Adı</label>
-                <InputText @bind-Value="clubRegisterForm.ClubName" type="text" id="ClubName" placeholder="Kulüp Adını Girin" />
+                <InputText @bind-Value="clubRegisterForm.ClubName" type="text" id="ClubName" placeholder="Örn: Yazılım Kulübü" />
                 <ValidationMessage For="@(() => clubRegisterForm.ClubName)" />
             </div>
 
             <div class="form-group">
                 <label for="ClubDescription">Kulüp Açıklaması</label>
-                <InputTextArea @bind-Value="clubRegisterForm.ClubDescription" id="ClubDescription" placeholder="Kulüp Açıklamasını Girin" rows="3" />
+                <InputTextArea @bind-Value="clubRegisterForm.ClubDescription" id="ClubDescription" placeholder="Kulübünüz hakkında kısa bir açıklama yazın..." rows="1" />
                 <ValidationMessage For="@(() => clubRegisterForm.ClubDescription)" />
             </div>
 
             <div class="form-group">
                 <label for="ClubEmail">E-posta</label>
-                <InputText @bind-Value="clubRegisterForm.ClubEmail" type="email" id="ClubEmail" placeholder="E-posta Adresini Girin" />
+                <InputText @bind-Value="clubRegisterForm.ClubEmail" type="email" id="ClubEmail" placeholder="ornek@kulup.dogus.edu.tr" />
                 <ValidationMessage For="@(() => clubRegisterForm.ClubEmail)" />
             </div>
 
             <div class="form-group">
                 <label for="ClubPassword">Şifre</label>
-                <InputText @bind-Value="clubRegisterForm.ClubPassword" type="password" id="ClubPassword" placeholder="Şifrenizi Girin" />
+                <InputText @bind-Value="clubRegisterForm.ClubPassword" type="password" id="ClubPassword" placeholder="En az 6 karakter" />
                 <ValidationMessage For="@(() => clubRegisterForm.ClubPassword)" />
             </div>
 
             <div class="form-group">
                 <label for="ClubPasswordConfirm">Şifre Tekrar</label>
-                <InputText @bind-Value="clubRegisterForm.ClubPasswordConfirm" type="password" id="ClubPasswordConfirm" placeholder="Şifrenizi Tekrar Girin" />
+                <InputText @bind-Value="clubRegisterForm.ClubPasswordConfirm" type="password" id="ClubPasswordConfirm" placeholder="Şifrenizi tekrar giriniz" />
                 <ValidationMessage For="@(() => clubRegisterForm.ClubPasswordConfirm)" />
             </div>
 

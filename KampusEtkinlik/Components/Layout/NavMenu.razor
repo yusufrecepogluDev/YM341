@@ -1,4 +1,6 @@
-﻿@rendermode InteractiveServer
+﻿@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject TokenService TokenService
+@using KampusEtkinlik.Services
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -16,17 +18,20 @@
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/kulup">
-                <span class="bi bi-calendar-icon" aria-hidden="true"></span> Kulüp Paneli
-            </NavLink>
-        </div>
+        @if (isClub)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/kulup">
+                    <span class="bi bi-calendar-icon" aria-hidden="true"></span> Kulüp Paneli
+                </NavLink>
+            </div>
+        }
         
-        <div class="nav-item px-3">
+        @* <div class="nav-item px-3">
             <NavLink class="nav-link" href="/login">
                 <span class="bi bi-login-icon" aria-hidden="true"></span> Giriş Yap
             </NavLink>
-        </div>
+        </div> *@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="/takvim">
                 <span class="bi bi-calendar-icon" aria-hidden="true"></span> Takvim
@@ -35,5 +40,23 @@
     </nav>
 </div>
 
+@code {
+    private bool isClub = false;
 
-
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                var userType = await TokenService.GetUserTypeAsync();
+                isClub = userType == "club";
+                StateHasChanged();
+            }
+            catch
+            {
+                isClub = false;
+            }
+        }
+    }
+}

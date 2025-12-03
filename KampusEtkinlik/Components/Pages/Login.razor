@@ -46,13 +46,13 @@ body {
             
             <div class="form-group">
                 <label for="StudentNumber">Öğrenci Numarası</label>
-                <InputText @bind-Value="studentLoginForm.StudentNumberText" type="text" inputmode="numeric" id="StudentNumber" placeholder="Okul Numaranızı Girin" />
+                <InputText @bind-Value="studentLoginForm.StudentNumberText" type="text" inputmode="numeric" id="StudentNumber" placeholder="Örn: 2021010001" />
                 <ValidationMessage For="@(() => studentLoginForm.StudentNumberText)" />
             </div>
 
             <div class="form-group">
                 <label for="StudentPassword">Şifre</label>
-                <InputText @bind-Value="studentLoginForm.StudentPassword" type="password" id="StudentPassword" placeholder="Şifrenizi Girin" />
+                <InputText @bind-Value="studentLoginForm.StudentPassword" type="password" id="StudentPassword" placeholder="Şifrenizi giriniz" />
                 <ValidationMessage For="@(() => studentLoginForm.StudentPassword)" />
             </div>
 
@@ -85,13 +85,13 @@ body {
             
             <div class="form-group">
                 <label for="ClubNumber">Kulüp Numarası</label>
-                <InputText @bind-Value="clubLoginForm.ClubNumberText" type="text" inputmode="numeric" id="ClubNumber" placeholder="Kulüp Numaranızı Girin" />
+                <InputText @bind-Value="clubLoginForm.ClubNumberText" type="text" inputmode="numeric" id="ClubNumber" placeholder="Örn: 20221001" />
                 <ValidationMessage For="@(() => clubLoginForm.ClubNumberText)" />
             </div>
 
             <div class="form-group">
                 <label for="ClubPassword">Şifre</label>
-                <InputText @bind-Value="clubLoginForm.ClubPassword" type="password" id="ClubPassword" placeholder="Şifrenizi Girin" />
+                <InputText @bind-Value="clubLoginForm.ClubPassword" type="password" id="ClubPassword" placeholder="Şifrenizi giriniz" />
                 <ValidationMessage For="@(() => clubLoginForm.ClubPassword)" />
             </div>
 

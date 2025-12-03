@@ -1,6 +1,7 @@
 ﻿@page "/kulup"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject ActivityService ActivityService
+@inject AnnouncementService AnnouncementService
 @inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
 @inject TokenService TokenService
@@ -27,12 +28,12 @@
 
             <div class="form-group">
                 <label class="label-1">Etkinlik Başlığı</label>
-                <InputTextArea @bind-Value="model.ActivityName" class="form-control-2"  placeholder="Etkinliği başlığını buraya girin" />
+                <InputText @bind-Value="model.ActivityName" class="form-control" placeholder="Örn: Bahar Şenliği 2024" />
             </div>
 
             <div class="form-group">
                 <label class="label-1">Etkinlik Açıklaması</label>
-                <InputTextArea @bind-Value="model.ActivityDescription" class="form-control-2" placeholder="Etkinlik açıklamasını buraya girin"/> 
+                <InputTextArea @bind-Value="model.ActivityDescription" class="form-control" placeholder="Etkinlik hakkında detaylı bilgi verin..."/> 
             </div>
 
             <div class="trh-grp">  @* tarihleri gruplandırmak için trh-grp diye class adı ekledim --Enes*@
@@ -112,27 +113,62 @@
 }
 @if (aktifSekme == 2)
     {
-        <div class="sayfa-cont">
-            <div class="etk-cont">
+        <div class="sayfa-cont" @onclick="() => openAnnouncementDropdownId = null">
+            <div class="etk-cont" @onclick:stopPropagation="true">
                 <h2 class="etk-title">Duyuru Oluştur</h2>
                 
-                <div class="form-group">
-                    <label class="label-1">Duyuru Başlığı</label>
-                    <input class="form-control" placeholder="Başlık giriniz..." />
-                </div>
+                <EditForm FormName="AnnouncementCreate" Model="@announcementModel" OnValidSubmit="@CreateAnnouncement">
+                    <div class="form-group">
+                        <label class="label-1">Duyuru Başlığı</label>
+                        <InputText @bind-Value="announcementModel.AnnouncementTitle" class="form-control" placeholder="Örn: Toplantı Duyurusu" />
+                    </div>
 
-                <div class="form-group">
-                    <label class="label-1">Duyuru İçeriği</label>
-                    <textarea class="form-control-2" placeholder="Duyuru detaylarını yazın..."></textarea>
-                </div>
+                    <div class="form-group">
+                        <label class="label-1">Duyuru İçeriği</label>
+                        <InputTextArea @bind-Value="announcementModel.AnnouncementContent" class="form-control" placeholder="Duyurunuzun detaylarını buraya yazın..."></InputTextArea>
+                    </div>
 
-                <button class="etk-btn">Duyuru Yayınla</button>
+                    <button type="submit" class="etk-btn">Duyuru Yayınla</button>
+                </EditForm>
             </div>
 
-            <div class="etkinlikler-cont">
+            <div class="etkinlikler-cont" @onclick:stopPropagation="true">
                 <h2 class="etk-title-2">Duyurular</h2>
+
+                @if (!string.IsNullOrEmpty(announcementMesaj))
+                {
+                    <div class="alert-message">@announcementMesaj</div>
+                }
+
                 <div class="etkinlik-kart">
-                    <p style="text-align:center; color:#666;">Henüz duyuru yok.</p>
+                    @if (announcements == null)
+                    {
+                        <p>Yükleniyor...</p>
+                    }
+                    else if (!announcements.Any())
+                    {
+                        <p style="text-align:center; color:#666;">Henüz duyuru yok.</p>
+                    }
+                    else
+                    {
+                        @foreach (var announcement in announcements)
+                        {
+                            <div class="etkinlik-icerik">
+                                <div class="etkinlik-text">
+                                    <h5 class="etkinlik-baslik">@announcement.AnnouncementTitle</h5>
+                                    <p class="etkinlik-ozet">@announcement.AnnouncementContent</p>
+                                    <small>@announcement.StartDate.ToString("dd.MM.yyyy HH:mm")</small>
+                                </div>
+                                <div class="dropdown @(openAnnouncementDropdownId == announcement.AnnouncementID ? "active" : "")">
+                                    <button class="dropdown-btn" type="button" @onclick="() => ToggleAnnouncementDropdown(announcement.AnnouncementID)" @onclick:stopPropagation="true">⋮</button>
+                                    <div class="dropdown-content @(openAnnouncementDropdownId == announcement.AnnouncementID ? "show" : "")" @onclick:stopPropagation="true">
+                                        <button type="button" @onclick="() => { EditAnnouncement(announcement.AnnouncementID); openAnnouncementDropdownId = null; }">Düzenle</button>
+                                        <button type="button" @onclick="() => { DeleteAnnouncement(announcement.AnnouncementID); openAnnouncementDropdownId = null; }">Sil</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
                 </div>
             </div>
         </div>
@@ -150,12 +186,12 @@
 
                     <div class="form-group">
                         <label>Etkinlik Başlığı</label>
-                        <InputTextArea @bind-Value="editModel.ActivityName" class="form-control-2" />
+                        <InputText @bind-Value="editModel.ActivityName" class="form-control" placeholder="Etkinlik başlığı" />
                     </div>
 
                     <div class="form-group">
                         <label>Etkinlik Açıklaması</label>
-                        <InputTextArea @bind-Value="editModel.ActivityDescription" class="form-control-2" />
+                        <InputTextArea @bind-Value="editModel.ActivityDescription" class="form-control-2" placeholder="Etkinlik açıklaması" />
                     </div>
 
                     <div class="trh-grp">
@@ -212,6 +248,50 @@
             </div>
         </div>
     }
+
+    @* Duyuru Düzenleme Popup *@
+    @if (showEditAnnouncementModal && editingAnnouncement != null)
+    {
+        <div class="modal-overlay" @onclick="CloseEditAnnouncementModal">
+            <div class="modal-content" @onclick:stopPropagation>
+                <h3>Duyuru Düzenle</h3>
+
+                <EditForm Model="@editAnnouncementModel" OnValidSubmit="@SaveEditAnnouncement">
+                    <div class="form-group">
+                        <label>Duyuru Başlığı</label>
+                        <InputText @bind-Value="editAnnouncementModel.AnnouncementTitle" class="form-control" placeholder="Duyuru başlığı" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Duyuru İçeriği</label>
+                        <InputTextArea @bind-Value="editAnnouncementModel.AnnouncementContent" class="form-control-2" placeholder="Duyuru içeriği" />
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button type="button" class="btn-cancel" @onclick="CloseEditAnnouncementModal">İptal</button>
+                        <button type="submit" class="btn-save">Kaydet</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+    @* Duyuru Silme Onay Popup *@
+    @if (showDeleteAnnouncementModal)
+    {
+        <div class="modal-overlay" @onclick="CloseDeleteAnnouncementModal">
+            <div class="modal-content" @onclick:stopPropagation style="max-width: 400px;">
+                <h3>Duyuruyu Sil</h3>
+                <p>Bu duyuruyu silmek istediğinizden emin misiniz?</p>
+                <p><strong>@deletingAnnouncementTitle</strong></p>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" @onclick="CloseDeleteAnnouncementModal">İptal</button>
+                    <button type="button" class="btn-confirm-delete" @onclick="ConfirmDeleteAnnouncement">Sil</button>
+                </div>
+            </div>
+        </div>
+    }
 </AuthGuard>
 
 @code {
@@ -220,8 +300,6 @@
 
     private string mesaj = "";
     private int aktifSekme = 1;
-
-
 
     private List<Activity>? activities;
     private int currentClubId = 0;
@@ -239,6 +317,25 @@
     // Dropdown için
     private int? openDropdownId = null;
 
+    // Duyuru yönetimi için
+    [SupplyParameterFromForm]
+    private AnnouncementCreateDto announcementModel { get; set; } = new();
+    private string announcementMesaj = "";
+    private List<Announcement>? announcements;
+    
+    // Duyuru düzenleme için
+    private bool showEditAnnouncementModal = false;
+    private Announcement? editingAnnouncement = null;
+    private Announcement editAnnouncementModel = new();
+    
+    // Duyuru silme için
+    private bool showDeleteAnnouncementModal = false;
+    private int deletingAnnouncementId = 0;
+    private string deletingAnnouncementTitle = "";
+    
+    // Duyuru dropdown için
+    private int? openAnnouncementDropdownId = null;
+
     private void ToggleDropdown(int activityId)
     {
         if (openDropdownId == activityId)
@@ -252,12 +349,27 @@
         StateHasChanged();
     }
 
+    private void ToggleAnnouncementDropdown(int announcementId)
+    {
+        if (openAnnouncementDropdownId == announcementId)
+        {
+            openAnnouncementDropdownId = null;
+        }
+        else
+        {
+            openAnnouncementDropdownId = announcementId;
+        }
+        StateHasChanged();
+    }
+
     protected override void OnInitialized()
     {
         model.StartDate = DateTime.Now;
         model.EndDate = DateTime.Now.AddDays(1);
         model.EvaluationStartDate = DateTime.Now;
         model.EvaluationEndDate = DateTime.Now.AddDays(7);
+        
+        announcementModel.StartDate = DateTime.Now;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -273,7 +385,9 @@
                 {
                     model.OrganizingClubID = clubId.Value;
                     currentClubId = clubId.Value;
+                    announcementModel.ClubID = clubId.Value;
                     await LoadActivities();
+                    await LoadAnnouncements();
                 }
                 else
                 {
@@ -487,5 +601,191 @@
         showDeleteModal = false;
         deletingActivityId = 0;
         deletingActivityName = "";
+    }
+
+    // Duyuru yönetimi fonksiyonları
+    private async Task LoadAnnouncements()
+    {
+        try
+        {
+            var allAnnouncements = await AnnouncementService.GetAllAsync();
+            
+            announcements = allAnnouncements
+                .Where(a => !a.IsDeleted && a.IsActive)
+                .Where(a => currentClubId <= 0 || a.ClubID == currentClubId)
+                .OrderByDescending(a => a.StartDate)
+                .ToList();
+                
+            System.Diagnostics.Debug.WriteLine($"Toplam {allAnnouncements.Count} duyuru, {announcements.Count} aktif duyuru gösteriliyor");
+        }
+        catch (Exception ex)
+        {
+            announcementMesaj = $"❌ Duyurular yüklenirken hata: {ex.Message}";
+            System.Diagnostics.Debug.WriteLine($"LoadAnnouncements hatası: {ex}");
+            announcements = new List<Announcement>();
+        }
+    }
+
+    private async Task CreateAnnouncement()
+    {
+        if (currentClubId <= 0)
+        {
+            try
+            {
+                var clubId = await TokenService.GetUserIdAsync();
+                if (clubId.HasValue)
+                {
+                    currentClubId = clubId.Value;
+                    announcementModel.ClubID = currentClubId;
+                }
+            }
+            catch { }
+        }
+        
+        if (announcementModel.ClubID <= 0 || currentClubId <= 0)
+        {
+            announcementMesaj = $"❌ Hata: Kulüp bilgisi bulunamadı. Lütfen önce giriş yapın.";
+            return;
+        }
+
+        try
+        {
+            announcementModel.StartDate = DateTime.Now;
+            
+            var sonuc = await AnnouncementService.AddAsync(announcementModel);
+
+            if (sonuc)
+            {
+                announcementMesaj = "✅ Duyuru başarıyla yayınlandı.";
+                
+                announcementModel = new AnnouncementCreateDto
+                {
+                    ClubID = currentClubId,
+                    StartDate = DateTime.Now
+                };
+                
+                await LoadAnnouncements();
+                StateHasChanged();
+            }
+            else
+            {
+                announcementMesaj = "❌ API hatası oluştu.";
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"CreateAnnouncement hatası: {ex}");
+            announcementMesaj = $"❌ Hata: {ex.Message}";
+        }
+    }
+
+    private async Task EditAnnouncement(int announcementId)
+    {
+        try
+        {
+            editingAnnouncement = await AnnouncementService.GetByIdAsync(announcementId);
+            
+            if (editingAnnouncement != null)
+            {
+                editAnnouncementModel = new Announcement
+                {
+                    AnnouncementID = editingAnnouncement.AnnouncementID,
+                    AnnouncementTitle = editingAnnouncement.AnnouncementTitle,
+                    AnnouncementContent = editingAnnouncement.AnnouncementContent,
+                    ClubID = editingAnnouncement.ClubID,
+                    StartDate = editingAnnouncement.StartDate,
+                    IsActive = editingAnnouncement.IsActive,
+                    IsDeleted = editingAnnouncement.IsDeleted,
+                    CreationDate = editingAnnouncement.CreationDate
+                };
+                
+                showEditAnnouncementModal = true;
+            }
+            else
+            {
+                announcementMesaj = "❌ Duyuru bulunamadı.";
+            }
+        }
+        catch (Exception ex)
+        {
+            announcementMesaj = $"❌ Hata: {ex.Message}";
+        }
+    }
+
+    private async Task SaveEditAnnouncement()
+    {
+        if (editingAnnouncement == null) return;
+
+        try
+        {
+            var sonuc = await AnnouncementService.UpdateAsync(editingAnnouncement.AnnouncementID, editAnnouncementModel);
+            
+            if (sonuc)
+            {
+                announcementMesaj = "✅ Duyuru başarıyla güncellendi.";
+                showEditAnnouncementModal = false;
+                editingAnnouncement = null;
+                await LoadAnnouncements();
+                StateHasChanged();
+            }
+            else
+            {
+                announcementMesaj = "❌ Duyuru güncellenirken hata oluştu.";
+            }
+        }
+        catch (Exception ex)
+        {
+            announcementMesaj = $"❌ Hata: {ex.Message}";
+        }
+    }
+
+    private void CloseEditAnnouncementModal()
+    {
+        showEditAnnouncementModal = false;
+        editingAnnouncement = null;
+    }
+
+    private void DeleteAnnouncement(int announcementId)
+    {
+        var announcement = announcements?.FirstOrDefault(a => a.AnnouncementID == announcementId);
+        if (announcement != null)
+        {
+            deletingAnnouncementId = announcementId;
+            deletingAnnouncementTitle = announcement.AnnouncementTitle;
+            showDeleteAnnouncementModal = true;
+        }
+    }
+
+    private async Task ConfirmDeleteAnnouncement()
+    {
+        try
+        {
+            var sonuc = await AnnouncementService.DeleteAsync(deletingAnnouncementId);
+            
+            if (sonuc)
+            {
+                announcementMesaj = "✅ Duyuru başarıyla silindi.";
+                showDeleteAnnouncementModal = false;
+                deletingAnnouncementId = 0;
+                deletingAnnouncementTitle = "";
+                await LoadAnnouncements();
+                StateHasChanged();
+            }
+            else
+            {
+                announcementMesaj = "❌ Duyuru silinirken hata oluştu.";
+            }
+        }
+        catch (Exception ex)
+        {
+            announcementMesaj = $"❌ Hata: {ex.Message}";
+        }
+    }
+
+    private void CloseDeleteAnnouncementModal()
+    {
+        showDeleteAnnouncementModal = false;
+        deletingAnnouncementId = 0;
+        deletingAnnouncementTitle = "";
     }
 }
