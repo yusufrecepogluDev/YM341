@@ -338,10 +338,11 @@ public class CalendarController : ControllerBase
 
 ### Sprint 1 - Temel Yapı (Gün 1)
 1. ✅ Backend: DTO ve Repository oluştur
-2. ✅ Backend: Controller ve endpoint'leri yaz*
+2. ✅ Backend: Controller ve endpoint'leri yaz
 3. ✅ Backend: Test verisi ekle
-4. ✅ Frontend: API Service oluştur*
-5. ✅ Frontend: Mock data ile basit takvim grid'i yap**
+4. ✅ Backend: API testleri tamamlandı
+5. ⏳ Frontend: API Service oluştur
+6. ⏳ Frontend: Mock data ile basit takvim grid'i yap
 
 ### Sprint 2 - Entegrasyon (Gün 2)
 1. ✅ CORS ayarları*
