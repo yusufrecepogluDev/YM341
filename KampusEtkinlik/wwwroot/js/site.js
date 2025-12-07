@@ -12,3 +12,10 @@ window.scrollElementByWidth = (element, forward = false) => {
         element.scrollLeft += forward ? scrollAmount : -scrollAmount;
     }
 };
+
+// Chat widget scroll to bottom
+window.scrollToBottom = (element) => {
+    if (element) {
+        element.scrollTop = element.scrollHeight;
+    }
+};

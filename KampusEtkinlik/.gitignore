@@ -3,6 +3,8 @@ bin/
 obj/
 artifacts/
 
+.kiro/
+
 # Visual Studio
 .vs/
 *.vcxproj.user

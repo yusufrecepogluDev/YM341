@@ -1,0 +1,24 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=YOUR_SERVER;Database=YOUR_DATABASE;User Id=YOUR_USER;Password=YOUR_PASSWORD;TrustServerCertificate=True;"
+  },
+  "JwtSettings": {
+    "SecretKey": "YOUR_SECRET_KEY_HERE_MINIMUM_32_CHARACTERS_LONG",
+    "Issuer": "ClupApi",
+    "Audience": "KampusEtkinlik",
+    "ExpirationMinutes": 60
+  },
+  "N8nSettings": {
+    "WebhookUrl": "https://your-n8n-instance.com/webhook/your-webhook-id",
+    "TimeoutSeconds": 30,
+    "RetryCount": 2,
+    "ApiKey": "YOUR_N8N_API_KEY_IF_REQUIRED"
+  }
+}

@@ -20,6 +20,14 @@ builder.Services.AddHttpClient<ActivityService>();
 builder.Services.AddHttpClient<AuthenticationService>();
 builder.Services.AddHttpClient<CalendarApiService>();
 
+// Chat servisi - N8n chatbot entegrasyonu için (uses IHttpClientFactory)
+builder.Services.AddHttpClient("ChatClient", client =>
+{
+    // Base configuration for chat client
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+builder.Services.AddScoped<IChatClientService, ChatClientService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

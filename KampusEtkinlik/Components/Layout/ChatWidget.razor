@@ -1,0 +1,330 @@
+@rendermode InteractiveServer
+@using KampusEtkinlik.Data.DTOs
+@using KampusEtkinlik.Services
+@inject IChatClientService ChatClientService
+@inject IJSRuntime JSRuntime
+@inject ILogger<ChatWidget> Logger
+
+@* Floating Action Button *@
+<div class="chat-fab @(IsOpen ? "hidden" : "")" @onclick="ToggleChat">
+    <span class="chat-icon">💬</span>
+</div>
+
+@* Chat Window *@
+@if (IsOpen)
+{
+    <div class="chat-window">
+        <div class="chat-header">
+            <h3>AI Asistan</h3>
+            <div class="header-actions">
+                <button class="trash-btn @(Messages == null || !Messages.Any() ? "invisible" : "")" 
+                        @onclick="ShowClearConfirmation" 
+                        disabled="@IsLoading"
+                        title="Sohbeti Temizle">
+                    🗑️
+                </button>
+                <button class="close-btn" @onclick="ToggleChat">×</button>
+            </div>
+        </div>
+
+        <div class="chat-messages" @ref="messageContainer">
+            @if (Messages == null || !Messages.Any())
+            {
+                <div class="welcome-message">
+                    <p>👋 Merhaba! Size nasıl yardımcı olabilirim?</p>
+                    <p class="hint">Kampüs etkinlikleri, kulüpler ve duyurular hakkında sorabilirsiniz.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var message in Messages)
+                {
+                    <div class="message @(message.IsBot ? "bot-message" : "user-message")">
+                        <div class="message-content">
+                            <p>@message.Content</p>
+                            <span class="message-time">@message.Timestamp.ToLocalTime().ToString("HH:mm")</span>
+                        </div>
+                    </div>
+                }
+            }
+
+            @if (IsLoading)
+            {
+                <div class="message bot-message typing">
+                    <div class="message-content">
+                        @if (_showLongWaitMessage)
+                        {
+                            <p class="wait-message">⏳ Yanıt hazırlanıyor, lütfen bekleyin...</p>
+                        }
+                        else
+                        {
+                            <p class="typing-text">Bot yazıyor</p>
+                        }
+                        <div class="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" 
+                   class="chat-input" 
+                   placeholder="Mesajınızı yazın..." 
+                   @bind="CurrentMessage"
+                   @bind:event="oninput"
+                   @onkeydown="HandleKeyDown"
+                   disabled="@IsLoading" />
+            <button class="send-btn" 
+                    @onclick="SendMessage" 
+                    disabled="@(IsLoading || string.IsNullOrWhiteSpace(CurrentMessage))">
+                ➤
+            </button>
+        </div>
+    </div>
+
+    @* Confirmation Dialog *@
+    @if (_showClearConfirmation)
+    {
+        <div class="confirmation-overlay" @onclick="HideClearConfirmation">
+            <div class="confirmation-dialog" @onclick:stopPropagation>
+                <h4>Geçmişi Temizle</h4>
+                <p>Tüm sohbet geçmişi silinecek. Emin misiniz?</p>
+                <div class="confirmation-buttons">
+                    <button class="confirm-btn cancel" @onclick="HideClearConfirmation">İptal</button>
+                    <button class="confirm-btn delete" @onclick="ConfirmClearHistory">Evet, Temizle</button>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private ElementReference messageContainer;
+    private bool IsOpen { get; set; } = false;
+    private List<ChatMessageDto> Messages { get; set; } = new();
+    private bool IsLoading { get; set; } = false;
+    private string CurrentMessage { get; set; } = string.Empty;
+    private System.Threading.CancellationTokenSource? _loadingTimeoutCts;
+    private bool _showLongWaitMessage = false;
+    private bool _showClearConfirmation = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Logger.LogInformation("ChatWidget initializing - loading message history");
+            Messages = await ChatClientService.LoadHistoryAsync();
+            Logger.LogInformation("Loaded {Count} messages from history", Messages.Count);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading chat history");
+            Messages = new List<ChatMessageDto>();
+        }
+    }
+
+    private void ToggleChat()
+    {
+        IsOpen = !IsOpen;
+        Logger.LogInformation("Chat window toggled: {IsOpen}", IsOpen);
+        
+        if (IsOpen)
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(100);
+                await ScrollToBottom();
+            });
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await SendMessage();
+        }
+    }
+
+    private async Task SendMessage()
+    {
+        // Requirement 2.4: Empty message rejection
+        if (string.IsNullOrWhiteSpace(CurrentMessage))
+        {
+            Logger.LogWarning("Attempted to send empty message");
+            return;
+        }
+
+        try
+        {
+            IsLoading = true;
+            _showLongWaitMessage = false;
+            
+            // Requirement 8.3: Show long wait message after 5 seconds
+            _loadingTimeoutCts = new System.Threading.CancellationTokenSource();
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(5000, _loadingTimeoutCts.Token);
+                    _showLongWaitMessage = true;
+                    await InvokeAsync(StateHasChanged);
+                }
+                catch (TaskCanceledException)
+                {
+                    // Expected when request completes before 5 seconds
+                }
+            });
+            
+            var messageText = CurrentMessage.Trim();
+            CurrentMessage = string.Empty;
+
+            Logger.LogInformation("Sending user message: {Message}", messageText);
+
+            // Requirement 2.1: Add user message to list
+            var userMessage = new ChatMessageDto
+            {
+                Id = Guid.NewGuid().ToString(),
+                Content = messageText,
+                IsBot = false,
+                Timestamp = DateTime.UtcNow,
+                Status = MessageStatus.Sent
+            };
+
+            Messages.Add(userMessage);
+            await InvokeAsync(StateHasChanged);
+            await ScrollToBottom();
+
+            // Requirement 2.2: Send message to ClupApi
+            Logger.LogInformation("Calling ChatClientService.SendMessageAsync");
+            var botResponse = await ChatClientService.SendMessageAsync(messageText);
+            Logger.LogInformation("ChatClientService.SendMessageAsync completed, response is {IsNull}", botResponse == null ? "null" : "not null");
+
+            if (botResponse != null)
+            {
+                // Requirement 3.1: Add bot response to list
+                Messages.Add(botResponse);
+                Logger.LogInformation("Bot response received and added to messages");
+
+                // Requirement 6.1: Save to session storage
+                await ChatClientService.SaveHistoryAsync(Messages);
+            }
+            else
+            {
+                Logger.LogWarning("Bot response was null");
+                var errorMessage = new ChatMessageDto
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Content = "Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.",
+                    IsBot = true,
+                    Timestamp = DateTime.UtcNow,
+                    Status = MessageStatus.Error
+                };
+                Messages.Add(errorMessage);
+            }
+
+            await InvokeAsync(StateHasChanged);
+            await ScrollToBottom();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Logger.LogError(ex, "Unauthorized access while sending message");
+            await ShowErrorMessage("Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.");
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogError(ex, "Network error while sending message");
+            await ShowErrorMessage("Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.");
+        }
+        catch (TaskCanceledException ex)
+        {
+            Logger.LogError(ex, "Request timeout while sending message");
+            await ShowErrorMessage("İstek zaman aşımına uğradı. Lütfen tekrar deneyin.");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Unexpected error while sending message");
+            // Development modunda detaylı hata göster
+            var errorMessage = $"Beklenmeyen bir hata oluştu: {ex.Message}";
+            await ShowErrorMessage(errorMessage);
+        }
+        finally
+        {
+            IsLoading = false;
+            _showLongWaitMessage = false;
+            _loadingTimeoutCts?.Cancel();
+            _loadingTimeoutCts?.Dispose();
+            _loadingTimeoutCts = null;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task ShowErrorMessage(string errorText)
+    {
+        var errorMessage = new ChatMessageDto
+        {
+            Id = Guid.NewGuid().ToString(),
+            Content = errorText,
+            IsBot = true,
+            Timestamp = DateTime.UtcNow,
+            Status = MessageStatus.Error
+        };
+        Messages.Add(errorMessage);
+        await InvokeAsync(StateHasChanged);
+        await ScrollToBottom();
+    }
+
+    private void ShowClearConfirmation()
+    {
+        // Requirement 6.3: Show confirmation dialog
+        _showClearConfirmation = true;
+    }
+
+    private void HideClearConfirmation()
+    {
+        _showClearConfirmation = false;
+    }
+
+    private async Task ConfirmClearHistory()
+    {
+        _showClearConfirmation = false;
+        await ClearHistory();
+    }
+
+    private async Task ClearHistory()
+    {
+        try
+        {
+            Logger.LogInformation("Clearing chat history");
+            
+            // Requirement 6.5: Clear history functionality
+            await ChatClientService.ClearHistoryAsync();
+            Messages.Clear();
+            
+            Logger.LogInformation("Chat history cleared successfully");
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error clearing chat history");
+            await ShowErrorMessage("Geçmiş temizlenirken bir hata oluştu.");
+        }
+    }
+
+    private async Task ScrollToBottom()
+    {
+        try
+        {
+            // Requirement 3.3: Auto-scroll to latest message
+            await JSRuntime.InvokeVoidAsync("scrollToBottom", messageContainer);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Error scrolling to bottom");
+        }
+    }
+}

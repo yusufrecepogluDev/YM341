@@ -28,6 +28,40 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]))
         };
+
+        // Add detailed logging for JWT authentication
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                var authHeader = context.Request.Headers["Authorization"].ToString();
+                logger.LogInformation("JWT OnMessageReceived - Authorization header: {Header}", 
+                    string.IsNullOrEmpty(authHeader) ? "EMPTY" : authHeader.Substring(0, Math.Min(50, authHeader.Length)));
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogError("JWT Authentication failed: {Exception}", context.Exception.Message);
+                logger.LogError("Token: {Token}", context.Request.Headers["Authorization"].ToString());
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogInformation("JWT Token validated successfully for user: {User}", 
+                    context.Principal?.Identity?.Name ?? "Unknown");
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogWarning("JWT Challenge triggered: {Error} - {ErrorDescription}", 
+                    context.Error, context.ErrorDescription);
+                return Task.CompletedTask;
+            }
+        };
     });
 
 
@@ -40,6 +74,20 @@ builder.Services.AddScoped<ICalendarRepository, CalendarRepository>();
 
 // Service dependency injection
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+// ChatService with HttpClient configuration (Requirement 5.1, 5.2)
+builder.Services.AddHttpClient<IChatService, ChatService>((serviceProvider, client) =>
+{
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    var timeoutSeconds = configuration.GetValue<int>("N8nSettings:TimeoutSeconds", 30);
+    
+    // Configure HttpClient timeout
+    client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
+    
+    // Add default headers if needed
+    client.DefaultRequestHeaders.Add("User-Agent", "ClupApi-ChatService/1.0");
+})
+.SetHandlerLifetime(TimeSpan.FromMinutes(5)); // Connection pooling
 
 // Controller�lar� JSON format�nda d�zenli ��kt� ile ekle
 builder.Services.AddControllers()
@@ -65,14 +113,19 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
     });
 
-// CORS (Blazor Server eri�imi i�in)
+// CORS (Blazor Server erişimi için)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClient", policy =>
     {
-        policy.WithOrigins("https://localhost:7065") // Blazor Server URL�si
+        policy.WithOrigins(
+            "https://localhost:7193",  // Blazor Server HTTPS
+            "http://localhost:5278",   // Blazor Server HTTP
+            "https://localhost:7065",  // Legacy Blazor Server HTTPS
+            "http://localhost:7065")   // Legacy Blazor Server HTTP
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials(); // JWT token için gerekli
     });
 
     options.AddPolicy("AllowSwagger", policy =>
@@ -95,6 +148,26 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// Validate N8n settings on startup (Requirement 5.1, 5.2)
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+var configuration = app.Services.GetRequiredService<IConfiguration>();
+
+var n8nWebhookUrl = configuration["N8nSettings:WebhookUrl"];
+if (string.IsNullOrWhiteSpace(n8nWebhookUrl))
+{
+    logger.LogWarning("N8n webhook URL is not configured. Chat functionality will not work properly.");
+    logger.LogWarning("Please configure 'N8nSettings:WebhookUrl' in appsettings.json");
+}
+else if (!n8nWebhookUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+{
+    logger.LogError("N8n webhook URL must use HTTPS protocol. Current URL: {WebhookUrl}", n8nWebhookUrl);
+    logger.LogError("Chat service will fail to initialize. Please update the configuration.");
+}
+else
+{
+    logger.LogInformation("N8n webhook URL configured: {WebhookUrl}", n8nWebhookUrl);
+}
+
 // Middleware pipeline
 
 if (app.Environment.IsDevelopment())
@@ -108,21 +181,18 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-
-app.UseAuthentication();
-
-app.UseAuthorization();
-
 app.UseHttpsRedirection();
 
-// Swagger testleri i�in geni� eri�im
-if (app.Environment.IsDevelopment())
-    app.UseCors("AllowSwagger");
-else
-    app.UseCors("AllowClient");
+// CORS must be before Authentication and Authorization
+app.UseCors("AllowClient");
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
+
+// Make Program class accessible for integration tests
+public partial class Program { }
