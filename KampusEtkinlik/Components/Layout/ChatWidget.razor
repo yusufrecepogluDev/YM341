@@ -1,6 +1,7 @@
 @rendermode InteractiveServer
 @using KampusEtkinlik.Data.DTOs
 @using KampusEtkinlik.Services
+@using Markdig
 @inject IChatClientService ChatClientService
 @inject IJSRuntime JSRuntime
 @inject ILogger<ChatWidget> Logger
@@ -41,7 +42,14 @@
                 {
                     <div class="message @(message.IsBot ? "bot-message" : "user-message")">
                         <div class="message-content">
-                            <p>@message.Content</p>
+                            @if (message.IsBot)
+                            {
+                                @((MarkupString)RenderMarkdown(message.Content))
+                            }
+                            else
+                            {
+                                <p>@message.Content</p>
+                            }
                             <span class="message-time">@message.Timestamp.ToLocalTime().ToString("HH:mm")</span>
                         </div>
                     </div>
@@ -111,6 +119,32 @@
     private System.Threading.CancellationTokenSource? _loadingTimeoutCts;
     private bool _showLongWaitMessage = false;
     private bool _showClearConfirmation = false;
+    
+    // Markdown pipeline for rendering bot messages
+    private static readonly MarkdownPipeline _markdownPipeline = new MarkdownPipelineBuilder()
+        .UseAdvancedExtensions()
+        .Build();
+
+    /// <summary>
+    /// Renders markdown content to HTML for bot messages
+    /// </summary>
+    private string RenderMarkdown(string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+            return string.Empty;
+        
+        try
+        {
+            var html = Markdown.ToHtml(content, _markdownPipeline);
+            return html;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Error rendering markdown, falling back to plain text");
+            // Fallback: convert newlines to <br> tags
+            return $"<p>{System.Web.HttpUtility.HtmlEncode(content).Replace("\n", "<br/>")}</p>";
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -138,7 +172,25 @@
             {
                 await Task.Delay(100);
                 await ScrollToBottom();
+                
+                // Initialize chat session with calendar context
+                await InitializeChatSession();
             });
+        }
+    }
+
+    private async Task InitializeChatSession()
+    {
+        try
+        {
+            Logger.LogInformation("Initializing chat session with calendar context");
+            await ChatClientService.InitializeChatAsync();
+            Logger.LogInformation("Chat session initialized successfully");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initializing chat session");
+            // Don't show error to user, just log it
         }
     }
 

@@ -76,6 +76,11 @@ namespace ClupApi.DTOs
         public string? SessionId { get; set; }
         
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        
+        /// <summary>
+        /// Context data containing upcoming activities and announcements (sent every 14 messages)
+        /// </summary>
+        public string? ContextData { get; set; }
     }
 
     /// <summary>
@@ -89,5 +94,13 @@ namespace ClupApi.DTOs
         public string? SessionId { get; set; }
         
         public Dictionary<string, object>? Metadata { get; set; }
+    }
+
+    /// <summary>
+    /// Calendar context data - uses same CalendarEventDto as calendar page
+    /// </summary>
+    public class CalendarContextDto
+    {
+        public List<CalendarEventDto> CalendarEvents { get; set; } = new();
     }
 }

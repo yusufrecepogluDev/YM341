@@ -30,7 +30,7 @@ namespace ClupApi.Repositories
                     Categories = "KulupEtkinligi",
                     CategoriesColor = "#4CAF50",
                     IsAllDay = a.StartDate.TimeOfDay == TimeSpan.Zero && a.EndDate.TimeOfDay == TimeSpan.Zero,
-                    Location = a.OrganizingClub.ClubName
+                    OrganizingClub = a.OrganizingClub.ClubName
                 })
                 .ToListAsync();
 
@@ -51,7 +51,7 @@ namespace ClupApi.Repositories
                     Categories = "Duyuru",
                     CategoriesColor = "#2196F3",
                     IsAllDay = true,
-                    Location = a.Club.ClubName
+                    OrganizingClub = a.Club.ClubName
                 })
                 .ToListAsync();
 
@@ -72,7 +72,7 @@ namespace ClupApi.Repositories
                         Categories = "AkademikOlay",
                         CategoriesColor = "#FF9800",
                         IsAllDay = true, // Akademik olaylar genelde tam gün
-                        Location = a.Category
+                        OrganizingClub = a.Category
                     })
                     .ToListAsync();
 
@@ -109,7 +109,7 @@ namespace ClupApi.Repositories
                     Categories = "KulupEtkinligi",
                     CategoriesColor = "#4CAF50",
                     IsAllDay = a.StartDate.TimeOfDay == TimeSpan.Zero && a.EndDate.TimeOfDay == TimeSpan.Zero,
-                    Location = a.OrganizingClub.ClubName
+                    OrganizingClub = a.OrganizingClub.ClubName
                 })
                 .ToListAsync();
 
@@ -130,7 +130,7 @@ namespace ClupApi.Repositories
                     Categories = "Duyuru",
                     CategoriesColor = "#2196F3",
                     IsAllDay = true,
-                    Location = a.Club.ClubName
+                    OrganizingClub = a.Club.ClubName
                 })
                 .ToListAsync();
 
@@ -151,7 +151,7 @@ namespace ClupApi.Repositories
                         Categories = "AkademikOlay",
                         CategoriesColor = "#FF9800",
                         IsAllDay = true, // Akademik olaylar genelde tam gün
-                        Location = a.Category
+                        OrganizingClub = a.Category
                     })
                     .ToListAsync();
 

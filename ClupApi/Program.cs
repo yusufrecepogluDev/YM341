@@ -71,6 +71,10 @@ builder.Services.AddScoped<ClupApi.Repositories.IActivityRepository, ActivityRep
 builder.Services.AddScoped<ClupApi.Repositories.IAnnouncementRepository, AnnouncementRepository>();
 builder.Services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
 builder.Services.AddScoped<ICalendarRepository, CalendarRepository>();
+builder.Services.AddScoped<IClubRepository, ClubRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IClubMembershipRepository, ClubMembershipRepository>();
+builder.Services.AddScoped<IActivityParticipationRepository, ActivityParticipationRepository>();
 
 // Service dependency injection
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();

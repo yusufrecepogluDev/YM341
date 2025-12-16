@@ -10,7 +10,7 @@
         public string Categories { get; set; } = string.Empty; // "AkademikOlay", "KulupEtkinligi", "Duyuru"
         public string CategoriesColor { get; set; } = string.Empty;
         public bool IsAllDay { get; set; }
-        public string Location { get; set; } = string.Empty;
+        public string OrganizingClub { get; set; } = string.Empty;
     }
 
     public class CategoryDto

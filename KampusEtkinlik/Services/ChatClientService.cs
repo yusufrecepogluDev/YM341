@@ -17,6 +17,7 @@ namespace KampusEtkinlik.Services
         Task<List<ChatMessageDto>> LoadHistoryAsync();
         Task SaveHistoryAsync(List<ChatMessageDto> messages);
         Task ClearHistoryAsync();
+        Task InitializeChatAsync();
     }
 
     /// <summary>
@@ -31,7 +32,9 @@ namespace KampusEtkinlik.Services
         private readonly ILogger<ChatClientService> _logger;
         private readonly string _baseUrl;
         private const string ChatHistoryKey = "chatHistory";
+        private const string SessionIdKey = "chatSessionId";
         private const int MaxHistorySize = 50;
+        private string? _cachedSessionId;
 
         public ChatClientService(
             IHttpClientFactory httpClientFactory,
@@ -82,7 +85,7 @@ namespace KampusEtkinlik.Services
                 var request = new ChatRequestDto
                 {
                     Message = message,
-                    SessionId = Guid.NewGuid().ToString() // Generate session ID for context
+                    SessionId = await GetOrCreateSessionId() // Use consistent session ID
                 };
 
                 _logger.LogInformation("Sending message to backend API");
@@ -228,6 +231,107 @@ namespace KampusEtkinlik.Services
             {
                 _logger.LogError(ex, "Error clearing chat history");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Gets or creates a session ID for the chat
+        /// </summary>
+        private async Task<string> GetOrCreateSessionId()
+        {
+            // Return cached session ID if available
+            if (!string.IsNullOrEmpty(_cachedSessionId))
+            {
+                return _cachedSessionId;
+            }
+
+            try
+            {
+                // Try to load from session storage
+                var result = await _sessionStorage.GetAsync<string>(SessionIdKey);
+                if (result.Success && !string.IsNullOrEmpty(result.Value))
+                {
+                    _cachedSessionId = result.Value;
+                    _logger.LogInformation("Loaded existing session ID from storage");
+                    return _cachedSessionId;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error loading session ID from storage");
+            }
+
+            // Create new session ID
+            _cachedSessionId = Guid.NewGuid().ToString();
+            _logger.LogInformation("Created new session ID: {SessionId}", _cachedSessionId);
+
+            try
+            {
+                // Save to session storage
+                await _sessionStorage.SetAsync(SessionIdKey, _cachedSessionId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error saving session ID to storage");
+            }
+
+            return _cachedSessionId;
+        }
+
+        /// <summary>
+        /// Initializes chat session by sending calendar context to N8n
+        /// This is called when chat widget is opened
+        /// </summary>
+        public async Task InitializeChatAsync()
+        {
+            try
+            {
+                _logger.LogInformation("Initializing chat session");
+
+                // Get or create session ID
+                var sessionId = await GetOrCreateSessionId();
+
+                // Get token
+                var token = await _tokenService.GetTokenAsync();
+                if (string.IsNullOrEmpty(token))
+                {
+                    _logger.LogWarning("No token available for chat initialization");
+                    return;
+                }
+
+                _logger.LogInformation("Token retrieved, length: {Length}", token.Length);
+
+                // Create HTTP client
+                var client = _httpClientFactory.CreateClient("ChatClient");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                // Prepare request
+                var request = new
+                {
+                    Message = "initialize",
+                    SessionId = sessionId
+                };
+
+                _logger.LogInformation("Sending initialization request to backend API");
+
+                // Send initialization request
+                var response = await client.PostAsJsonAsync("/api/chat/initialize", request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("Chat session initialized successfully");
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogWarning("Chat initialization returned {StatusCode}: {Error}", 
+                        response.StatusCode, errorContent);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error initializing chat session");
+                // Don't throw - initialization failure shouldn't break the app
             }
         }
     }

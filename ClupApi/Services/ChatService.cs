@@ -1,4 +1,5 @@
 using ClupApi.DTOs;
+using ClupApi.Repositories;
 using ClupApi.Repositories.Interfaces;
 using System.Text;
 using System.Text.Json;
@@ -14,21 +15,27 @@ namespace ClupApi.Services
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
         private readonly ILogger<ChatService> _logger;
+        private readonly ICalendarRepository _calendarRepository;
         private readonly string _webhookUrl;
         private readonly int _timeoutSeconds;
         private readonly int _retryCount;
         private readonly string? _apiKey;
 
-        public ChatService(HttpClient httpClient, IConfiguration configuration, ILogger<ChatService> logger)
+        public ChatService(
+            HttpClient httpClient, 
+            IConfiguration configuration, 
+            ILogger<ChatService> logger,
+            ICalendarRepository calendarRepository)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _calendarRepository = calendarRepository ?? throw new ArgumentNullException(nameof(calendarRepository));
 
             // Read N8n settings from configuration
             _webhookUrl = _configuration["N8nSettings:WebhookUrl"] ?? string.Empty;
-            _timeoutSeconds = int.TryParse(_configuration["N8nSettings:TimeoutSeconds"], out var timeout) ? timeout : 30;
-            _retryCount = int.TryParse(_configuration["N8nSettings:RetryCount"], out var retry) ? retry : 2;
+            _timeoutSeconds = int.TryParse(_configuration["N8nSettings:TimeoutSeconds"], out var timeout) ? timeout : 120;
+            _retryCount = int.TryParse(_configuration["N8nSettings:RetryCount"], out var retry) ? retry : 1;
             _apiKey = _configuration["N8nSettings:ApiKey"];
 
             // Validate webhook URL
@@ -63,7 +70,7 @@ namespace ClupApi.Services
         /// Sends a chat message to N8n webhook and returns the bot response
         /// Implements retry logic and timeout handling
         /// </summary>
-        public async Task<ChatResponseDto> SendToN8nAsync(string message, string userId, string? sessionId = null)
+        public async Task<ChatResponseDto> SendToN8nAsync(string message, string userId, string? sessionId = null, string? contextData = null)
         {
             if (string.IsNullOrWhiteSpace(message))
             {
@@ -92,7 +99,8 @@ namespace ClupApi.Services
                 ChatInput = message,
                 UserId = userId,
                 SessionId = sessionId,
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.UtcNow,
+                ContextData = contextData // Include context data if provided (Requirement 10.1) // değişicek
             };
 
             // Implement retry logic (Requirement 4.4)
@@ -172,6 +180,13 @@ namespace ClupApi.Services
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
+
+            // Log if context data is being sent
+            if (!string.IsNullOrWhiteSpace(request.ContextData))
+            {
+                _logger.LogInformation("Sending context data to N8n (length: {Length} chars)", request.ContextData.Length);
+                _logger.LogDebug("Context data preview: {Preview}", request.ContextData.Substring(0, Math.Min(200, request.ContextData.Length)));
+            }
 
             var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
@@ -302,6 +317,127 @@ namespace ClupApi.Services
             _logger.LogInformation("Successfully extracted AI response: {Response}", aiResponse.Substring(0, Math.Min(100, aiResponse.Length)));
 
             return new N8nWebhookResponse { Response = aiResponse };
+        }
+
+        /// <summary>
+        /// Gets calendar context data - uses CalendarRepository to get same data as calendar page
+        /// Includes: Activities, Announcements, and Academic Events
+        /// </summary>
+        public async Task<CalendarContextDto> GetCalendarContextAsync()
+        {
+            try
+            {
+                // Get events for the next 30 days (same approach as calendar page)
+                var startDate = DateTime.Now;
+                var endDate = DateTime.Now.AddDays(30);
+                
+                var calendarEvents = await _calendarRepository.GetEventsByDateRangeAsync(startDate, endDate);
+
+                _logger.LogInformation("Retrieved {EventCount} calendar events for chatbot context", calendarEvents.Count);
+
+                return new CalendarContextDto
+                {
+                    CalendarEvents = calendarEvents
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving calendar context data");
+                return new CalendarContextDto
+                {
+                    CalendarEvents = new List<CalendarEventDto>()
+                };
+            }
+        }
+
+        /// <summary>
+        /// Formats calendar context data into a readable text format for the chatbot
+        /// </summary>
+        public string FormatContextData(CalendarContextDto context)
+        {
+            if (context == null || !context.CalendarEvents.Any())
+            {
+                return "=== KAMPÜS TAKVİM BİLGİLERİ ===\n\nŞu anda takvimde kayıtlı etkinlik bulunmamaktadır.\n";
+            }
+
+            var sb = new StringBuilder();
+            sb.AppendLine("=== KAMPÜS TAKVİM BİLGİLERİ (Önümüzdeki 30 Gün) ===");
+            sb.AppendLine();
+
+            // Group events by category
+            var activities = context.CalendarEvents.Where(e => e.Categories == "KulupEtkinligi").ToList();
+            var announcements = context.CalendarEvents.Where(e => e.Categories == "Duyuru").ToList();
+            var academicEvents = context.CalendarEvents.Where(e => e.Categories == "AkademikOlay").ToList();
+
+            // Format Activities (Kulüp Etkinlikleri)
+            if (activities.Any())
+            {
+                sb.AppendLine("📅 KULÜP ETKİNLİKLERİ:");
+                sb.AppendLine();
+                foreach (var evt in activities.OrderBy(e => e.StartDate))
+                {
+                    sb.AppendLine($"• {evt.Title}");
+                    sb.AppendLine($"  Kulüp: {evt.OrganizingClub}");
+                    sb.AppendLine($"  Tarih: {evt.StartDate:dd.MM.yyyy HH:mm} - {evt.EndDate:dd.MM.yyyy HH:mm}");
+                    if (!string.IsNullOrWhiteSpace(evt.Description))
+                    {
+                        var shortDesc = evt.Description.Length > 100 ? evt.Description.Substring(0, 100) + "..." : evt.Description;
+                        sb.AppendLine($"  Açıklama: {shortDesc}");
+                    }
+                    sb.AppendLine();
+                }
+            }
+
+            // Format Announcements (Duyurular)
+            if (announcements.Any())
+            {
+                sb.AppendLine("📢 DUYURULAR:");
+                sb.AppendLine();
+                foreach (var evt in announcements.OrderByDescending(e => e.StartDate))
+                {
+                    sb.AppendLine($"• {evt.Title}");
+                    sb.AppendLine($"  Kulüp: {evt.OrganizingClub}");
+                    sb.AppendLine($"  Tarih: {evt.StartDate:dd.MM.yyyy}");
+                    if (!string.IsNullOrWhiteSpace(evt.Description))
+                    {
+                        var shortContent = evt.Description.Length > 150 ? evt.Description.Substring(0, 150) + "..." : evt.Description;
+                        sb.AppendLine($"  İçerik: {shortContent}");
+                    }
+                    sb.AppendLine();
+                }
+            }
+
+            // Format Academic Events (Akademik Olaylar)
+            if (academicEvents.Any())
+            {
+                sb.AppendLine("🎓 AKADEMİK TAKVİM:");
+                sb.AppendLine();
+                foreach (var evt in academicEvents.OrderBy(e => e.StartDate))
+                {
+                    sb.AppendLine($"• {evt.Title}");
+                    sb.AppendLine($"  Tarih: {evt.StartDate:dd.MM.yyyy} - {evt.EndDate:dd.MM.yyyy}");
+                    if (!string.IsNullOrWhiteSpace(evt.OrganizingClub))
+                    {
+                        sb.AppendLine($"  Kategori: {evt.OrganizingClub}");
+                    }
+                    if (!string.IsNullOrWhiteSpace(evt.Description))
+                    {
+                        var shortDesc = evt.Description.Length > 100 ? evt.Description.Substring(0, 100) + "..." : evt.Description;
+                        sb.AppendLine($"  Açıklama: {shortDesc}");
+                    }
+                    sb.AppendLine();
+                }
+            }
+
+            if (!activities.Any() && !announcements.Any() && !academicEvents.Any())
+            {
+                sb.AppendLine("Önümüzdeki 30 gün içinde kayıtlı etkinlik bulunmamaktadır.");
+                sb.AppendLine();
+            }
+
+            sb.AppendLine("=== TAKVİM BİLGİLERİ SONU ===");
+
+            return sb.ToString();
         }
     }
 }

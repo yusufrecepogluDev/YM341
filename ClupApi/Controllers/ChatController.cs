@@ -18,11 +18,17 @@ namespace ClupApi.Controllers
     {
         private readonly IChatService _chatService;
         private readonly ILogger<ChatController> _logger;
+        private readonly IConfiguration _configuration;
+        
+        // Static dictionary to track message counts per session (Requirement 10.1)
+        private static readonly Dictionary<string, int> _userMessageCounters = new();
+        private static readonly object _counterLock = new();
 
-        public ChatController(IChatService chatService, ILogger<ChatController> logger)
+        public ChatController(IChatService chatService, ILogger<ChatController> logger, IConfiguration configuration)
         {
             _chatService = chatService ?? throw new ArgumentNullException(nameof(chatService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         /// <summary>
@@ -57,11 +63,39 @@ namespace ClupApi.Controllers
 
                 _logger.LogInformation("Sending message to N8n chatbot for user {UserId}", userId);
 
+                // Increment message counter (Requirement 10.1)
+                if (!string.IsNullOrWhiteSpace(request.SessionId))
+                {
+                    IncrementMessageCounter(request.SessionId);
+                }
+
+                // Check if we should send context data (Requirement 10.1)
+                string? contextData = null;
+                if (!string.IsNullOrWhiteSpace(request.SessionId) && ShouldSendContext(request.SessionId))
+                {
+                    _logger.LogInformation("Retrieving calendar context data for session {SessionId}", request.SessionId);
+                    
+                    try
+                    {
+                        var calendarContext = await _chatService.GetCalendarContextAsync();
+                        contextData = _chatService.FormatContextData(calendarContext);
+                        
+                        _logger.LogInformation("Calendar context data prepared: {EventCount} events",
+                            calendarContext.CalendarEvents.Count);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to retrieve calendar context data, continuing without context");
+                        // Continue without context data if retrieval fails
+                    }
+                }
+
                 // Call ChatService to send message to N8n webhook (Requirement 4.1, 4.3)
                 var response = await _chatService.SendToN8nAsync(
                     request.Message, 
                     userId, 
-                    request.SessionId);
+                    request.SessionId,
+                    contextData);
 
                 // Handle unsuccessful response (Requirement 4.4, 4.5)
                 if (!response.Success)
@@ -170,6 +204,123 @@ namespace ClupApi.Controllers
                 return StatusCode(500, ApiResponse.ErrorResponse(
                     "Servis sağlık kontrolü başarısız",
                     new[] { ex.Message }));
+            }
+        }
+
+        /// <summary>
+        /// Initializes chat session by sending calendar context to N8n
+        /// POST /api/chat/initialize
+        /// Requires: JWT authentication
+        /// </summary>
+        /// <param name="request">Chat request with session ID</param>
+        /// <returns>ApiResponse indicating initialization success</returns>
+        [HttpPost("initialize")]
+        public async Task<IActionResult> InitializeChat([FromBody] ChatRequestDto request)
+        {
+            try
+            {
+                // Extract user ID from JWT token
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    _logger.LogWarning("InitializeChat called without valid user ID in JWT token");
+                    return Unauthorized(ApiResponse.ErrorResponse(
+                        "Geçersiz kimlik doğrulama",
+                        new[] { "Kullanıcı kimliği bulunamadı" }));
+                }
+
+                _logger.LogInformation("Initializing chat session for user {UserId}", userId);
+
+                // Get calendar context data
+                var calendarContext = await _chatService.GetCalendarContextAsync();
+                var contextData = _chatService.FormatContextData(calendarContext);
+                
+                _logger.LogInformation("Calendar context prepared for initialization: {EventCount} events",
+                    calendarContext.CalendarEvents.Count);
+
+                // Send initialization message to N8n with context data
+                var initMessage = "Sistem başlatılıyor. Takvim bilgileri yükleniyor.";
+                var response = await _chatService.SendToN8nAsync(
+                    initMessage, 
+                    userId, 
+                    request.SessionId,
+                    contextData);
+
+                if (!response.Success)
+                {
+                    _logger.LogError("Failed to initialize chat session: {ErrorMessage}", response.ErrorMessage);
+                    return StatusCode(500, ApiResponse.ErrorResponse(
+                        "Chat başlatılamadı",
+                        new[] { response.ErrorMessage ?? "Bilinmeyen hata" }));
+                }
+
+                _logger.LogInformation("Chat session initialized successfully for user {UserId}", userId);
+
+                return Ok(ApiResponse<object>.SuccessResponse(
+                    new { Initialized = true, Timestamp = DateTime.UtcNow },
+                    "Chat başlatıldı"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in InitializeChat endpoint");
+                return HandleInternalServerError("Chat başlatılırken bir hata oluştu");
+            }
+        }
+
+        /// <summary>
+        /// Checks if context data should be sent based on message count
+        /// Requirement 10.1: Send context every 14 messages (and on first message)
+        /// </summary>
+        /// <param name="sessionId">The session ID to check</param>
+        /// <returns>True if context should be sent, false otherwise</returns>
+        private bool ShouldSendContext(string sessionId)
+        {
+            if (string.IsNullOrWhiteSpace(sessionId))
+            {
+                return false;
+            }
+
+            lock (_counterLock)
+            {
+                if (!_userMessageCounters.TryGetValue(sessionId, out var count))
+                {
+                    return false;
+                }
+
+                // Get context refresh interval from configuration (default: 14)
+                var contextRefreshInterval = _configuration.GetValue<int>("N8nSettings:ContextRefreshInterval", 14);
+
+                // Send context on first message (count == 1) and every N messages thereafter
+                return count == 1 || count % contextRefreshInterval == 0;
+            }
+        }
+
+        /// <summary>
+        /// Increments the message counter for a session
+        /// Requirement 10.1: Track message count per session
+        /// </summary>
+        /// <param name="sessionId">The session ID to increment</param>
+        private void IncrementMessageCounter(string sessionId)
+        {
+            if (string.IsNullOrWhiteSpace(sessionId))
+            {
+                return;
+            }
+
+            lock (_counterLock)
+            {
+                if (_userMessageCounters.ContainsKey(sessionId))
+                {
+                    _userMessageCounters[sessionId]++;
+                }
+                else
+                {
+                    _userMessageCounters[sessionId] = 1;
+                }
+
+                _logger.LogDebug("Message counter for session {SessionId}: {Count}", 
+                    sessionId, _userMessageCounters[sessionId]);
             }
         }
     }
