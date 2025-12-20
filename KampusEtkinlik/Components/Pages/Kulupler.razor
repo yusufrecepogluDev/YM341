@@ -1,0 +1,275 @@
+﻿@page "/kulupler"
+
+<div class="clubs-container">
+    <div class="clubs-header">
+        <h1 class="clubs-title">Kulüpler</h1>
+        <p class="clubs-subtitle">Kampüsteki tüm kulüpleri keşfedin ve ilginizi çeken kulüplere katılın</p>
+    </div>
+
+    <div class="clubs-grid">
+        @foreach (var club in clubs)
+        {
+            <div class="club-card" @onclick="() => ShowClubDetails(club)">
+                <div class="club-image">
+                    <img src="/Images/Dogus_universitesi_yeni_logo.png" alt="@club.Name" class="club-logo" />
+                </div>
+                <div class="club-content">
+                    <h3 class="club-title">@club.Name</h3>
+                    <p class="club-description">@club.Description</p>
+                </div>
+                <div class="club-actions">
+                    <button class="join-btn @(club.IsMember ? "joined" : "")" 
+                            @onclick="() => ToggleMembership(club)"
+                            @onclick:stopPropagation="true">
+                        @(club.IsMember ? "Üye Olundu ✓" : "Üye Ol")
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Detay Modal -->
+@if (selectedClub != null)
+{
+    <div class="modal-overlay" @onclick="CloseModal">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            <button class="modal-close" @onclick="CloseModal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+            
+            <div class="modal-header">
+                <div class="modal-logo">
+                    <img src="/Images/Dogus_universitesi_yeni_logo.png" alt="@selectedClub.Name" />
+                </div>
+                <h2 class="modal-title">@selectedClub.Name</h2>
+            </div>
+            
+            <div class="modal-body">
+                <div class="modal-section">
+                    <h3>Kulüp Hakkında</h3>
+                    <p class="modal-description">@selectedClub.Description</p>
+                </div>
+                
+                <div class="modal-section">
+                    <h3>Gelecek Etkinlikler</h3>
+                    @if (GetUpcomingActivities(selectedClub.Id).Any())
+                    {
+                        <div class="activities-list">
+                            @foreach (var activity in GetUpcomingActivities(selectedClub.Id))
+                            {
+                                <div class="activity-item">
+                                    <div class="activity-date">
+                                        <span class="day">@activity.Date.Day</span>
+                                        <span class="month">@activity.Date.ToString("MMM", new System.Globalization.CultureInfo("tr-TR"))</span>
+                                    </div>
+                                    <div class="activity-info">
+                                        <h4 class="activity-title">@activity.Title</h4>
+                                        <p class="activity-description">@activity.Description</p>
+                                        <span class="activity-time">@activity.Date.ToString("HH:mm")</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="no-items">Yaklaşan etkinlik bulunmuyor.</p>
+                    }
+                </div>
+
+                <div class="modal-section">
+                    <h3>Son Duyurular</h3>
+                    @if (GetRecentAnnouncements(selectedClub.Id).Any())
+                    {
+                        <div class="announcements-list">
+                            @foreach (var announcement in GetRecentAnnouncements(selectedClub.Id))
+                            {
+                                <div class="announcement-item">
+                                    <div class="announcement-header">
+                                        <h4 class="announcement-title">@announcement.Title</h4>
+                                        <span class="announcement-date">@announcement.Date.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</span>
+                                    </div>
+                                    <p class="announcement-content">@announcement.Content</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="no-items">Son duyuru bulunmuyor.</p>
+                    }
+                </div>
+
+                <div class="modal-section">
+                    <h3>Üyelik Durumu</h3>
+                    <div class="membership-status @(selectedClub.IsMember ? "member" : "non-member")">
+                        @if (selectedClub.IsMember)
+                        {
+                            <span class="status-icon">✓</span>
+                            <span>Bu kulübün üyesisiniz</span>
+                        }
+                        else
+                        {
+                            <span class="status-icon">○</span>
+                            <span>Bu kulübün üyesi değilsiniz</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="modal-btn secondary" @onclick="CloseModal">Kapat</button>
+                <button class="modal-btn primary @(selectedClub.IsMember ? "joined" : "")" 
+                        @onclick="() => ToggleMembership(selectedClub)">
+                    @(selectedClub.IsMember ? "Üyelikten Ayrıl" : "Üye Ol")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ClubViewModel> clubs = new();
+    private ClubViewModel? selectedClub = null;
+
+    protected override void OnInitialized()
+    {
+        // Örnek kulüp verileri - ileride API'den gelecek
+        clubs = new List<ClubViewModel>
+        {
+            new ClubViewModel
+            {
+                Id = 1,
+                Name = "Bilgisayar Kulübü",
+                Description = "Yazılım geliştirme, programlama ve teknoloji üzerine çalışmalar yapan kulüp. Hackathon'lar, workshop'lar ve projeler düzenliyoruz. Modern teknolojileri öğrenmek, projeler geliştirmek ve sektör profesyonelleriyle buluşmak için ideal bir ortam sunuyoruz. Üyelerimiz için düzenli olarak coding bootcamp'ler, hackathon'lar ve teknoloji sohbetleri organize ediyoruz.",
+                ImageUrl = "",
+                IsMember = false
+            },
+            new ClubViewModel
+            {
+                Id = 2,
+                Name = "Fotoğrafçılık Kulübü",
+                Description = "Fotoğraf sanatını seven, öğrenmek ve geliştirmek isteyen öğrencilerin buluşma noktası. Sergiler ve fotoğraf gezileri düzenliyoruz. Analog ve dijital fotoğrafçılık teknikleri öğretiyoruz. Üyelerimizle birlikte İstanbul'un en güzel köşelerini keşfediyor, fotoğraf çekimleri yapıyoruz.",
+                ImageUrl = "",
+                IsMember = true
+            },
+            new ClubViewModel
+            {
+                Id = 3,
+                Name = "Müzik Kulübü",
+                Description = "Müzik severlerin bir araya geldiği kulüp. Konserler, müzik atölyeleri ve grup çalışmaları yapıyoruz. Farklı müzik türlerinde eğitimler veriyoruz ve üyelerimizin müzikal yeteneklerini geliştirmelerine yardımcı oluyoruz. Düzenli olarak konserler ve müzik etkinlikleri organize ediyoruz.",
+                ImageUrl = "",
+                IsMember = false
+            },
+            new ClubViewModel
+            {
+                Id = 4,
+                Name = "Spor Kulübü",
+                Description = "Çeşitli spor dallarında etkinlikler düzenleyen kulüp. Turnuvalar, antrenmanlar ve spor etkinlikleri organize ediyoruz. Basketbol, futbol, voleybol, tenis ve fitness gibi birçok spor dalında aktiviteler düzenliyoruz. Sağlıklı yaşam ve takım ruhu geliştirmeyi hedefliyoruz.",
+                ImageUrl = "",
+                IsMember = true
+            },
+            new ClubViewModel
+            {
+                Id = 5,
+                Name = "Edebiyat Kulübü",
+                Description = "Kitap severlerin buluştuğu kulüp. Kitap okuma grupları, yazar söyleşileri ve edebiyat etkinlikleri düzenliyoruz. Klasik ve çağdaş edebiyat eserlerini tartışıyor, yazma atölyeleri düzenliyoruz. Ünlü yazarlarla söyleşiler ve imza günleri organize ediyoruz.",
+                ImageUrl = "",
+                IsMember = false
+            },
+            new ClubViewModel
+            {
+                Id = 6,
+                Name = "Sanat Kulübü",
+                Description = "Resim, heykel ve diğer sanat dallarında çalışmalar yapan kulüp. Sergiler ve sanat atölyeleri düzenliyoruz. Çeşitli sanat tekniklerini öğretiyoruz ve üyelerimizin sanatsal yeteneklerini geliştirmelerine destek oluyoruz. Düzenli olarak sergi ve sanat etkinlikleri organize ediyoruz.",
+                ImageUrl = "",
+                IsMember = false
+            }
+        };
+    }
+
+    private void ShowClubDetails(ClubViewModel club)
+    {
+        selectedClub = club;
+    }
+
+    private void CloseModal()
+    {
+        selectedClub = null;
+    }
+
+    private void ToggleMembership(ClubViewModel club)
+    {
+        club.IsMember = !club.IsMember;
+        StateHasChanged();
+    }
+
+    private List<ActivityViewModel> GetUpcomingActivities(int clubId)
+    {
+        // Örnek etkinlik verileri - ileride API'den gelecek
+        var allActivities = new List<ActivityViewModel>
+        {
+            new ActivityViewModel { ClubId = 1, Title = "Hackathon 2025", Description = "48 saatlik yazılım geliştirme yarışması", Date = DateTime.Now.AddDays(5) },
+            new ActivityViewModel { ClubId = 1, Title = "Python Workshop", Description = "Başlangıç seviyesi Python eğitimi", Date = DateTime.Now.AddDays(12) },
+            new ActivityViewModel { ClubId = 2, Title = "Fotoğraf Sergisi", Description = "Üyelerimizin çektiği fotoğrafların sergilenmesi", Date = DateTime.Now.AddDays(8) },
+            new ActivityViewModel { ClubId = 2, Title = "Boğaz Turu", Description = "Fotoğraf çekimi için Boğaz gezisi", Date = DateTime.Now.AddDays(15) },
+            new ActivityViewModel { ClubId = 3, Title = "Akustik Konser", Description = "Öğrenci performansları", Date = DateTime.Now.AddDays(3) },
+            new ActivityViewModel { ClubId = 4, Title = "Basketbol Turnuvası", Description = "Fakülteler arası basketbol müsabakası", Date = DateTime.Now.AddDays(7) },
+            new ActivityViewModel { ClubId = 5, Title = "Kitap Kulübü Buluşması", Description = "Bu ayın kitabı: 1984", Date = DateTime.Now.AddDays(10) },
+            new ActivityViewModel { ClubId = 6, Title = "Resim Atölyesi", Description = "Yağlı boya teknikleri", Date = DateTime.Now.AddDays(6) }
+        };
+
+        return allActivities.Where(a => a.ClubId == clubId && a.Date > DateTime.Now)
+                           .OrderBy(a => a.Date)
+                           .Take(3)
+                           .ToList();
+    }
+
+    private List<AnnouncementViewModel> GetRecentAnnouncements(int clubId)
+    {
+        // Örnek duyuru verileri - ileride API'den gelecek
+        var allAnnouncements = new List<AnnouncementViewModel>
+        {
+            new AnnouncementViewModel { ClubId = 1, Title = "Yeni Üye Alımları", Content = "Bilgisayar Kulübü'ne yeni üye alımları başladı. Başvurular 31 Aralık'a kadar.", Date = DateTime.Now.AddDays(-2) },
+            new AnnouncementViewModel { ClubId = 1, Title = "Toplantı Saati Değişikliği", Content = "Haftalık toplantılarımız artık Çarşamba 14:00'da yapılacaktır.", Date = DateTime.Now.AddDays(-5) },
+            new AnnouncementViewModel { ClubId = 2, Title = "Ekipman Kiralama", Content = "Kulüp üyeleri için profesyonel fotoğraf makinesi kiralama hizmeti başladı.", Date = DateTime.Now.AddDays(-1) },
+            new AnnouncementViewModel { ClubId = 3, Title = "Müzik Odası Rezervasyonu", Content = "Müzik odası rezervasyonları için yeni sistem devreye girdi.", Date = DateTime.Now.AddDays(-3) },
+            new AnnouncementViewModel { ClubId = 4, Title = "Spor Salonu Saatleri", Content = "Spor salonu kullanım saatleri güncellendi. Hafta içi 08:00-22:00 arası.", Date = DateTime.Now.AddDays(-4) },
+            new AnnouncementViewModel { ClubId = 5, Title = "Yazar Söyleşisi", Content = "Ünlü yazar Ahmet Ümit ile söyleşi 25 Aralık'ta gerçekleşecek.", Date = DateTime.Now.AddDays(-1) },
+            new AnnouncementViewModel { ClubId = 6, Title = "Malzeme Desteği", Content = "Sanat malzemeleri için kulüp bütçesinden destek sağlanacak.", Date = DateTime.Now.AddDays(-6) }
+        };
+
+        return allAnnouncements.Where(a => a.ClubId == clubId)
+                              .OrderByDescending(a => a.Date)
+                              .Take(3)
+                              .ToList();
+    }
+
+    private class ClubViewModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = string.Empty;
+        public bool IsMember { get; set; } = false;
+    }
+
+    private class ActivityViewModel
+    {
+        public int ClubId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public DateTime Date { get; set; }
+    }
+
+    private class AnnouncementViewModel
+    {
+        public int ClubId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
+        public DateTime Date { get; set; }
+    }
+}
