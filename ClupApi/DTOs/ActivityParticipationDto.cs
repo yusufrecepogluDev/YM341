@@ -22,6 +22,13 @@ namespace ClupApi.DTOs
         public int? Rating { get; set; }
     }
 
+    public class RatingDto
+    {
+        [Required(ErrorMessage = "Puan zorunludur")]
+        [Range(1, 5, ErrorMessage = "Puan 1-5 arasında olmalıdır")]
+        public int Rating { get; set; }
+    }
+
     public class ActivityParticipationResponseDto
     {
         public int ParticipationID { get; set; }

@@ -115,6 +115,9 @@ builder.Services.AddSingleton<ISecurityLogger, SecurityLogger>();
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
+// Background Service - Süresi dolmuş etkinlik ve duyuruları temizler
+builder.Services.AddHostedService<CleanupBackgroundService>();
+
 // ChatService with HttpClient configuration (Requirement 5.1, 5.2)
 builder.Services.AddHttpClient<IChatService, ChatService>((serviceProvider, client) =>
 {
@@ -151,6 +154,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.WriteIndented = true;
         options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
 // CORS (Blazor Server erişimi için)

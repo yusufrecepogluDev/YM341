@@ -4,6 +4,8 @@
 @using KampusEtkinlik.Services
 @inject ActivityService ActivityService
 @inject AnnouncementService AnnouncementService
+@inject ActivityParticipationService ParticipationService
+@inject TokenService TokenService
 @inject IJSRuntime JSRuntime
 
 <main class="ana-icerik">
@@ -32,7 +34,6 @@
                     @foreach (var activity in activities)
                     {
                         <div class="slider-card content-card"
-                             style="background: @GetRandomGradient();"
                              @onclick="() => OpenActivityPopup(activity)">
                             <div class="card-content">
                                 <h3>@activity.ActivityName</h3>
@@ -97,6 +98,7 @@
 
 </main>
 
+
 @* --- POP-UP MODAL ALANI --- *@
 @if (isPopupVisible)
 {
@@ -108,9 +110,22 @@
                 <div class="modal-header">
                     <button class="modal-close-btn" @onclick="ClosePopup">×</button>
                     <h2 class="modal-title">@selectedActivity.ActivityName</h2>
-                    <div class="modal-type-badge"></div>
+                    <p class="modal-club-name">@selectedActivity.OrganizingClubName</p>
                 </div>
                 <div class="modal-body">
+                    @* Ortalama Puan *@
+                    <div class="rating-average-box">
+                        <div class="rating-stars-display">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                var starIndex = i;
+                                <span class="star-display @(starIndex <= Math.Round(averageRating) ? "filled" : "")">★</span>
+                            }
+                        </div>
+                        <span class="rating-value">@averageRating.ToString("0.0")</span>
+                        <span class="rating-count">(@ratingCount değerlendirme)</span>
+                    </div>
+
                     <div class="modal-info-grid">
                         <div class="info-item">
                             <strong>Başlangıç</strong>
@@ -124,10 +139,84 @@
                         </div>
                         <div class="info-item">
                             <strong>Kontenjan</strong>
-                            <span>@selectedActivity.ParticipantLimit</span>
+                            <span>@(selectedActivity.NumberOfParticipants ?? 0) / @(selectedActivity.ParticipantLimit?.ToString() ?? "∞")</span>
                         </div>
                     </div>
                     <div class="modal-description">@selectedActivity.ActivityDescription</div>
+                    
+                    @* Katılım ve Değerlendirme Bölümü *@
+                    @if (isStudent)
+                    {
+                        <div class="modal-actions">
+                            @* Değerlendirme Yıldızları - Sadece katılımcılar için ve değerlendirme süresi içinde *@
+                            @if (isParticipating && CanRate())
+                            {
+                                <div class="rating-section">
+                                    <label class="rating-label">Etkinliği Değerlendir:</label>
+                                    <div class="star-rating">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            var starValue = i;
+                                            <span class="star @(starValue <= (hoverRating > 0 ? hoverRating : userRating) ? "active" : "")"
+                                                  @onclick="() => SetRating(starValue)"
+                                                  @onmouseover="() => hoverRating = starValue"
+                                                  @onmouseout="() => hoverRating = 0">★</span>
+                                        }
+                                    </div>
+                                    @if (isRatingProcessing)
+                                    {
+                                        <span class="rating-status"><span class="spinner-small"></span></span>
+                                    }
+                                    else if (!string.IsNullOrEmpty(ratingMessage))
+                                    {
+                                        <span class="rating-status @(ratingSuccess ? "success" : "error")">@ratingMessage</span>
+                                    }
+                                </div>
+                            }
+                            else if (isParticipating && !CanRate())
+                            {
+                                <div class="rating-section disabled">
+                                    <label class="rating-label">Değerlendirme:</label>
+                                    <p class="rating-info">@GetRatingStatusMessage()</p>
+                                </div>
+                            }
+
+                            @* Kayıt Butonu *@
+                            @if (isCheckingParticipation)
+                            {
+                                <button class="btn-participation loading" disabled>
+                                    <span class="spinner"></span> Kontrol ediliyor...
+                                </button>
+                            }
+                            else if (isParticipating)
+                            {
+                                <button class="btn-participation leave" @onclick="LeaveActivity" disabled="@isProcessing">
+                                    @if (isProcessing)
+                                    {
+                                        <span class="spinner"></span>
+                                    }
+                                    Kaydı İptal Et
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn-participation join" @onclick="JoinActivity" disabled="@isProcessing">
+                                    @if (isProcessing)
+                                    {
+                                        <span class="spinner"></span>
+                                    }
+                                    Etkinliğe Kayıt Ol
+                                </button>
+                            }
+                            
+                            @if (!string.IsNullOrEmpty(participationMessage))
+                            {
+                                <div class="participation-message @(participationSuccess ? "success" : "error")">
+                                    @participationMessage
+                                </div>
+                            }
+                        </div>
+                    }
                 </div>
             }
             else if (selectedAnnouncement != null)
@@ -149,6 +238,7 @@
     </div>
 }
 
+
 @code {
     private List<Activity>? activities;
     private List<Announcement>? announcements;
@@ -157,6 +247,25 @@
     private bool isPopupVisible = false;
     private Activity? selectedActivity;
     private Announcement? selectedAnnouncement;
+    
+    // Katılım durumu için
+    private bool isStudent = false;
+    private int currentUserId = 0;
+    private bool isParticipating = false;
+    private bool isCheckingParticipation = false;
+    private bool isProcessing = false;
+    private string participationMessage = "";
+    private bool participationSuccess = false;
+    
+    // Rating için
+    private int userRating = 0;
+    private int hoverRating = 0;
+    private double averageRating = 0;
+    private int ratingCount = 0;
+    private bool isRatingProcessing = false;
+    private string ratingMessage = "";
+    private bool ratingSuccess = false;
+    
     private string[] gradients = {
         "linear-gradient(135deg, #dc3545, #c82333)",
         "linear-gradient(135deg, #6a0080, #9b59b6)",
@@ -178,9 +287,174 @@
         catch (Exception) { activities = new(); announcements = new(); }
     }
 
-    private void OpenActivityPopup(Activity activity) { selectedActivity = activity; selectedAnnouncement = null; isPopupVisible = true; }
-    private void OpenAnnouncementPopup(Announcement announcement) { selectedAnnouncement = announcement; selectedActivity = null; isPopupVisible = true; }
-    private void ClosePopup() { isPopupVisible = false; selectedActivity = null; selectedAnnouncement = null; }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var userType = await TokenService.GetUserTypeAsync();
+            var userId = await TokenService.GetUserIdAsync();
+            
+            isStudent = userType == "student";
+            currentUserId = userId ?? 0;
+            
+            StateHasChanged();
+        }
+    }
+
+    private async Task OpenActivityPopup(Activity activity)
+    {
+        selectedActivity = activity;
+        selectedAnnouncement = null;
+        isPopupVisible = true;
+        participationMessage = "";
+        ratingMessage = "";
+        userRating = 0;
+        hoverRating = 0;
+        
+        // Ortalama puanı al
+        await LoadActivityRating();
+        
+        // Öğrenci ise katılım durumunu kontrol et
+        if (isStudent && currentUserId > 0)
+        {
+            await CheckParticipationStatus();
+        }
+        
+        StateHasChanged();
+    }
+
+    private async Task LoadActivityRating()
+    {
+        if (selectedActivity == null) return;
+        
+        var result = await ParticipationService.GetActivityRatingAsync(selectedActivity.ActivityID);
+        if (result.Success)
+        {
+            averageRating = result.AverageRating;
+            ratingCount = result.RatingCount;
+        }
+    }
+
+    private async Task CheckParticipationStatus()
+    {
+        if (selectedActivity == null) return;
+        
+        isCheckingParticipation = true;
+        StateHasChanged();
+        
+        var result = await ParticipationService.CheckParticipationAsync(selectedActivity.ActivityID, currentUserId);
+        isParticipating = result.IsParticipating;
+        userRating = result.CurrentRating ?? 0;
+        
+        isCheckingParticipation = false;
+        StateHasChanged();
+    }
+
+    private bool CanRate()
+    {
+        if (selectedActivity == null) return false;
+        var now = DateTime.UtcNow;
+        return now >= selectedActivity.StartDate && now <= selectedActivity.EndDate.AddDays(1);
+    }
+
+    private string GetRatingStatusMessage()
+    {
+        if (selectedActivity == null) return "";
+        var now = DateTime.UtcNow;
+        
+        if (now < selectedActivity.StartDate)
+            return "Etkinlik başladıktan sonra değerlendirme yapabilirsiniz.";
+        if (now > selectedActivity.EndDate.AddDays(1))
+            return "Değerlendirme süresi dolmuştur.";
+        return "";
+    }
+
+    private async Task SetRating(int rating)
+    {
+        if (selectedActivity == null || !CanRate()) return;
+        
+        isRatingProcessing = true;
+        ratingMessage = "";
+        StateHasChanged();
+        
+        var result = await ParticipationService.RateActivityAsync(selectedActivity.ActivityID, rating);
+        
+        ratingMessage = result.Message;
+        ratingSuccess = result.Success;
+        
+        if (result.Success)
+        {
+            userRating = rating;
+            await LoadActivityRating(); // Ortalamayı güncelle
+        }
+        
+        isRatingProcessing = false;
+        StateHasChanged();
+    }
+
+    private async Task JoinActivity()
+    {
+        if (selectedActivity == null) return;
+        
+        isProcessing = true;
+        participationMessage = "";
+        StateHasChanged();
+        
+        var result = await ParticipationService.JoinActivityAsync(selectedActivity.ActivityID);
+        
+        participationMessage = result.Message;
+        participationSuccess = result.Success;
+        
+        if (result.Success)
+        {
+            isParticipating = true;
+            selectedActivity.NumberOfParticipants = (selectedActivity.NumberOfParticipants ?? 0) + 1;
+        }
+        
+        isProcessing = false;
+        StateHasChanged();
+    }
+
+    private async Task LeaveActivity()
+    {
+        if (selectedActivity == null) return;
+        
+        isProcessing = true;
+        participationMessage = "";
+        StateHasChanged();
+        
+        var result = await ParticipationService.LeaveActivityAsync(selectedActivity.ActivityID);
+        
+        participationMessage = result.Message;
+        participationSuccess = result.Success;
+        
+        if (result.Success)
+        {
+            isParticipating = false;
+            if (selectedActivity.NumberOfParticipants > 0)
+                selectedActivity.NumberOfParticipants--;
+        }
+        
+        isProcessing = false;
+        StateHasChanged();
+    }
+
+    private void OpenAnnouncementPopup(Announcement announcement) 
+    { 
+        selectedAnnouncement = announcement; 
+        selectedActivity = null; 
+        isPopupVisible = true; 
+    }
+    
+    private void ClosePopup() 
+    { 
+        isPopupVisible = false; 
+        selectedActivity = null; 
+        selectedAnnouncement = null; 
+        participationMessage = ""; 
+        ratingMessage = "";
+    }
+    
     private string GetRandomGradient() => gradients[random.Next(gradients.Length)];
 
     private async Task ScrollActivityLeft() => await JSRuntime.InvokeVoidAsync("scrollElementByWidth", etkinlikListesi);

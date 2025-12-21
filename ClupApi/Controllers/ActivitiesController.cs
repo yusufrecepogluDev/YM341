@@ -3,7 +3,7 @@ using ClupApi.DTOs;
 using ClupApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
+using AutoMapper;
 
 namespace ClupApi.Controllers
 {
@@ -12,27 +12,31 @@ namespace ClupApi.Controllers
     public class ActivitiesController : ControllerBase
     {
         private readonly IActivityRepository _repository;
+        private readonly IMapper _mapper;
 
-        public ActivitiesController(IActivityRepository repository)
+        public ActivitiesController(IActivityRepository repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        [AllowAnonymous] // Public activity listing
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var activities = await _repository.GetAllAsync();
-            return Ok(activities);
+            var dtos = _mapper.Map<List<ActivityResponseDto>>(activities);
+            return Ok(dtos);
         }
 
         [HttpGet("{id}")]
-        [AllowAnonymous] // Public activity details
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(int id)
         {
             var activity = await _repository.GetByIdAsync(id);
             if (activity == null) return NotFound();
-            return Ok(activity);
+            var dto = _mapper.Map<ActivityResponseDto>(activity);
+            return Ok(dto);
         }
 
         [HttpPost]

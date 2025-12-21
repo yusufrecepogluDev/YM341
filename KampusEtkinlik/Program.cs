@@ -44,6 +44,14 @@ builder.Services.AddHttpClient<ClubMembershipService>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7077");
 });
+builder.Services.AddHttpClient<ActivityParticipationService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7077");
+});
+builder.Services.AddHttpClient<AnalyticsService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7077");
+});
 
 // Chat servisi - N8n chatbot entegrasyonu için (uses IHttpClientFactory)
 builder.Services.AddHttpClient("ChatClient", client =>

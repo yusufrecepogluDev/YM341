@@ -6,6 +6,7 @@
         public string ActivityName { get; set; } = string.Empty;
         public string? ActivityDescription { get; set; }
         public int OrganizingClubID { get; set; }
+        public string OrganizingClubName { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int? ParticipantLimit { get; set; }

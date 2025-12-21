@@ -3,6 +3,7 @@
 @inject ActivityService ActivityService
 @inject AnnouncementService AnnouncementService
 @inject ClubMembershipService MembershipService
+@inject AnalyticsService AnalyticsService
 @inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
 @inject TokenService TokenService
@@ -19,6 +20,7 @@
             <button type="button" class="@(aktifSekme == 1 ? "active-tab" : "")" @onclick="() => aktifSekme = 1">Etkinlik Yönetimi</button>
             <button type="button" class="@(aktifSekme == 2 ? "active-tab" : "")" @onclick="() => aktifSekme = 2">Duyuru Yönetimi</button>
             <button type="button" class="@(aktifSekme == 3 ? "active-tab" : "")" @onclick="() => aktifSekme = 3">Üyelik Yönetimi</button>
+            <button type="button" class="@(aktifSekme == 4 ? "active-tab" : "")" @onclick="() => { aktifSekme = 4; LoadAnalytics(); }">📊 İstatistikler</button>
         </div>
         @if (aktifSekme == 1)
         {
@@ -270,6 +272,121 @@
             </div>
         }
 
+        @if (aktifSekme == 4)
+        {
+            <div class="sayfa-cont analytics-cont">
+                @if (isLoadingAnalytics)
+                {
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>İstatistikler yükleniyor...</p>
+                    </div>
+                }
+                else if (clubAnalytics == null)
+                {
+                    <div class="empty-state">
+                        <span class="empty-icon">📊</span>
+                        <p>İstatistik verisi bulunamadı.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="analytics-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📅</div>
+                            <div class="stat-value">@clubAnalytics.TotalActivities</div>
+                            <div class="stat-label">Toplam Etkinlik</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-value">@clubAnalytics.TotalParticipants</div>
+                            <div class="stat-label">Toplam Katılımcı</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏳</div>
+                            <div class="stat-value">@clubAnalytics.UpcomingActivities</div>
+                            <div class="stat-label">Yaklaşan Etkinlik</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-value">@clubAnalytics.CompletedActivities</div>
+                            <div class="stat-label">Tamamlanan</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-value">@clubAnalytics.AverageOccupancyRate.ToString("F1")%</div>
+                            <div class="stat-label">Ort. Doluluk</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⭐</div>
+                            <div class="stat-value">@(clubAnalytics.OverallAverageRating > 0 ? clubAnalytics.OverallAverageRating.ToString("F1") : "-")</div>
+                            <div class="stat-label">Ort. Puan (@clubAnalytics.TotalRatings oy)</div>
+                        </div>
+                    </div>
+
+                    @if (clubAnalytics.Activities.Any() || clubAnalytics.MonthlyStats.Any())
+                    {
+                        <div class="analytics-sections-wrapper">
+                            @if (clubAnalytics.Activities.Any())
+                            {
+                                <div class="analytics-section">
+                                    <h3>📋 Etkinlik Detayları</h3>
+                                    <div class="activity-analytics-list">
+                                        @foreach (var activity in clubAnalytics.Activities.OrderByDescending(a => a.StartDate))
+                                        {
+                                            <div class="activity-analytics-card">
+                                                <div class="activity-analytics-header">
+                                                    <h4>@activity.ActivityName</h4>
+                                                    <span class="status-badge @GetStatusClass(activity.Status)">@activity.Status</span>
+                                                </div>
+                                                <div class="activity-analytics-stats">
+                                                    <div class="mini-stat">
+                                                        <span class="mini-label">Katılımcı</span>
+                                                        <span class="mini-value">@activity.TotalParticipants / @(activity.ParticipantLimit?.ToString() ?? "∞")</span>
+                                                    </div>
+                                                    <div class="mini-stat">
+                                                        <span class="mini-label">Doluluk</span>
+                                                        <span class="mini-value">@activity.OccupancyRate.ToString("F1")%</span>
+                                                    </div>
+                                                    <div class="mini-stat">
+                                                        <span class="mini-label">Puan</span>
+                                                        <span class="mini-value">@(activity.AverageRating.HasValue ? $"{activity.AverageRating:F1} ({activity.RatingCount})" : "-")</span>
+                                                    </div>
+                                                    <div class="mini-stat">
+                                                        <span class="mini-label">Tarih</span>
+                                                        <span class="mini-value">@activity.StartDate.ToString("dd.MM.yyyy")</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            @if (clubAnalytics.MonthlyStats.Any())
+                            {
+                                <div class="analytics-section">
+                                    <h3>📈 Aylık İstatistikler</h3>
+                                    <div class="monthly-stats-list">
+                                        @foreach (var month in clubAnalytics.MonthlyStats.OrderByDescending(m => m.Year).ThenByDescending(m => m.Month))
+                                        {
+                                            <div class="monthly-stat-card">
+                                                <div class="month-name">@month.MonthName @month.Year</div>
+                                                <div class="month-stats">
+                                                    <span>📅 @month.ActivityCount etkinlik</span>
+                                                    <span>👥 @month.ParticipantCount katılımcı</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        }
+
         @* Üye Çıkarma Onay Popup *@
         @if (showRemoveMemberModal)
         {
@@ -460,6 +577,10 @@
     private bool showRemoveMemberModal = false;
     private int removingMemberId = 0;
     private string removingMemberName = "";
+
+    // Analytics için
+    private ClubAnalyticsSummaryDto? clubAnalytics;
+    private bool isLoadingAnalytics = false;
 
     private void ToggleDropdown(int activityId)
     {
@@ -1006,5 +1127,41 @@
         showRemoveMemberModal = false;
         removingMemberId = 0;
         removingMemberName = "";
+    }
+
+    // Analytics fonksiyonları
+    private async Task LoadAnalytics()
+    {
+        if (currentClubId <= 0) return;
+
+        isLoadingAnalytics = true;
+        StateHasChanged();
+
+        try
+        {
+            clubAnalytics = await AnalyticsService.GetClubAnalyticsAsync(currentClubId);
+            System.Diagnostics.Debug.WriteLine($"Analytics yüklendi: {clubAnalytics?.TotalActivities ?? 0} etkinlik");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"LoadAnalytics hatası: {ex.Message}");
+            clubAnalytics = null;
+        }
+        finally
+        {
+            isLoadingAnalytics = false;
+            StateHasChanged();
+        }
+    }
+
+    private string GetStatusClass(string status)
+    {
+        return status.ToLower() switch
+        {
+            "yaklaşan" or "upcoming" => "status-upcoming",
+            "devam ediyor" or "ongoing" => "status-ongoing",
+            "tamamlandı" or "completed" => "status-completed",
+            _ => "status-default"
+        };
     }
 }

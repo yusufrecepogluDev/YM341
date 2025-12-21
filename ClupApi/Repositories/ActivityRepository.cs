@@ -25,6 +25,7 @@ namespace ClupApi.Repositories
         public async Task<List<Activity>> GetAllAsync()
         {
             return await _context.Activity
+                .Include(a => a.OrganizingClub)
                 .Where(a => !a.IsDeleted)
                 .ToListAsync();
         }
@@ -32,6 +33,7 @@ namespace ClupApi.Repositories
         public async Task<Activity?> GetByIdAsync(int id)
         {
             return await _context.Activity
+                .Include(a => a.OrganizingClub)
                 .Where(a => a.ActivityID == id && !a.IsDeleted)
                 .FirstOrDefaultAsync();
         }
