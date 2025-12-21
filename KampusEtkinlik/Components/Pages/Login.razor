@@ -163,7 +163,7 @@ body {
                 }
                 else if (userType == "club")
                 {
-                    NavigationManager.NavigateTo("/kulup");
+                    NavigationManager.NavigateTo("/kulupyonetim");
                     return;
                 }
             }
@@ -239,7 +239,6 @@ body {
             }
 
             successMessage = $"Hoş geldin {result.Data.StudentName} {result.Data.StudentSurname}!";
-            await Task.Delay(1500);
             NavigationManager.NavigateTo("/home");
         }
         else
@@ -289,15 +288,11 @@ body {
 
             successMessage = $"Hoş geldin {result.Data.ClubName}!";
             
-            // Token'ın kaydedildiğinden emin olmak için kısa bir bekleme
-            await Task.Delay(500);
-            
             // Yönlendirmeden önce token'ı doğrula
             var savedUserType = await TokenService.GetUserTypeAsync();
             System.Diagnostics.Debug.WriteLine($"Login - Saved userType: '{savedUserType}'");
             
-            await Task.Delay(500);
-            NavigationManager.NavigateTo("/kulup");
+            NavigationManager.NavigateTo("/kulupyonetim");
         }
         else
         {

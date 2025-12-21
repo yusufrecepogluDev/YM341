@@ -13,6 +13,11 @@ namespace ClupApi.Models
         [MaxLength(100)]
         public string ClubName { get; set; }
 
+        [Required]
+        [MaxLength(500)]
+        [Column("_Description")]
+        public string Description { get; set; } = string.Empty;
+
         public long ClubNumber { get; set; }
 
         [Required]

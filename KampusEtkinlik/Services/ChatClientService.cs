@@ -8,9 +8,6 @@ using System.Net.Http;
 
 namespace KampusEtkinlik.Services
 {
-    /// <summary>
-    /// Interface for chat client service
-    /// </summary>
     public interface IChatClientService
     {
         Task<ChatMessageDto?> SendMessageAsync(string message);
@@ -20,10 +17,6 @@ namespace KampusEtkinlik.Services
         Task InitializeChatAsync();
     }
 
-    /// <summary>
-    /// Service for managing chat communication with backend API
-    /// Handles message sending, history persistence, and session storage
-    /// </summary>
     public class ChatClientService : IChatClientService
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -49,11 +42,6 @@ namespace KampusEtkinlik.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _baseUrl = $"{configuration["ApiSettings:BaseUrl"]}/api/chat";
         }
-
-        /// <summary>
-        /// Sends a message to the backend chat API and returns the bot's response
-        /// Requirement 2.2: Send message to ClupApi
-        /// </summary>
         public async Task<ChatMessageDto?> SendMessageAsync(string message)
         {
             try
@@ -64,7 +52,6 @@ namespace KampusEtkinlik.Services
                     return null;
                 }
 
-                // Get authentication token
                 var token = await _tokenService.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
@@ -74,33 +61,31 @@ namespace KampusEtkinlik.Services
 
                 _logger.LogInformation("Token retrieved, length: {Length}", token.Length);
                 
-                // Check if token is expired
+
                 if (_tokenService.IsTokenExpired(token))
                 {
                     _logger.LogError("Token is expired");
                     throw new UnauthorizedAccessException("Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.");
                 }
 
-                // Prepare request
                 var request = new ChatRequestDto
                 {
                     Message = message,
-                    SessionId = await GetOrCreateSessionId() // Use consistent session ID
+                    SessionId = await GetOrCreateSessionId() 
                 };
 
                 _logger.LogInformation("Sending message to backend API");
 
-                // Create a new HttpClient for this request using named client
                 var httpClient = _httpClientFactory.CreateClient("ChatClient");
                 
-                // Create request message manually to ensure headers are preserved
+
                 var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/message");
                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 requestMessage.Content = JsonContent.Create(request);
 
                 _logger.LogInformation("Sending POST request to: {Url}", _baseUrl + "/message");
                 
-                // Send request to backend
+
                 var response = await httpClient.SendAsync(requestMessage);
 
                 if (!response.IsSuccessStatusCode)
@@ -112,7 +97,7 @@ namespace KampusEtkinlik.Services
                     throw new HttpRequestException($"Backend error: {response.StatusCode} - {errorContent}");
                 }
 
-                // Parse response
+
                 var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<ChatResponseDto>>();
 
                 if (apiResponse == null || !apiResponse.Success || apiResponse.Data == null)
@@ -121,7 +106,7 @@ namespace KampusEtkinlik.Services
                     throw new InvalidOperationException("Geçersiz yanıt alındı");
                 }
 
-                // Create bot message
+
                 var botMessage = new ChatMessageDto
                 {
                     Id = Guid.NewGuid().ToString(),
@@ -151,11 +136,6 @@ namespace KampusEtkinlik.Services
                 throw;
             }
         }
-
-        /// <summary>
-        /// Loads chat history from session storage
-        /// Requirement 6.2: Load history from session storage
-        /// </summary>
         public async Task<List<ChatMessageDto>> LoadHistoryAsync()
         {
             try
@@ -180,11 +160,6 @@ namespace KampusEtkinlik.Services
             }
         }
 
-        /// <summary>
-        /// Saves chat history to session storage
-        /// Requirement 6.1: Save messages to session storage
-        /// Requirement 6.4: Limit to 50 messages
-        /// </summary>
         public async Task SaveHistoryAsync(List<ChatMessageDto> messages)
         {
             try
@@ -213,10 +188,6 @@ namespace KampusEtkinlik.Services
             }
         }
 
-        /// <summary>
-        /// Clears all chat history from session storage
-        /// Requirement 6.5: Clear history functionality
-        /// </summary>
         public async Task ClearHistoryAsync()
         {
             try
@@ -234,9 +205,7 @@ namespace KampusEtkinlik.Services
             }
         }
 
-        /// <summary>
-        /// Gets or creates a session ID for the chat
-        /// </summary>
+
         private async Task<string> GetOrCreateSessionId()
         {
             // Return cached session ID if available
@@ -278,10 +247,6 @@ namespace KampusEtkinlik.Services
             return _cachedSessionId;
         }
 
-        /// <summary>
-        /// Initializes chat session by sending calendar context to N8n
-        /// This is called when chat widget is opened
-        /// </summary>
         public async Task InitializeChatAsync()
         {
             try

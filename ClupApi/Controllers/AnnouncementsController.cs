@@ -2,6 +2,8 @@ using ClupApi.Models;
 using ClupApi.DTOs;
 using ClupApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace ClupApi.Controllers
 {
@@ -17,6 +19,7 @@ namespace ClupApi.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous] // Public announcement listing
         public async Task<IActionResult> GetAll()
         {
             var announcements = await _repository.GetAllAsync();
@@ -24,6 +27,7 @@ namespace ClupApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous] // Public announcement details
         public async Task<IActionResult> GetById(int id)
         {
             var announcement = await _repository.GetByIdAsync(id);
@@ -32,16 +36,20 @@ namespace ClupApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "ClubOnly")]
         public async Task<IActionResult> Create([FromBody] AnnouncementCreateDto createDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            // Auto-set ClubID from authenticated club (security requirement)
+            var currentClubId = GetCurrentClubId();
+
             var announcement = new Announcement
             {
                 AnnouncementTitle = createDto.AnnouncementTitle,
                 AnnouncementContent = createDto.AnnouncementContent,
-                ClubID = createDto.ClubID,
+                ClubID = currentClubId, // Always use authenticated club's ID
                 StartDate = createDto.StartDate,
                 CreationDate = DateTime.UtcNow,
                 IsActive = true,
@@ -53,6 +61,7 @@ namespace ClupApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "ClubOnly")]
         public async Task<IActionResult> Update(int id, [FromBody] AnnouncementUpdateDto updateDto)
         {
             if (!ModelState.IsValid)
@@ -61,6 +70,13 @@ namespace ClupApi.Controllers
             var existingAnnouncement = await _repository.GetByIdAsync(id);
             if (existingAnnouncement == null) 
                 return NotFound();
+
+            // Ownership check - clubs can only update their own announcements
+            var currentClubId = GetCurrentClubId();
+            if (existingAnnouncement.ClubID != currentClubId)
+            {
+                return Forbid();
+            }
 
             existingAnnouncement.AnnouncementTitle = updateDto.AnnouncementTitle;
             existingAnnouncement.AnnouncementContent = updateDto.AnnouncementContent;
@@ -71,10 +87,29 @@ namespace ClupApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "ClubOnly")]
         public async Task<IActionResult> Delete(int id)
         {
+            var existingAnnouncement = await _repository.GetByIdAsync(id);
+            if (existingAnnouncement == null)
+                return NotFound();
+
+            // Ownership check - clubs can only delete their own announcements
+            var currentClubId = GetCurrentClubId();
+            if (existingAnnouncement.ClubID != currentClubId)
+            {
+                return Forbid();
+            }
+
             await _repository.DeleteAsync(id);
             return NoContent();
+        }
+
+        private int GetCurrentClubId()
+        {
+            // Token'da "userId" claim'i kullanılıyor
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            return int.TryParse(userIdClaim, out var clubId) ? clubId : 0;
         }
     }
 }

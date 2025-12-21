@@ -15,9 +15,6 @@ namespace ClupApi.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Tüm akademik etkinlikleri getirir
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -25,9 +22,6 @@ namespace ClupApi.Controllers
             return Ok(ApiResponse<IEnumerable<AcademicEvents>>.SuccessResponse(events));
         }
 
-        /// <summary>
-        /// ID'ye göre akademik etkinlik getirir
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -38,9 +32,6 @@ namespace ClupApi.Controllers
             return Ok(ApiResponse<AcademicEvents>.SuccessResponse(academicEvent));
         }
 
-        /// <summary>
-        /// Kategoriye göre akademik etkinlikleri getirir
-        /// </summary>
         [HttpGet("category/{category}")]
         public async Task<IActionResult> GetByCategory(string category)
         {
@@ -51,12 +42,10 @@ namespace ClupApi.Controllers
             return Ok(ApiResponse<IEnumerable<AcademicEvents>>.SuccessResponse(events));
         }
 
-        /// <summary>
-        /// Gelecek akademik etkinlikleri getirir
-        /// </summary>
         [HttpGet("upcoming")]
         public async Task<IActionResult> GetUpcoming()
         {
+            // Bugünden sonraki etkinlikleri getir
             var today = DateTime.Today;
             var events = await _context.AcademicEvents
                 .Where(e => e.StartDate >= today)

@@ -1,24 +1,18 @@
-﻿/* Renk Değişkenleri */
-:root {
-    --primary-color: #4f46e5;
-    --activity-color: #4CAF50;
-    --announcement-color: #FF9800;
-    --academic-color: red;
-    --today-color: #3b82f6;
-    --border-color: #e5e7eb;
-    --text-primary: #1f2937;
-    --text-secondary: #6b7280;
-    --bg-hover: #f3f4f6;
-    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+﻿
+.calendar-container-container {
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--bg-page);
 }
-
 /* Container */
 .calendar-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg-page);
+    transition: var(--theme-transition);
 }
 
 /* Header */
@@ -32,12 +26,14 @@
     font-weight: 700;
     color: var(--text-primary);
     margin: 0 0 0.5rem 0;
+    transition: var(--theme-transition);
 }
 
 .calendar-subtitle {
     font-size: 1.125rem;
     color: var(--text-secondary);
     margin: 0;
+    transition: var(--theme-transition);
 }
 
 /* Ay Navigasyonu */
@@ -47,9 +43,10 @@
     justify-content: space-between;
     margin-bottom: 2rem;
     padding: 1rem;
-    background: white;
+    background: var(--card-bg);
     border-radius: 12px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-sm);
+    transition: var(--theme-transition);
 }
 
 .current-month {
@@ -60,6 +57,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    transition: var(--theme-transition);
 }
 
 .loading-spinner {
@@ -68,12 +66,8 @@
 }
 
 @keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 .nav-btn {
@@ -82,19 +76,12 @@
     justify-content: center;
     width: 40px;
     height: 40px;
-    border: 2px solid #9ca3af;
-    background: #ffffff;
+    border: 2px solid var(--border-dark);
+    background: var(--card-bg);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
-    color: #374151;
-    position: relative;
-    z-index: 10;
-}
-
-.nav-btn svg {
-    position: relative;
-    z-index: 11;
+    color: var(--text-primary);
 }
 
 .nav-btn:hover {
@@ -104,15 +91,7 @@
     transform: scale(1.05);
 }
 
-.nav-btn:hover svg path {
-    stroke: #ffffff;
-}
-
-.nav-btn:active {
-    transform: scale(0.95);
-}
-
-/* Legend (Renk Açıklaması) */
+/* Legend */
 .legend {
     display: flex;
     gap: 2.5rem;
@@ -120,8 +99,9 @@
     margin-bottom: 2rem;
     flex-wrap: wrap;
     padding: 1rem;
-    background: #f9fafb;
+    background: var(--calendar-legend-bg);
     border-radius: 8px;
+    transition: var(--theme-transition);
 }
 
 .legend-item {
@@ -136,35 +116,27 @@
     border-radius: 50%;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
-    display: inline-block;
 }
 
-.legend-dot.activity {
-    background-color: #4CAF50 !important;
-}
-
-.legend-dot.announcement {
-    background-color: #FF9800 !important;
-}
-
-.legend-dot.academic {
-    background-color: red !important;
-}
-    background-color: red !important;
-}
+.legend-dot.activity { background-color: #4CAF50 !important; }
+.legend-dot.announcement { background-color: #FF9800 !important; }
+.legend-dot.academic { background-color: red !important; }
 
 .legend-text {
     font-size: 0.95rem;
     color: var(--text-primary);
     font-weight: 600;
+    transition: var(--theme-transition);
 }
 
 /* Takvim Wrapper */
 .calendar-wrapper {
-    background: white;
+    background: var(--card-bg);
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: var(--shadow-lg);
+    animation: fadeIn 0.3s ease-out;
+    transition: var(--theme-transition);
 }
 
 /* Gün İsimleri */
@@ -183,6 +155,7 @@
     padding: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    transition: var(--theme-transition);
 }
 
 /* Takvim Grid */
@@ -194,27 +167,25 @@
 
 /* Gün Hücresi */
 .day {
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--border-dark);
     border-radius: 8px;
     padding: 0.5rem;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: flex-start;
     cursor: pointer;
     transition: all 0.2s ease;
-    background: white;
-    position: relative;
+    background: var(--calendar-day-bg);
     min-height: 100px;
     max-height: 120px;
     overflow: hidden;
 }
 
 .day:hover {
-    background: var(--bg-hover);
-    border-color: var(--primary-color);
+    background: var(--hover-bg);
+    border-color: #4f46e5;
     transform: translateY(-2px);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-sm);
 }
 
 .day-number {
@@ -222,25 +193,18 @@
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 0.25rem;
-    align-self: flex-start;
+    transition: var(--theme-transition);
 }
 
 /* Bugün */
 .day.today {
-    background: #f0f9ff;
+    background: var(--calendar-today-bg);
     border: 3px solid #3b82f6;
-    border-color: #3b82f6;
 }
 
 .day.today .day-number {
     color: #1e40af;
     font-weight: 700;
-}
-
-.day.today:hover {
-    background: #dbeafe;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
 }
 
 /* Diğer Ay Günleri */
@@ -250,7 +214,7 @@
 }
 
 .day.other-month:hover {
-    background: white;
+    background: var(--calendar-day-bg);
     border-color: var(--border-color);
     transform: none;
     box-shadow: none;
@@ -277,11 +241,6 @@
     cursor: pointer;
 }
 
-.event-item:hover {
-    transform: translateX(2px);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
 .event-item .event-dot {
     width: 8px;
     height: 8px;
@@ -296,42 +255,15 @@
     white-space: nowrap;
     font-size: 0.7rem;
     font-weight: 500;
-    color: #374151;
+    color: var(--text-primary);
 }
 
-.event-item.activity {
-    background: rgba(76, 175, 80, 0.1);
-    border-left: 2px solid #4CAF50;
-}
-
-.event-item.activity .event-dot {
-    background-color: #4CAF50;
-}
-
-.event-item.announcement {
-    background: rgba(255, 152, 0, 0.1);
-    border-left: 2px solid #FF9800;
-}
-
-.event-item.announcement .event-dot {
-    background-color: #FF9800;
-}
-
-.event-item.academic {
-    background: rgba(255, 0, 0, 0.1);
-    border-left: 2px solid red;
-}
-
-.event-item.academic .event-dot {
-    background-color: red;
-}
-    background: rgba(255, 152, 0, 0.1);
-    border-left: 2px solid red;
-}
-
-.event-item.academic .event-dot {
-    background-color: red;
-}
+.event-item.activity { background: rgba(76, 175, 80, 0.1); border-left: 2px solid #4CAF50; }
+.event-item.activity .event-dot { background-color: #4CAF50; }
+.event-item.announcement { background: rgba(255, 152, 0, 0.1); border-left: 2px solid #FF9800; }
+.event-item.announcement .event-dot { background-color: #FF9800; }
+.event-item.academic { background: rgba(255, 0, 0, 0.1); border-left: 2px solid red; }
+.event-item.academic .event-dot { background-color: red; }
 
 .more-events {
     font-size: 0.65rem;
@@ -340,133 +272,6 @@
     text-align: center;
     padding: 2px;
     cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.more-events:hover {
-    color: #1e40af;
-    text-decoration: underline;
-}
-
-/* Responsive Tasarım */
-@media (max-width: 1024px) {
-    .calendar-container {
-        padding: 1.5rem;
-    }
-
-    .calendar-title {
-        font-size: 2rem;
-    }
-
-    .day {
-        min-height: 70px;
-    }
-}
-
-@media (max-width: 768px) {
-    .calendar-container {
-        padding: 1rem;
-    }
-
-    .calendar-title {
-        font-size: 1.75rem;
-    }
-
-    .calendar-subtitle {
-        font-size: 1rem;
-    }
-
-    .current-month {
-        font-size: 1.25rem;
-    }
-
-    .weekday {
-        font-size: 0.75rem;
-        padding: 0.5rem;
-    }
-
-    .day {
-        min-height: 80px;
-        max-height: 100px;
-        padding: 0.25rem;
-    }
-
-    .day-number {
-        font-size: 0.875rem;
-    }
-
-    .event-item .event-title {
-        font-size: 0.6rem;
-    }
-
-    .event-list {
-        font-size: 0.6rem;
-    }
-
-    .legend {
-        gap: 1rem;
-    }
-
-    .legend-text {
-        font-size: 0.75rem;
-    }
-
-    .calendar-wrapper {
-        padding: 1rem;
-    }
-
-    .calendar-grid {
-        gap: 0.25rem;
-    }
-
-    .modal-content {
-        max-height: 90vh;
-    }
-
-    .modal-title {
-        font-size: 1.25rem;
-    }
-
-    .modal-header {
-        padding: 1rem;
-    }
-
-    .modal-body {
-        padding: 1rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .calendar-title {
-        font-size: 1.5rem;
-    }
-
-    .day {
-        min-height: 70px;
-        max-height: 90px;
-    }
-
-    .day-number {
-        font-size: 0.75rem;
-    }
-
-    .event-item .event-title {
-        font-size: 0.55rem;
-    }
-
-    .event-item .event-dot {
-        width: 6px;
-        height: 6px;
-    }
-
-    .legend-dot {
-        width: 10px;
-        height: 10px;
-    }
-
-    .more-events {
-        font-size: 0.6rem;
-    }
 }
 
 /* Modal */
@@ -476,7 +281,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--modal-overlay);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -486,7 +291,7 @@
 }
 
 .modal-content {
-    background: white;
+    background: var(--modal-bg);
     border-radius: 16px;
     max-width: 600px;
     width: 100%;
@@ -494,8 +299,9 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--modal-shadow);
     animation: slideUp 0.3s ease-out;
+    transition: var(--theme-transition);
 }
 
 .modal-header {
@@ -503,7 +309,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 1.5rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .modal-title {
@@ -511,25 +317,26 @@
     font-weight: 700;
     color: var(--text-primary);
     margin: 0;
+    transition: var(--theme-transition);
 }
 
 .modal-close {
     width: 40px;
     height: 40px;
     border: none;
-    background: #f3f4f6;
+    background: var(--hover-bg);
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    color: #6b7280;
+    color: var(--text-secondary);
 }
 
 .modal-close:hover {
-    background: #e5e7eb;
-    color: #374151;
+    background: var(--btn-secondary-hover);
+    color: var(--text-primary);
 }
 
 .modal-body {
@@ -549,10 +356,6 @@
     margin-bottom: 2rem;
 }
 
-.modal-category:last-child {
-    margin-bottom: 0;
-}
-
 .category-title {
     display: flex;
     align-items: center;
@@ -568,29 +371,12 @@
     border-radius: 50%;
 }
 
-.category-title.activity {
-    color: #4CAF50;
-}
-
-.category-title.activity .category-dot {
-    background-color: #4CAF50;
-}
-
-.category-title.announcement {
-    color: #FF9800;
-}
-
-.category-title.announcement .category-dot {
-    background-color: #FF9800;
-}
-
-.category-title.academic {
-    color: red;
-}
-
-.category-title.academic .category-dot {
-    background-color: red;
-}
+.category-title.activity { color: #4CAF50; }
+.category-title.activity .category-dot { background-color: #4CAF50; }
+.category-title.announcement { color: #FF9800; }
+.category-title.announcement .category-dot { background-color: #FF9800; }
+.category-title.academic { color: red; }
+.category-title.academic .category-dot { background-color: red; }
 
 .modal-event {
     padding: 1rem;
@@ -599,30 +385,16 @@
     border-left: 3px solid;
 }
 
-.modal-event:last-child {
-    margin-bottom: 0;
-}
-
-.modal-event.activity {
-    background: rgba(76, 175, 80, 0.05);
-    border-color: #4CAF50;
-}
-
-.modal-event.announcement {
-    background: rgba(255, 152, 0, 0.05);
-    border-color: #FF9800;
-}
-
-.modal-event.academic {
-    background: rgba(255, 0, 0, 0.05);
-    border-color: red;
-}
+.modal-event.activity { background: rgba(76, 175, 80, 0.05); border-color: #4CAF50; }
+.modal-event.announcement { background: rgba(255, 152, 0, 0.05); border-color: #FF9800; }
+.modal-event.academic { background: rgba(255, 0, 0, 0.05); border-color: red; }
 
 .event-name {
     font-size: 1rem;
     font-weight: 600;
     color: var(--text-primary);
     margin: 0 0 0.5rem 0;
+    transition: var(--theme-transition);
 }
 
 .event-description {
@@ -630,6 +402,7 @@
     color: var(--text-secondary);
     margin: 0 0 0.75rem 0;
     line-height: 1.5;
+    transition: var(--theme-transition);
 }
 
 .event-meta {
@@ -643,52 +416,33 @@
     align-items: center;
     gap: 0.375rem;
     font-size: 0.875rem;
-    color: #6b7280;
-}
-
-.meta-item svg {
-    flex-shrink: 0;
+    color: var(--text-secondary);
 }
 
 /* Animasyonlar */
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.calendar-wrapper {
-    animation: fadeIn 0.3s ease-out;
+/* Responsive */
+@media (max-width: 768px) {
+    .calendar-container { padding: 1rem; }
+    .calendar-title { font-size: 1.75rem; }
+    .day { min-height: 80px; max-height: 100px; padding: 0.25rem; }
+    .day-number { font-size: 0.875rem; }
+    .legend { gap: 1rem; }
+    .calendar-wrapper { padding: 1rem; }
+    .calendar-grid { gap: 0.25rem; }
 }
 
-/* Print Stilleri */
-@media print {
-    .calendar-container {
-        max-width: 100%;
-    }
-
-    .nav-btn {
-        display: none;
-    }
-
-    .day:hover {
-        transform: none;
-        box-shadow: none;
-    }
+@media (max-width: 480px) {
+    .calendar-title { font-size: 1.5rem; }
+    .day { min-height: 70px; max-height: 90px; }
+    .day-number { font-size: 0.75rem; }
 }

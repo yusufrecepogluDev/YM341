@@ -15,24 +15,16 @@ namespace ClupApi.Controllers
             _calendarRepository = calendarRepository;
         }
 
-        /// <summary>
-        /// Belirli bir tarih aralığındaki tüm etkinlikleri getirir
-        /// </summary>
-        /// <param name="startDate">Başlangıç tarihi</param>
-        /// <param name="endDate">Bitiş tarihi</param>
-        /// <returns>Etkinlik listesi</returns>
         [HttpGet("events")]
         public async Task<IActionResult> GetEvents(
             [FromQuery] DateTime startDate,
             [FromQuery] DateTime endDate)
         {
-            // Validasyon: startDate < endDate
             if (startDate > endDate)
             {
                 return HandleBadRequest("Başlangıç tarihi bitiş tarihinden sonra olamaz");
             }
 
-            // Validasyon: Maksimum 3 aylık aralık (performans için)
             var maxRange = startDate.AddMonths(3);
             if (endDate > maxRange)
             {
@@ -43,11 +35,6 @@ namespace ClupApi.Controllers
             return HandleResult(events);
         }
 
-        /// <summary>
-        /// Belirli bir günün tüm etkinliklerini getirir
-        /// </summary>
-        /// <param name="date">Tarih</param>
-        /// <returns>Günlük etkinlik listesi</returns>
         [HttpGet("events/daily")]
         public async Task<IActionResult> GetDailyEvents(
             [FromQuery] DateTime date)
@@ -56,10 +43,6 @@ namespace ClupApi.Controllers
             return HandleResult(events);
         }
 
-        /// <summary>
-        /// Tüm etkinlik kategorilerini getirir
-        /// </summary>
-        /// <returns>Kategori listesi</returns>
         [HttpGet("categories")]
         public async Task<IActionResult> GetCategories()
         {

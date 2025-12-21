@@ -1,33 +1,84 @@
 ﻿@page "/kulupler"
+@using KampusEtkinlik.Services
+@using KampusEtkinlik.Data.DTOs
+@using KampusEtkinlik.Data.Models
+@inject ClubService ClubService
+@inject ClubMembershipService MembershipService
+@inject MembershipCacheService CacheService
+@inject ActivityService ActivityService
+@inject AnnouncementService AnnouncementService
+@inject AuthenticationService AuthService
 
-<div class="clubs-container">
-    <div class="clubs-header">
-        <h1 class="clubs-title">Kulüpler</h1>
-        <p class="clubs-subtitle">Kampüsteki tüm kulüpleri keşfedin ve ilginizi çeken kulüplere katılın</p>
-    </div>
 
-    <div class="clubs-grid">
-        @foreach (var club in clubs)
-        {
-            <div class="club-card" @onclick="() => ShowClubDetails(club)">
-                <div class="club-image">
-                    <img src="/Images/Dogus_universitesi_yeni_logo.png" alt="@club.Name" class="club-logo" />
+<div class="clubs-container-container">
+    <div class="clubs-container">
+        <div class="clubs-header">
+            <h1 class="clubs-title">Kulüpler</h1>
+            <p class="clubs-subtitle">Kampüsteki tüm kulüpleri keşfedin ve ilginizi çeken kulüplere katılın</p>
+        </div>
+
+        <div class="clubs-grid">
+            @if (isLoading)
+            {
+                <div class="loading-message">
+                    <p>Kulüpler yükleniyor...</p>
                 </div>
-                <div class="club-content">
-                    <h3 class="club-title">@club.Name</h3>
-                    <p class="club-description">@club.Description</p>
+            }
+            else if (!clubs.Any())
+            {
+                <div class="no-clubs-message">
+                    <p>Henüz kayıtlı kulüp bulunmuyor.</p>
                 </div>
-                <div class="club-actions">
-                    <button class="join-btn @(club.IsMember ? "joined" : "")" 
-                            @onclick="() => ToggleMembership(club)"
-                            @onclick:stopPropagation="true">
-                        @(club.IsMember ? "Üye Olundu ✓" : "Üye Ol")
-                    </button>
-                </div>
-            </div>
-        }
+            }
+            else
+            {
+                @foreach (var club in clubs)
+                {
+                    <div class="club-card" @onclick="() => ShowClubDetails(club)">
+                        <div class="club-image">
+                            <img src="/Images/Dogus_universitesi_yeni_logo.png" alt="@club.ClubName" class="club-logo" />
+                        </div>
+                        <div class="club-content">
+                            <h3 class="club-title">@club.ClubName</h3>
+                            <p class="club-description">@club.Description</p>
+                            <div class="club-stats">
+                                <span class="member-count">@club.MemberCount üye</span>
+                            </div>
+                        </div>
+                        <div class="club-actions">
+                            <button class="join-btn @GetMembershipButtonClass(club.ClubID)"
+                                    @onclick="() => ToggleMembership(club)"
+                                    @onclick:stopPropagation="true"
+                                    disabled="@(isProcessingMembership || userType == "club")">
+                                @GetMembershipButtonText(club.ClubID)
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
     </div>
 </div>
+
+<!-- Üyelikten Ayrılma Onay Modal -->
+@if (showLeaveConfirmation && clubToLeave != null)
+{
+    <div class="modal-overlay" @onclick="CancelLeave">
+        <div class="confirmation-modal" @onclick:stopPropagation="true">
+            <div class="confirmation-icon">⚠️</div>
+            <h3 class="confirmation-title">Üyelikten Ayrıl</h3>
+            <p class="confirmation-message">
+                <strong>@clubToLeave.ClubName</strong> kulübünden ayrılmak istediğinize emin misiniz?
+            </p>
+            <div class="confirmation-actions">
+                <button class="confirm-btn cancel" @onclick="CancelLeave">İptal</button>
+                <button class="confirm-btn leave" @onclick="ConfirmLeave" disabled="@isProcessingMembership">
+                    @(isProcessingMembership ? "İşleniyor..." : "Evet, Ayrıl")
+                </button>
+            </div>
+        </div>
+    </div>
+}
 
 <!-- Detay Modal -->
 @if (selectedClub != null)
@@ -36,39 +87,39 @@
         <div class="modal-content" @onclick:stopPropagation="true">
             <button class="modal-close" @onclick="CloseModal">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                 </svg>
             </button>
-            
+
             <div class="modal-header">
                 <div class="modal-logo">
-                    <img src="/Images/Dogus_universitesi_yeni_logo.png" alt="@selectedClub.Name" />
+                    <img src="/Images/Dogus_universitesi_yeni_logo.png" alt="@selectedClub.ClubName" />
                 </div>
-                <h2 class="modal-title">@selectedClub.Name</h2>
+                <h2 class="modal-title">@selectedClub.ClubName</h2>
             </div>
-            
+
             <div class="modal-body">
                 <div class="modal-section">
                     <h3>Kulüp Hakkında</h3>
                     <p class="modal-description">@selectedClub.Description</p>
                 </div>
-                
+
                 <div class="modal-section">
                     <h3>Gelecek Etkinlikler</h3>
-                    @if (GetUpcomingActivities(selectedClub.Id).Any())
+                    @if (upcomingActivities.Any())
                     {
                         <div class="activities-list">
-                            @foreach (var activity in GetUpcomingActivities(selectedClub.Id))
+                            @foreach (var activity in upcomingActivities)
                             {
                                 <div class="activity-item">
                                     <div class="activity-date">
-                                        <span class="day">@activity.Date.Day</span>
-                                        <span class="month">@activity.Date.ToString("MMM", new System.Globalization.CultureInfo("tr-TR"))</span>
+                                        <span class="day">@activity.StartDate.Day</span>
+                                        <span class="month">@activity.StartDate.ToString("MMM", new System.Globalization.CultureInfo("tr-TR"))</span>
                                     </div>
                                     <div class="activity-info">
-                                        <h4 class="activity-title">@activity.Title</h4>
-                                        <p class="activity-description">@activity.Description</p>
-                                        <span class="activity-time">@activity.Date.ToString("HH:mm")</span>
+                                        <h4 class="activity-title">@activity.ActivityName</h4>
+                                        <p class="activity-description">@activity.ActivityDescription</p>
+                                        <span class="activity-time">@activity.StartDate.ToString("HH:mm")</span>
                                     </div>
                                 </div>
                             }
@@ -82,17 +133,17 @@
 
                 <div class="modal-section">
                     <h3>Son Duyurular</h3>
-                    @if (GetRecentAnnouncements(selectedClub.Id).Any())
+                    @if (recentAnnouncements.Any())
                     {
                         <div class="announcements-list">
-                            @foreach (var announcement in GetRecentAnnouncements(selectedClub.Id))
+                            @foreach (var announcement in recentAnnouncements)
                             {
                                 <div class="announcement-item">
                                     <div class="announcement-header">
-                                        <h4 class="announcement-title">@announcement.Title</h4>
-                                        <span class="announcement-date">@announcement.Date.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</span>
+                                        <h4 class="announcement-title">@announcement.AnnouncementTitle</h4>
+                                        <span class="announcement-date">@announcement.StartDate.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</span>
                                     </div>
-                                    <p class="announcement-content">@announcement.Content</p>
+                                    <p class="announcement-content">@announcement.AnnouncementContent</p>
                                 </div>
                             }
                         </div>
@@ -105,26 +156,19 @@
 
                 <div class="modal-section">
                     <h3>Üyelik Durumu</h3>
-                    <div class="membership-status @(selectedClub.IsMember ? "member" : "non-member")">
-                        @if (selectedClub.IsMember)
-                        {
-                            <span class="status-icon">✓</span>
-                            <span>Bu kulübün üyesisiniz</span>
-                        }
-                        else
-                        {
-                            <span class="status-icon">○</span>
-                            <span>Bu kulübün üyesi değilsiniz</span>
-                        }
+                    <div class="membership-status @GetMembershipStatusClass(selectedClub.ClubID)">
+                        <span class="status-icon">@GetMembershipStatusIcon(selectedClub.ClubID)</span>
+                        <span>@GetMembershipStatusText(selectedClub.ClubID)</span>
                     </div>
                 </div>
             </div>
-            
+
             <div class="modal-footer">
                 <button class="modal-btn secondary" @onclick="CloseModal">Kapat</button>
-                <button class="modal-btn primary @(selectedClub.IsMember ? "joined" : "")" 
-                        @onclick="() => ToggleMembership(selectedClub)">
-                    @(selectedClub.IsMember ? "Üyelikten Ayrıl" : "Üye Ol")
+                <button class="modal-btn primary @GetMembershipButtonClass(selectedClub.ClubID)"
+                        @onclick="() => ToggleMembershipFromModal(selectedClub)"
+                        disabled="@(isProcessingMembership || userType == "club")">
+                    @GetMembershipButtonText(selectedClub.ClubID)
                 </button>
             </div>
         </div>
@@ -132,144 +176,473 @@
 }
 
 @code {
-    private List<ClubViewModel> clubs = new();
-    private ClubViewModel? selectedClub = null;
+    // State variables
+    private List<KampusEtkinlik.Services.ClubResponseDto> clubs = new();
+    private KampusEtkinlik.Services.ClubResponseDto? selectedClub = null;
+    private List<Activity> upcomingActivities = new();
+    private List<Announcement> recentAnnouncements = new();
+    private Dictionary<int, KampusEtkinlik.Services.ClubMembershipStatus> membershipStatuses = new();
 
-    protected override void OnInitialized()
+    // Loading states
+    private bool isLoading = true;
+    private bool isProcessingMembership = false;
+
+    // Leave confirmation state
+    private bool showLeaveConfirmation = false;
+    private KampusEtkinlik.Services.ClubResponseDto? clubToLeave = null;
+
+    // User info
+    private string userType;
+    private int currentStudentId = 0;
+    private bool isAuthenticated = false;
+
+    protected override async Task OnInitializedAsync()
     {
-        // Örnek kulüp verileri - ileride API'den gelecek
-        clubs = new List<ClubViewModel>
-        {
-            new ClubViewModel
-            {
-                Id = 1,
-                Name = "Bilgisayar Kulübü",
-                Description = "Yazılım geliştirme, programlama ve teknoloji üzerine çalışmalar yapan kulüp. Hackathon'lar, workshop'lar ve projeler düzenliyoruz. Modern teknolojileri öğrenmek, projeler geliştirmek ve sektör profesyonelleriyle buluşmak için ideal bir ortam sunuyoruz. Üyelerimiz için düzenli olarak coding bootcamp'ler, hackathon'lar ve teknoloji sohbetleri organize ediyoruz.",
-                ImageUrl = "",
-                IsMember = false
-            },
-            new ClubViewModel
-            {
-                Id = 2,
-                Name = "Fotoğrafçılık Kulübü",
-                Description = "Fotoğraf sanatını seven, öğrenmek ve geliştirmek isteyen öğrencilerin buluşma noktası. Sergiler ve fotoğraf gezileri düzenliyoruz. Analog ve dijital fotoğrafçılık teknikleri öğretiyoruz. Üyelerimizle birlikte İstanbul'un en güzel köşelerini keşfediyor, fotoğraf çekimleri yapıyoruz.",
-                ImageUrl = "",
-                IsMember = true
-            },
-            new ClubViewModel
-            {
-                Id = 3,
-                Name = "Müzik Kulübü",
-                Description = "Müzik severlerin bir araya geldiği kulüp. Konserler, müzik atölyeleri ve grup çalışmaları yapıyoruz. Farklı müzik türlerinde eğitimler veriyoruz ve üyelerimizin müzikal yeteneklerini geliştirmelerine yardımcı oluyoruz. Düzenli olarak konserler ve müzik etkinlikleri organize ediyoruz.",
-                ImageUrl = "",
-                IsMember = false
-            },
-            new ClubViewModel
-            {
-                Id = 4,
-                Name = "Spor Kulübü",
-                Description = "Çeşitli spor dallarında etkinlikler düzenleyen kulüp. Turnuvalar, antrenmanlar ve spor etkinlikleri organize ediyoruz. Basketbol, futbol, voleybol, tenis ve fitness gibi birçok spor dalında aktiviteler düzenliyoruz. Sağlıklı yaşam ve takım ruhu geliştirmeyi hedefliyoruz.",
-                ImageUrl = "",
-                IsMember = true
-            },
-            new ClubViewModel
-            {
-                Id = 5,
-                Name = "Edebiyat Kulübü",
-                Description = "Kitap severlerin buluştuğu kulüp. Kitap okuma grupları, yazar söyleşileri ve edebiyat etkinlikleri düzenliyoruz. Klasik ve çağdaş edebiyat eserlerini tartışıyor, yazma atölyeleri düzenliyoruz. Ünlü yazarlarla söyleşiler ve imza günleri organize ediyoruz.",
-                ImageUrl = "",
-                IsMember = false
-            },
-            new ClubViewModel
-            {
-                Id = 6,
-                Name = "Sanat Kulübü",
-                Description = "Resim, heykel ve diğer sanat dallarında çalışmalar yapan kulüp. Sergiler ve sanat atölyeleri düzenliyoruz. Çeşitli sanat tekniklerini öğretiyoruz ve üyelerimizin sanatsal yeteneklerini geliştirmelerine destek oluyoruz. Düzenli olarak sergi ve sanat etkinlikleri organize ediyoruz.",
-                ImageUrl = "",
-                IsMember = false
-            }
-        };
+        await LoadUserInfo();
+        await LoadClubs();
+        await LoadMembershipStatusesWithCache();
     }
 
-    private void ShowClubDetails(ClubViewModel club)
+    private async Task LoadUserInfo()
+    {
+        try
+        {
+            isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            if (isAuthenticated)
+            {
+                var userInfo = await AuthService.GetCurrentUserAsync();
+                userType = userInfo.UserType;
+                // API'de userType küçük harfle "student" olarak kaydediliyor
+                if (userInfo != null && userInfo.UserType.Equals("student", StringComparison.OrdinalIgnoreCase))
+                {
+                    currentStudentId = userInfo.UserId;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Kullanıcı bilgisi yüklenirken hata: {ex.Message}");
+        }
+    }
+
+    private async Task LoadClubs()
+    {
+        try
+        {
+            isLoading = true;
+            clubs = await ClubService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Kulüpler yüklenirken hata: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>
+    /// Cache-first loading: Önce sessionStorage'dan yükle, sonra API'den refresh et
+    /// Requirements: 1.1, 1.2, 1.3, 1.4
+    /// </summary>
+    private async Task LoadMembershipStatusesWithCache()
+    {
+        // Requirement 1.4: Unauthenticated kullanıcılar için sessionStorage işlemlerini atla
+        if (!isAuthenticated || currentStudentId == 0)
+        {
+            Console.WriteLine("Kullanıcı authenticated değil, cache işlemleri atlanıyor.");
+            return;
+        }
+
+        bool cacheLoadSuccessful = false;
+
+        try
+        {
+            // 1. Önce cache'den yükle (Requirements 1.1, 1.2)
+            var cachedStatuses = await CacheService.GetCachedStatusesAsync(currentStudentId);
+            if (cachedStatuses != null && cachedStatuses.Count > 0)
+            {
+                membershipStatuses = cachedStatuses;
+                cacheLoadSuccessful = true;
+                Console.WriteLine($"Cache'den {cachedStatuses.Count} üyelik durumu yüklendi.");
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Requirement 5.1: SessionStorage okuma hatası durumunda API-only mode'a geç
+            Console.WriteLine($"SessionStorage okuma hatası (API-only mode): {ex.Message}");
+            cacheLoadSuccessful = false;
+        }
+
+        // 2. Arka planda API'den fresh data çek (Requirement 1.3)
+        await RefreshMembershipStatusesFromApi(cacheLoadSuccessful);
+    }
+
+    /// <summary>
+    /// API'den üyelik durumlarını çeker ve cache'i günceller
+    /// Requirements: 5.2, 5.3
+    /// </summary>
+    private async Task RefreshMembershipStatusesFromApi(bool hasCachedData = false)
+    {
+        if (!isAuthenticated || currentStudentId == 0)
+            return;
+
+        try
+        {
+            // Tüm üyelikleri bir kerede çek
+            var allMemberships = await MembershipService.GetStudentMembershipsAsync(currentStudentId);
+            Console.WriteLine($"API'den {allMemberships.Count} üyelik bulundu. StudentID: {currentStudentId}");
+
+            var newStatuses = new Dictionary<int, ClubMembershipStatus>();
+
+            // Her kulüp için üyelik durumunu belirle
+            foreach (var club in clubs)
+            {
+                var membership = allMemberships.FirstOrDefault(m => m.ClubID == club.ClubID);
+                if (membership == null)
+                {
+                    newStatuses[club.ClubID] = ClubMembershipStatus.NotMember;
+                }
+                else
+                {
+                    newStatuses[club.ClubID] = membership.IsApproved switch
+                    {
+                        null => ClubMembershipStatus.Pending,
+                        true => ClubMembershipStatus.Approved,
+                        false => ClubMembershipStatus.Rejected
+                    };
+                    Console.WriteLine($"Kulüp {club.ClubName}: {newStatuses[club.ClubID]}");
+                }
+            }
+
+            // Cache'i güncelle (hata olursa sessizce devam et)
+            try
+            {
+                await CacheService.SetCachedStatusesAsync(currentStudentId, newStatuses);
+            }
+            catch (Exception cacheEx)
+            {
+                Console.WriteLine($"Cache yazma hatası (işleme devam ediliyor): {cacheEx.Message}");
+            }
+
+            // UI'ı güncelle
+            membershipStatuses = newStatuses;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            // Requirement 5.2: API hatası durumunda cache'den göster
+            Console.WriteLine($"API hatası: {ex.Message}");
+
+            if (hasCachedData)
+            {
+                Console.WriteLine("API hatası - cache'den gösteriliyor.");
+                // membershipStatuses zaten cache'den yüklü, değiştirme
+            }
+            else
+            {
+                // Requirement 5.3: Her iki hata durumunda default status göster
+                Console.WriteLine("API ve cache hatası - default status gösteriliyor.");
+                membershipStatuses.Clear();
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task LoadMembershipStatuses()
+    {
+        if (!isAuthenticated || currentStudentId == 0)
+            return;
+
+        try
+        {
+            membershipStatuses.Clear();
+
+            // Tüm üyelikleri bir kerede çek
+            var allMemberships = await MembershipService.GetStudentMembershipsAsync(currentStudentId);
+            Console.WriteLine($"Toplam {allMemberships.Count} üyelik bulundu. StudentID: {currentStudentId}");
+
+            // Her kulüp için üyelik durumunu belirle
+            foreach (var club in clubs)
+            {
+                var membership = allMemberships.FirstOrDefault(m => m.ClubID == club.ClubID);
+                if (membership == null)
+                {
+                    membershipStatuses[club.ClubID] = KampusEtkinlik.Services.ClubMembershipStatus.NotMember;
+                }
+                else
+                {
+                    membershipStatuses[club.ClubID] = membership.IsApproved switch
+                    {
+                        null => KampusEtkinlik.Services.ClubMembershipStatus.Pending,
+                        true => KampusEtkinlik.Services.ClubMembershipStatus.Approved,
+                        false => KampusEtkinlik.Services.ClubMembershipStatus.Rejected
+                    };
+                    Console.WriteLine($"Kulüp {club.ClubName}: {membershipStatuses[club.ClubID]}");
+                }
+            }
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Üyelik durumları yüklenirken hata: {ex.Message}");
+        }
+    }
+
+    private async Task ShowClubDetails(KampusEtkinlik.Services.ClubResponseDto club)
     {
         selectedClub = club;
+        await LoadClubDetails(club.ClubID);
+    }
+
+    private async Task LoadClubDetails(int clubId)
+    {
+        try
+        {
+            // Etkinlikleri yükle
+            var allActivities = await ActivityService.GetAllAsync();
+            upcomingActivities = allActivities
+                .Where(a => a.OrganizingClubID == clubId && a.StartDate > DateTime.Now && a.IsActive)
+                .OrderBy(a => a.StartDate)
+                .Take(3)
+                .ToList();
+
+            // Duyuruları yükle
+            var allAnnouncements = await AnnouncementService.GetAllAsync();
+            recentAnnouncements = allAnnouncements
+                .Where(a => a.ClubID == clubId && a.IsActive)
+                .OrderByDescending(a => a.StartDate)
+                .Take(3)
+                .ToList();
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Kulüp detayları yüklenirken hata: {ex.Message}");
+        }
     }
 
     private void CloseModal()
     {
         selectedClub = null;
+        upcomingActivities.Clear();
+        recentAnnouncements.Clear();
     }
 
-    private void ToggleMembership(ClubViewModel club)
+    private async Task ToggleMembership(KampusEtkinlik.Services.ClubResponseDto club)
     {
-        club.IsMember = !club.IsMember;
-        StateHasChanged();
-    }
-
-    private List<ActivityViewModel> GetUpcomingActivities(int clubId)
-    {
-        // Örnek etkinlik verileri - ileride API'den gelecek
-        var allActivities = new List<ActivityViewModel>
+        if (!isAuthenticated)
         {
-            new ActivityViewModel { ClubId = 1, Title = "Hackathon 2025", Description = "48 saatlik yazılım geliştirme yarışması", Date = DateTime.Now.AddDays(5) },
-            new ActivityViewModel { ClubId = 1, Title = "Python Workshop", Description = "Başlangıç seviyesi Python eğitimi", Date = DateTime.Now.AddDays(12) },
-            new ActivityViewModel { ClubId = 2, Title = "Fotoğraf Sergisi", Description = "Üyelerimizin çektiği fotoğrafların sergilenmesi", Date = DateTime.Now.AddDays(8) },
-            new ActivityViewModel { ClubId = 2, Title = "Boğaz Turu", Description = "Fotoğraf çekimi için Boğaz gezisi", Date = DateTime.Now.AddDays(15) },
-            new ActivityViewModel { ClubId = 3, Title = "Akustik Konser", Description = "Öğrenci performansları", Date = DateTime.Now.AddDays(3) },
-            new ActivityViewModel { ClubId = 4, Title = "Basketbol Turnuvası", Description = "Fakülteler arası basketbol müsabakası", Date = DateTime.Now.AddDays(7) },
-            new ActivityViewModel { ClubId = 5, Title = "Kitap Kulübü Buluşması", Description = "Bu ayın kitabı: 1984", Date = DateTime.Now.AddDays(10) },
-            new ActivityViewModel { ClubId = 6, Title = "Resim Atölyesi", Description = "Yağlı boya teknikleri", Date = DateTime.Now.AddDays(6) }
-        };
 
-        return allActivities.Where(a => a.ClubId == clubId && a.Date > DateTime.Now)
-                           .OrderBy(a => a.Date)
-                           .Take(3)
-                           .ToList();
+            Console.WriteLine("Üyelik işlemi için giriş yapmanız gerekiyor.");
+            return;
+        }
+
+        await ProcessMembershipToggle(club.ClubID);
     }
 
-    private List<AnnouncementViewModel> GetRecentAnnouncements(int clubId)
+    private async Task ToggleMembershipFromModal(KampusEtkinlik.Services.ClubResponseDto club)
     {
-        // Örnek duyuru verileri - ileride API'den gelecek
-        var allAnnouncements = new List<AnnouncementViewModel>
+        if (!isAuthenticated)
         {
-            new AnnouncementViewModel { ClubId = 1, Title = "Yeni Üye Alımları", Content = "Bilgisayar Kulübü'ne yeni üye alımları başladı. Başvurular 31 Aralık'a kadar.", Date = DateTime.Now.AddDays(-2) },
-            new AnnouncementViewModel { ClubId = 1, Title = "Toplantı Saati Değişikliği", Content = "Haftalık toplantılarımız artık Çarşamba 14:00'da yapılacaktır.", Date = DateTime.Now.AddDays(-5) },
-            new AnnouncementViewModel { ClubId = 2, Title = "Ekipman Kiralama", Content = "Kulüp üyeleri için profesyonel fotoğraf makinesi kiralama hizmeti başladı.", Date = DateTime.Now.AddDays(-1) },
-            new AnnouncementViewModel { ClubId = 3, Title = "Müzik Odası Rezervasyonu", Content = "Müzik odası rezervasyonları için yeni sistem devreye girdi.", Date = DateTime.Now.AddDays(-3) },
-            new AnnouncementViewModel { ClubId = 4, Title = "Spor Salonu Saatleri", Content = "Spor salonu kullanım saatleri güncellendi. Hafta içi 08:00-22:00 arası.", Date = DateTime.Now.AddDays(-4) },
-            new AnnouncementViewModel { ClubId = 5, Title = "Yazar Söyleşisi", Content = "Ünlü yazar Ahmet Ümit ile söyleşi 25 Aralık'ta gerçekleşecek.", Date = DateTime.Now.AddDays(-1) },
-            new AnnouncementViewModel { ClubId = 6, Title = "Malzeme Desteği", Content = "Sanat malzemeleri için kulüp bütçesinden destek sağlanacak.", Date = DateTime.Now.AddDays(-6) }
+            Console.WriteLine("Üyelik işlemi için giriş yapmanız gerekiyor.");
+            return;
+        }
+
+        await ProcessMembershipToggle(club.ClubID);
+    }
+
+    private async Task ProcessMembershipToggle(int clubId)
+    {
+        if (isProcessingMembership)
+            return;
+
+        try
+        {
+            isProcessingMembership = true;
+            StateHasChanged();
+
+            var currentStatus = membershipStatuses.GetValueOrDefault(clubId, KampusEtkinlik.Services.ClubMembershipStatus.NotMember);
+
+            switch (currentStatus)
+            {
+                case KampusEtkinlik.Services.ClubMembershipStatus.NotMember:
+                    // Üyelik başvurusu yap
+                    var (success, message) = await MembershipService.ApplyToClubAsync(clubId);
+                    if (success)
+                    {
+                        membershipStatuses[clubId] = KampusEtkinlik.Services.ClubMembershipStatus.Pending;
+                        // Cache'i güncelle (Requirement 2.1)
+                        await CacheService.UpdateSingleStatusAsync(currentStudentId, clubId, ClubMembershipStatus.Pending);
+                        Console.WriteLine("Başvuru başarıyla gönderildi!");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Başvuru hatası: {message}");
+                    }
+                    break;
+
+                case KampusEtkinlik.Services.ClubMembershipStatus.Approved:
+                    // Onay popup'ını göster
+                    isProcessingMembership = false;
+                    clubToLeave = clubs.FirstOrDefault(c => c.ClubID == clubId);
+                    showLeaveConfirmation = true;
+                    StateHasChanged();
+                    return;
+
+                case KampusEtkinlik.Services.ClubMembershipStatus.Pending:
+                    Console.WriteLine("Başvurunuz zaten beklemede.");
+                    break;
+
+                case KampusEtkinlik.Services.ClubMembershipStatus.Rejected:
+                    // Reddedilen başvuru için tekrar başvuru yap
+                    var (reapplySuccess, reapplyMessage) = await MembershipService.ApplyToClubAsync(clubId);
+                    if (reapplySuccess)
+                    {
+                        membershipStatuses[clubId] = KampusEtkinlik.Services.ClubMembershipStatus.Pending;
+                        await CacheService.UpdateSingleStatusAsync(currentStudentId, clubId, ClubMembershipStatus.Pending);
+                        Console.WriteLine("Tekrar başvuru başarıyla gönderildi!");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Tekrar başvuru hatası: {reapplyMessage}");
+                    }
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Üyelik işlemi hatası: {ex.Message}");
+        }
+        finally
+        {
+            isProcessingMembership = false;
+            StateHasChanged();
+        }
+    }
+
+    // Helper methods for UI
+    private string GetMembershipButtonClass(int clubId)
+    {
+        // Kulüp giriş yaptıysa disabled class ekle
+        if (userType == "club")
+        {
+            return "club-account";
+        }
+
+        var status = membershipStatuses.GetValueOrDefault(clubId, KampusEtkinlik.Services.ClubMembershipStatus.NotMember);
+        return status switch
+        {
+            KampusEtkinlik.Services.ClubMembershipStatus.Approved => "joined",
+            KampusEtkinlik.Services.ClubMembershipStatus.Pending => "pending",
+            KampusEtkinlik.Services.ClubMembershipStatus.Rejected => "rejected",
+            _ => ""
         };
-
-        return allAnnouncements.Where(a => a.ClubId == clubId)
-                              .OrderByDescending(a => a.Date)
-                              .Take(3)
-                              .ToList();
     }
 
-    private class ClubViewModel
+    private string GetMembershipButtonText(int clubId)
     {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string ImageUrl { get; set; } = string.Empty;
-        public bool IsMember { get; set; } = false;
+        // Kulüp giriş yaptıysa farklı metin göster
+        if (userType == "club")
+        {
+            return "Kulüp Hesabı";
+        }
+
+        var status = membershipStatuses.GetValueOrDefault(clubId, KampusEtkinlik.Services.ClubMembershipStatus.NotMember);
+        return status switch
+        {
+            KampusEtkinlik.Services.ClubMembershipStatus.Approved => "Üye ✓",
+            KampusEtkinlik.Services.ClubMembershipStatus.Pending => "Beklemede...",
+            KampusEtkinlik.Services.ClubMembershipStatus.Rejected => "Tekrar Başvur",
+            _ => "Üye Ol"
+        };
     }
 
-    private class ActivityViewModel
+    private string GetMembershipStatusClass(int clubId)
     {
-        public int ClubId { get; set; }
-        public string Title { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public DateTime Date { get; set; }
+        var status = membershipStatuses.GetValueOrDefault(clubId, KampusEtkinlik.Services.ClubMembershipStatus.NotMember);
+        return status switch
+        {
+            KampusEtkinlik.Services.ClubMembershipStatus.Approved => "member",
+            KampusEtkinlik.Services.ClubMembershipStatus.Pending => "pending",
+            KampusEtkinlik.Services.ClubMembershipStatus.Rejected => "rejected",
+            _ => "non-member"
+        };
     }
 
-    private class AnnouncementViewModel
+    private string GetMembershipStatusIcon(int clubId)
     {
-        public int ClubId { get; set; }
-        public string Title { get; set; } = string.Empty;
-        public string Content { get; set; } = string.Empty;
-        public DateTime Date { get; set; }
+        var status = membershipStatuses.GetValueOrDefault(clubId, KampusEtkinlik.Services.ClubMembershipStatus.NotMember);
+        return status switch
+        {
+            KampusEtkinlik.Services.ClubMembershipStatus.Approved => "✓",
+            KampusEtkinlik.Services.ClubMembershipStatus.Pending => "⏳",
+            KampusEtkinlik.Services.ClubMembershipStatus.Rejected => "✗",
+            _ => "○"
+        };
+    }
+
+    private string GetMembershipStatusText(int clubId)
+    {
+        var status = membershipStatuses.GetValueOrDefault(clubId, KampusEtkinlik.Services.ClubMembershipStatus.NotMember);
+        return status switch
+        {
+            KampusEtkinlik.Services.ClubMembershipStatus.Approved => "Bu kulübün üyesisiniz",
+            KampusEtkinlik.Services.ClubMembershipStatus.Pending => "Başvurunuz değerlendiriliyor",
+            KampusEtkinlik.Services.ClubMembershipStatus.Rejected => "Başvurunuz reddedildi - Tekrar başvurabilirsiniz",
+            _ => "Bu kulübün üyesi değilsiniz"
+        };
+    }
+
+    // Leave confirmation methods
+    private void CancelLeave()
+    {
+        showLeaveConfirmation = false;
+        clubToLeave = null;
+    }
+
+    private async Task ConfirmLeave()
+    {
+        if (clubToLeave == null || isProcessingMembership)
+            return;
+
+        try
+        {
+            isProcessingMembership = true;
+            StateHasChanged();
+
+            var memberships = await MembershipService.GetStudentMembershipsAsync(currentStudentId);
+            var membership = memberships.FirstOrDefault(m => m.ClubID == clubToLeave.ClubID && m.IsApproved == true);
+
+            if (membership != null)
+            {
+                var (leaveSuccess, leaveMessage) = await MembershipService.LeaveMembershipAsync(membership.MembershipID);
+                if (leaveSuccess)
+                {
+                    membershipStatuses[clubToLeave.ClubID] = KampusEtkinlik.Services.ClubMembershipStatus.NotMember;
+                    await CacheService.RemoveStatusAsync(currentStudentId, clubToLeave.ClubID);
+                    Console.WriteLine("Üyelikten başarıyla ayrıldınız.");
+                }
+                else
+                {
+                    Console.WriteLine($"Ayrılma hatası: {leaveMessage}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Üyelikten ayrılma hatası: {ex.Message}");
+        }
+        finally
+        {
+            isProcessingMembership = false;
+            showLeaveConfirmation = false;
+            clubToLeave = null;
+            StateHasChanged();
+        }
     }
 }

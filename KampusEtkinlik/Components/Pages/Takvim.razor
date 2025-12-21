@@ -3,103 +3,105 @@
 @using KampusEtkinlik.Data.Models
 @inject CalendarApiService CalendarService
 
-<div class="calendar-container">
-    <div class="calendar-header">
-        <h1 class="calendar-title">Etkinlik Takvimi</h1>
-        <p class="calendar-subtitle">Tüm kulüp etkinliklerini ve duyuruları görüntüleyin</p>
-    </div>
-
-    <!-- Ay Navigasyonu -->
-    <div class="month-navigation">
-        <button class="nav-btn prev-btn" @onclick="PreviousMonth" disabled="@isLoading">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
-        
-        <h2 class="current-month">
-            @currentDate.ToString("MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))
-            @if (isLoading)
-            {
-                <span class="loading-spinner">⏳</span>
-            }
-        </h2>
-        
-        <button class="nav-btn next-btn" @onclick="NextMonth" disabled="@isLoading">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
-    </div>
-
-    <!-- Renk Açıklaması -->
-    <div class="legend">
-        <div class="legend-item">
-            <span class="legend-dot activity"></span>
-            <span class="legend-text">Kulüp Etkinlikleri</span>
-        </div>
-        <div class="legend-item">
-            <span class="legend-dot announcement"></span>
-            <span class="legend-text">Duyurular</span>
-        </div>
-        <div class="legend-item">
-            <span class="legend-dot academic"></span>
-            <span class="legend-text">Akademik Olaylar</span>
-        </div>
-    </div>
-
-    <!-- Takvim Grid -->
-    <div class="calendar-wrapper">
-        <!-- Gün İsimleri -->
-        <div class="weekdays">
-            <div class="weekday">Pzt</div>
-            <div class="weekday">Sal</div>
-            <div class="weekday">Çar</div>
-            <div class="weekday">Per</div>
-            <div class="weekday">Cum</div>
-            <div class="weekday">Cmt</div>
-            <div class="weekday">Paz</div>
+<div class="calendar-container-container">
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <h1 class="calendar-title">Etkinlik Takvimi</h1>
+            <p class="calendar-subtitle">Tüm kulüp etkinliklerini ve duyuruları görüntüleyin</p>
         </div>
 
-        <!-- Takvim Günleri (Dinamik) -->
-        <div class="calendar-grid">
-            @foreach (var day in calendarDays)
-            {
-                <div class="day @(day.IsOtherMonth ? "other-month" : "") @(day.IsToday ? "today" : "")" 
-                     title="@($"{day.Date:dd/MM/yyyy} - {day.Events.Count} etkinlik")"
-                     @onclick="() => OpenDayModal(day)">
-                    <span class="day-number">@day.Day</span>
-                    @if (day.HasEvents)
-                    {
-                        <div class="event-list">
-                            @{
-                                var displayEvents = day.Events.Take(3).ToList();
-                                var remainingCount = day.Events.Count - displayEvents.Count;
-                            }
-                            @foreach (var evt in displayEvents)
-                            {
-                                var categoryClass = evt.Categories switch
+        <!-- Ay Navigasyonu -->
+        <div class="month-navigation">
+            <button class="nav-btn prev-btn" @onclick="PreviousMonth" disabled="@isLoading">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+
+            <h2 class="current-month">
+                @currentDate.ToString("MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))
+                @if (isLoading)
+                {
+                    <span class="loading-spinner">⏳</span>
+                }
+            </h2>
+
+            <button class="nav-btn next-btn" @onclick="NextMonth" disabled="@isLoading">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Renk Açıklaması -->
+        <div class="legend">
+            <div class="legend-item">
+                <span class="legend-dot activity"></span>
+                <span class="legend-text">Kulüp Etkinlikleri</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot announcement"></span>
+                <span class="legend-text">Duyurular</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot academic"></span>
+                <span class="legend-text">Akademik Olaylar</span>
+            </div>
+        </div>
+
+        <!-- Takvim Grid -->
+        <div class="calendar-wrapper">
+            <!-- Gün İsimleri -->
+            <div class="weekdays">
+                <div class="weekday">Pzt</div>
+                <div class="weekday">Sal</div>
+                <div class="weekday">Çar</div>
+                <div class="weekday">Per</div>
+                <div class="weekday">Cum</div>
+                <div class="weekday">Cmt</div>
+                <div class="weekday">Paz</div>
+            </div>
+
+            <!-- Takvim Günleri (Dinamik) -->
+            <div class="calendar-grid">
+                @foreach (var day in calendarDays)
+                {
+                    <div class="day @(day.IsOtherMonth ? "other-month" : "") @(day.IsToday ? "today" : "")"
+                         title="@($"{day.Date:dd/MM/yyyy} - {day.Events.Count} etkinlik")"
+                         @onclick="() => OpenDayModal(day)">
+                        <span class="day-number">@day.Day</span>
+                        @if (day.HasEvents)
+                        {
+                            <div class="event-list">
+                                @{
+                                    var displayEvents = day.Events.Take(3).ToList();
+                                    var remainingCount = day.Events.Count - displayEvents.Count;
+                                }
+                                @foreach (var evt in displayEvents)
                                 {
-                                    "KulupEtkinligi" => "activity",
-                                    "Duyuru" => "announcement",
-                                    "AkademikOlay" => "academic",
-                                    _ => "activity"
-                                };
-                                var shortTitle = evt.Title.Length > 15 ? evt.Title.Substring(0, 15) + "..." : evt.Title;
-                                
-                                <div class="event-item @categoryClass" title="@evt.Title">
-                                    <span class="event-dot"></span>
-                                    <span class="event-title">@shortTitle</span>
-                                </div>
-                            }
-                            @if (remainingCount > 0)
-                            {
-                                <div class="more-events">+@remainingCount daha</div>
-                            }
-                        </div>
-                    }
-                </div>
-            }
+                                    var categoryClass = evt.Categories switch
+                                    {
+                                        "KulupEtkinligi" => "activity",
+                                        "Duyuru" => "announcement",
+                                        "AkademikOlay" => "academic",
+                                        _ => "activity"
+                                    };
+                                    var shortTitle = evt.Title.Length > 15 ? evt.Title.Substring(0, 15) + "..." : evt.Title;
+
+                                    <div class="event-item @categoryClass" title="@evt.Title">
+                                        <span class="event-dot"></span>
+                                        <span class="event-title">@shortTitle</span>
+                                    </div>
+                                }
+                                @if (remainingCount > 0)
+                                {
+                                    <div class="more-events">+@remainingCount daha</div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
         </div>
     </div>
 </div>
@@ -115,11 +117,11 @@
                 </h2>
                 <button class="modal-close" @onclick="CloseModal">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                     </svg>
                 </button>
             </div>
-            
+
             <div class="modal-body">
                 @if (!selectedDay.HasEvents)
                 {
@@ -145,8 +147,8 @@
                                         {
                                             <span class="meta-item">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                                                 </svg>
                                                 @evt.StartDate.ToString("HH:mm")
                                             </span>
@@ -155,8 +157,8 @@
                                         {
                                             <span class="meta-item">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                                                 </svg>
                                                 Tüm gün
                                             </span>
@@ -165,8 +167,8 @@
                                         {
                                             <span class="meta-item">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 5.02944 7.02944 1 12 1C16.9706 1 21 5.02944 21 10Z" stroke="currentColor" stroke-width="2"/>
-                                                    <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                                                    <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 5.02944 7.02944 1 12 1C16.9706 1 21 5.02944 21 10Z" stroke="currentColor" stroke-width="2" />
+                                                    <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2" />
                                                 </svg>
                                                 @evt.Location
                                             </span>
@@ -195,8 +197,8 @@
                                         {
                                             <span class="meta-item">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                                                 </svg>
                                                 @evt.StartDate.ToString("HH:mm") - @evt.EndDate.ToString("HH:mm")
                                             </span>
@@ -205,8 +207,8 @@
                                         {
                                             <span class="meta-item">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                                                 </svg>
                                                 Tüm gün
                                             </span>
@@ -215,8 +217,8 @@
                                         {
                                             <span class="meta-item">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 5.02944 7.02944 1 12 1C16.9706 1 21 5.02944 21 10Z" stroke="currentColor" stroke-width="2"/>
-                                                    <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                                                    <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 5.02944 7.02944 1 12 1C16.9706 1 21 5.02944 21 10Z" stroke="currentColor" stroke-width="2" />
+                                                    <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2" />
                                                 </svg>
                                                 @evt.Location
                                             </span>
@@ -245,8 +247,8 @@
                                         {
                                             <span class="meta-item">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 5.02944 7.02944 1 12 1C16.9706 1 21 5.02944 21 10Z" stroke="currentColor" stroke-width="2"/>
-                                                    <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                                                    <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 5.02944 7.02944 1 12 1C16.9706 1 21 5.02944 21 10Z" stroke="currentColor" stroke-width="2" />
+                                                    <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2" />
                                                 </svg>
                                                 @evt.Location
                                             </span>
@@ -297,10 +299,10 @@
         {
             var firstDay = new DateTime(currentDate.Year, currentDate.Month, 1);
             var lastDay = firstDay.AddMonths(1).AddDays(-1);
-            
+
             monthEvents = await CalendarService.GetEventsByDateRangeAsync(firstDay, lastDay);
             Console.WriteLine($"Yüklenen etkinlik sayısı: {monthEvents.Count}");
-            
+
             // Kategorilere göre say
             var activities = monthEvents.Count(e => e.Categories == "KulupEtkinligi");
             var announcements = monthEvents.Count(e => e.Categories == "Duyuru");
@@ -321,7 +323,7 @@
     private void OpenDayModal(CalendarDay day)
     {
         if (day.IsOtherMonth) return; // Diğer ayın günlerine tıklanmasın
-        
+
         selectedDay = day;
         showModal = true;
     }
@@ -335,17 +337,17 @@
     private void GenerateCalendar()
     {
         calendarDays.Clear();
-        
+
         var firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
         var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
-        
+
         // Pazartesi = 1, Pazar = 0 (DayOfWeek enum'unda Pazar = 0)
         int firstDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
         if (firstDayOfWeek == 0) firstDayOfWeek = 7; // Pazar'ı 7 yap
-        
+
         // Önceki aydan kaç gün göstereceğiz
         int daysFromPrevMonth = firstDayOfWeek - 1;
-        
+
         // Önceki ayın günlerini ekle
         var prevMonthStart = firstDayOfMonth.AddDays(-daysFromPrevMonth);
         for (int i = 0; i < daysFromPrevMonth; i++)
@@ -360,15 +362,15 @@
                 Events = new List<CalendarEvent>()
             });
         }
-        
+
         // Bu ayın günlerini ekle
         for (int day = 1; day <= lastDayOfMonth.Day; day++)
         {
             var date = new DateTime(currentDate.Year, currentDate.Month, day);
-            
+
             // Başlangıç tarihi bu gün olan etkinlikler
             var startEvents = monthEvents.Where(e => e.StartDate.Date == date.Date).ToList();
-            
+
             // Bitiş tarihi bu gün olan çok günlük etkinlikler (başlangıç tarihi farklı)
             var endEvents = monthEvents
                 .Where(e => e.EndDate.Date == date.Date && e.StartDate.Date != e.EndDate.Date)
@@ -385,9 +387,9 @@
                     Location = e.Location
                 })
                 .ToList();
-            
+
             var dayEvents = startEvents.Concat(endEvents).ToList();
-            
+
             calendarDays.Add(new CalendarDay
             {
                 Date = date,
@@ -397,11 +399,11 @@
                 Events = dayEvents
             });
         }
-        
+
         // Sonraki aydan günler ekle (toplam 35 veya 42 gün olacak şekilde)
         int totalDays = calendarDays.Count;
         int daysToAdd = totalDays <= 35 ? 35 - totalDays : 42 - totalDays;
-        
+
         for (int i = 1; i <= daysToAdd; i++)
         {
             var date = lastDayOfMonth.AddDays(i);
@@ -423,7 +425,7 @@
         public bool IsOtherMonth { get; set; }
         public bool IsToday { get; set; }
         public List<CalendarEvent> Events { get; set; } = new();
-        
+
         // Etkinlik göstergeleri
         public bool HasActivity => Events.Any(e => e.Categories == "KulupEtkinligi");
         public bool HasAnnouncement => Events.Any(e => e.Categories == "Duyuru");

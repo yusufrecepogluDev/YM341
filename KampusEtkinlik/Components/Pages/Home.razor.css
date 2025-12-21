@@ -2,22 +2,24 @@
 .ana-icerik {
     flex-grow: 1;
     padding: 1.5rem 0;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    background: var(--bg-page);
     min-height: calc(100vh - 70px);
     display: block;
     width: 100%;
     box-sizing: border-box;
+    transition: var(--theme-transition);
 }
 
 /* Başlıklar */
 .baslik {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--text-primary);
     margin-bottom: 1rem;
     text-align: center;
     position: relative;
     padding-bottom: 0.5rem;
+    transition: var(--theme-transition);
 }
 
     .baslik::after {
@@ -28,7 +30,7 @@
         transform: translateX(-50%);
         width: 60px;
         height: 3px;
-        background: linear-gradient(90deg, #dc3545, #6a0080);
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
         border-radius: 2px;
     }
 
@@ -42,17 +44,17 @@
 /* --- 2. SLIDER YAPISI --- */
 .slider-wrapper {
     position: relative;
-    background: white;
+    background: var(--card-bg);
     padding: 1.5rem 3.5rem;
     border-radius: 12px;
-    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
     overflow: hidden;
 }
 
     .slider-wrapper:hover {
         transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        box-shadow: var(--card-hover-shadow);
     }
 
 .slider-track {
@@ -114,16 +116,16 @@
 
 /* --- 4. DUYURU KARTLARI --- */
 .duyuru-karti {
-    background: white;
+    background: var(--card-bg);
     min-width: calc(25% - 0.75rem);
     max-width: calc(25% - 0.75rem);
     width: calc(25% - 0.75rem);
     padding: 1.2rem;
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-sm);
     text-align: left;
     flex-shrink: 0;
-    border-top: 4px solid #e0e0e0;
+    border-top: 4px solid var(--border-color);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
@@ -134,11 +136,11 @@
 
     .duyuru-karti:hover {
         transform: translateY(-6px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        box-shadow: var(--card-hover-shadow);
     }
 
     .duyuru-karti.highlight {
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
         color: white;
         border-top-color: #ffc107;
     }
@@ -162,21 +164,23 @@
     font-size: 1rem;
     font-weight: 600;
     margin: 0;
-    color: #2c3e50;
+    color: var(--text-primary);
     line-height: 1.3;
     flex: 1;
+    transition: var(--theme-transition);
 }
 
 .tarih-etiketi {
     font-size: 0.8rem;
-    color: #888;
+    color: var(--text-tertiary);
     white-space: nowrap;
     margin-left: 0.5rem;
+    transition: var(--theme-transition);
 }
 
 .duyuru-ozet {
     font-size: 0.9rem;
-    color: #666;
+    color: var(--text-secondary);
     margin: 0.5rem 0;
     line-height: 1.5;
     flex-grow: 1;
@@ -184,6 +188,7 @@
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
+    transition: var(--theme-transition);
 }
 
 .duyuru-ust-bilgi {
@@ -191,7 +196,8 @@
     justify-content: space-between;
     margin-bottom: 5px;
     font-size: 0.75rem;
-    color: #888;
+    color: var(--text-tertiary);
+    transition: var(--theme-transition);
 }
 
 .duyuru-footer {
@@ -200,7 +206,7 @@
     font-size: 0.9rem;
     font-weight: 600;
     text-align: right;
-    color: #dc3545;
+    color: var(--primary-color);
 }
 
 /* --- 5. BUTONLAR --- */
@@ -226,7 +232,7 @@
 }
 
     .kaydirma-butonu:hover {
-        background: #dc3545;
+        background: var(--primary-color);
         transform: translateY(-50%) scale(1.1);
         box-shadow: 0 5px 14px rgba(220, 53, 69, 0.4);
     }
@@ -246,7 +252,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--modal-overlay);
     z-index: 2000;
     display: flex;
     justify-content: center;
@@ -255,19 +261,20 @@
 }
 
 .modal-content {
-    background: white;
+    background: var(--modal-bg);
     border-radius: 12px;
     width: 90%;
     max-width: 500px;
     max-height: 80vh;
     overflow: hidden;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--modal-shadow);
     display: flex;
     flex-direction: column;
+    transition: var(--theme-transition);
 }
 
 .modal-header {
-    background: #dc3545;
+    background: var(--primary-color);
     padding: 1.5rem;
     position: relative;
 }
@@ -312,6 +319,8 @@
 .modal-body {
     padding: 1.5rem;
     overflow-y: auto;
+    background: var(--modal-bg);
+    transition: var(--theme-transition);
 }
 
 .modal-info-grid {
@@ -323,14 +332,15 @@
 
 .info-item {
     padding: 0.8rem;
-    background: #f3f4f6;
+    background: var(--bg-tertiary);
     border-radius: 8px;
     text-align: center;
+    transition: var(--theme-transition);
 }
 
     .info-item strong {
         display: block;
-        color: #dc3545;
+        color: var(--primary-color);
         font-size: 0.7rem;
         text-transform: uppercase;
         margin-bottom: 0.3rem;
@@ -338,9 +348,10 @@
 
     .info-item span {
         display: block;
-        color: #333;
+        color: var(--text-primary);
         font-size: 0.85rem;
         font-weight: 500;
+        transition: var(--theme-transition);
     }
 
 .modal-date-box {
@@ -348,24 +359,27 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.8rem;
-    background: #f3f4f6;
+    background: var(--bg-tertiary);
     border-radius: 8px;
     margin-bottom: 1rem;
+    transition: var(--theme-transition);
 }
 
     .modal-date-box p {
         margin: 0;
-        color: #555;
+        color: var(--text-secondary);
         font-size: 0.85rem;
+        transition: var(--theme-transition);
     }
 
 .modal-description {
     line-height: 1.6;
-    color: #444;
+    color: var(--text-secondary);
     font-size: 0.9rem;
     padding: 1rem;
-    background: #f9fafb;
+    background: var(--bg-secondary);
     border-radius: 8px;
+    transition: var(--theme-transition);
 }
 
 .extended-text {
@@ -377,22 +391,22 @@
 }
 
 .modal-body::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--scrollbar-track);
 }
 
 .modal-body::-webkit-scrollbar-thumb {
-    background: #dc3545;
+    background: var(--scrollbar-thumb);
     border-radius: 10px;
 }
 
 .modal-body::-webkit-scrollbar-thumb:hover {
-    background: #c82333;
+    background: var(--primary-hover);
 }
 
 /* Ayırıcı Çizgi */
 .ayirici-cizgi {
     height: 2px;
-    background: linear-gradient(90deg, transparent, #dc3545, transparent);
+    background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
     margin: 2rem 1.5rem;
     opacity: 0.3;
 }

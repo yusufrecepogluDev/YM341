@@ -1,7 +1,17 @@
-﻿.clubs-container {
+﻿
+.clubs-container-container {
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--bg-page);
+}
+
+.clubs-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
+    background: var(--bg-page);
+    transition: var(--theme-transition);
 }
 
 .clubs-header {
@@ -12,15 +22,17 @@
 .clubs-title {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--text-primary);
     margin-bottom: 0.5rem;
+    transition: var(--theme-transition);
 }
 
 .clubs-subtitle {
     font-size: 1.1rem;
-    color: #666;
+    color: var(--text-secondary);
     max-width: 600px;
     margin: 0 auto;
+    transition: var(--theme-transition);
 }
 
 .clubs-grid {
@@ -31,38 +43,34 @@
 }
 
 .club-card {
-    background: white;
+    background: var(--card-bg);
     border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--card-shadow);
     overflow: hidden;
     transition: all 0.3s ease;
-    border: 1px solid #f0f0f0;
+    border: 1px solid var(--card-border);
+    cursor: pointer;
 }
 
 .club-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--card-hover-shadow);
 }
 
 .club-image {
     width: 100%;
     height: 200px;
     overflow: hidden;
-    background: white;
+    background: var(--card-bg);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--card-border);
+    transition: var(--theme-transition);
 }
 
-.club-image img {
-    width: 120px;
-    height: 120px;
-    object-fit: contain;
-}
-
-.club-logo {
+.club-image img, .club-logo {
     width: 120px;
     height: 120px;
     object-fit: contain;
@@ -75,22 +83,24 @@
 .club-title {
     font-size: 1.4rem;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--text-primary);
     margin-bottom: 0.75rem;
     line-height: 1.3;
+    transition: var(--theme-transition);
 }
 
 .club-description {
     font-size: 0.95rem;
-    color: #666;
+    color: var(--text-secondary);
     line-height: 1.6;
     margin-bottom: 1.5rem;
     display: -webkit-box;
     -webkit-line-clamp: 3;
-    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    transition: var(--theme-transition);
 }
+
 
 .club-actions {
     padding: 0 1.5rem 1.5rem;
@@ -116,44 +126,27 @@
     box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
 }
 
-.join-btn:active {
-    transform: translateY(0);
-}
-
-/* Responsive tasarım */
-@media (max-width: 768px) {
-    .clubs-container {
-        padding: 1rem;
-    }
-
-    .clubs-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    .clubs-title {
-        font-size: 2rem;
-    }
-
-    .club-card {
-        margin: 0 auto;
-        max-width: 400px;
-    }
-}
-
-/* Tıklanabilir kart */
-.club-card {
-    cursor: pointer;
-}
-
-/* Üye olundu butonu */
 .join-btn.joined {
     background: linear-gradient(135deg, #10B981 0%, #059669 100%);
     box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
-.join-btn.joined:hover {
-    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+.join-btn.pending {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    cursor: default;
+}
+
+.join-btn.rejected {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+}
+
+.join-btn.club-account {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+    cursor: not-allowed;
+    opacity: 0.8;
 }
 
 /* Modal stilleri */
@@ -163,7 +156,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--modal-overlay);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -172,14 +165,15 @@
 }
 
 .modal-content {
-    background: white;
+    background: var(--modal-bg);
     border-radius: 16px;
     max-width: 600px;
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--modal-shadow);
+    transition: var(--theme-transition);
 }
 
 .modal-close {
@@ -190,7 +184,7 @@
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: #666;
+    color: var(--text-secondary);
     padding: 0.5rem;
     border-radius: 50%;
     transition: all 0.2s ease;
@@ -198,8 +192,8 @@
 }
 
 .modal-close:hover {
-    background: #f3f4f6;
-    color: #333;
+    background: var(--hover-bg);
+    color: var(--text-primary);
 }
 
 .modal-header {
@@ -207,7 +201,7 @@
     align-items: center;
     gap: 1.5rem;
     padding: 2rem 2rem 1rem;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .modal-logo {
@@ -216,9 +210,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: white;
+    background: var(--card-bg);
     border-radius: 50%;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
     flex-shrink: 0;
 }
 
@@ -231,9 +225,10 @@
 .modal-title {
     font-size: 1.8rem;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--text-primary);
     margin: 0;
     text-align: left;
+    transition: var(--theme-transition);
 }
 
 .modal-body {
@@ -247,15 +242,17 @@
 .modal-section h3 {
     font-size: 1.2rem;
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
     margin-bottom: 0.75rem;
+    transition: var(--theme-transition);
 }
 
 .modal-description {
     font-size: 1rem;
     line-height: 1.6;
-    color: #666;
+    color: var(--text-secondary);
     margin: 0;
+    transition: var(--theme-transition);
 }
 
 .membership-status {
@@ -265,23 +262,25 @@
     padding: 1rem;
     border-radius: 8px;
     font-weight: 500;
+    transition: var(--theme-transition);
 }
 
 .membership-status.member {
-    background: #f0fdf4;
-    color: #166534;
-    border: 1px solid #bbf7d0;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
-.membership-status.non-member {
-    background: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
+.membership-status.non-member, .membership-status.rejected {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-.status-icon {
-    font-size: 1.2rem;
-    font-weight: bold;
+.membership-status.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .modal-footer {
@@ -289,7 +288,7 @@
     display: flex;
     gap: 1rem;
     justify-content: flex-end;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid var(--border-color);
 }
 
 .modal-btn {
@@ -303,12 +302,12 @@
 }
 
 .modal-btn.secondary {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
 }
 
 .modal-btn.secondary:hover {
-    background: #e5e7eb;
+    background: var(--btn-secondary-hover);
 }
 
 .modal-btn.primary {
@@ -324,44 +323,140 @@
 
 .modal-btn.primary.joined {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
-.modal-btn.primary.joined:hover {
-    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+/* Confirmation Modal */
+.confirmation-modal {
+    background: var(--modal-bg);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: var(--modal-shadow);
+    transition: var(--theme-transition);
 }
 
-/* Responsive modal */
+.confirmation-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 1rem 0;
+}
+
+.confirmation-message {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 0 1.5rem 0;
+}
+
+.confirmation-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.confirm-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    min-width: 100px;
+}
+
+.confirm-btn.cancel {
+    background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
+}
+
+.confirm-btn.leave {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+/* Activity & Announcement Items */
+.activity-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.activity-title, .announcement-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+}
+
+.activity-description, .announcement-content {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.announcement-item {
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+}
+
+.no-items {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-    .modal-content {
-        margin: 1rem;
-        max-height: calc(100vh - 2rem);
-    }
-
-    .modal-header {
-        flex-direction: column;
-        text-align: center;
-        gap: 1rem;
-        padding: 1.5rem;
-    }
-
-    .modal-body,
-    .modal-footer {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-    }
-
-    .modal-footer {
-        flex-direction: column;
-    }
-
-    .modal-btn {
-        width: 100%;
-    }
+    .clubs-container { padding: 1rem; }
+    .clubs-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+    .clubs-title { font-size: 2rem; }
+    .club-card { margin: 0 auto; max-width: 400px; }
+    .modal-header { flex-direction: column; text-align: center; gap: 1rem; padding: 1.5rem; }
+    .modal-footer { flex-direction: column; }
+    .modal-btn, .confirm-btn { width: 100%; }
+    .confirmation-actions { flex-direction: column; }
 }
 
-/* Etkinl
-ikler ve Duyurular */
+
+/* Additional theme-aware styles */
+.club-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.member-count {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    transition: var(--theme-transition);
+}
+
+.loading-message,
+.no-clubs-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+    background: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid var(--card-border);
+    transition: var(--theme-transition);
+}
+
 .activities-list,
 .announcements-list {
     display: flex;
@@ -369,132 +464,51 @@ ikler ve Duyurular */
     gap: 1rem;
 }
 
-.activity-item {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem;
-    background: #f8fafc;
-    border-radius: 8px;
-    border-left: 4px solid #667eea;
-}
-
 .activity-date {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: #667eea;
-    color: white;
-    border-radius: 8px;
+    min-width: 50px;
     padding: 0.5rem;
-    min-width: 60px;
-    text-align: center;
+    background: var(--primary-light);
+    border-radius: 8px;
 }
 
 .activity-date .day {
-    font-size: 1.5rem;
-    font-weight: bold;
-    line-height: 1;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-color);
 }
 
 .activity-date .month {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    color: var(--primary-color);
     text-transform: uppercase;
-    opacity: 0.9;
 }
 
 .activity-info {
     flex: 1;
 }
 
-.activity-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0 0 0.5rem 0;
-}
-
-.activity-description {
-    font-size: 0.9rem;
-    color: #666;
-    margin: 0 0 0.5rem 0;
-    line-height: 1.4;
-}
-
 .activity-time {
     font-size: 0.8rem;
-    color: #667eea;
-    font-weight: 500;
-}
-
-.announcement-item {
-    padding: 1rem;
-    background: #fef7f0;
-    border-radius: 8px;
-    border-left: 4px solid #f59e0b;
+    color: var(--text-muted);
 }
 
 .announcement-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     margin-bottom: 0.5rem;
-    gap: 1rem;
-}
-
-.announcement-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0;
-    flex: 1;
 }
 
 .announcement-date {
     font-size: 0.8rem;
-    color: #f59e0b;
-    font-weight: 500;
-    white-space: nowrap;
+    color: var(--text-muted);
 }
 
-.announcement-content {
-    font-size: 0.9rem;
-    color: #666;
-    margin: 0;
-    line-height: 1.4;
-}
-
-.no-items {
-    font-size: 0.9rem;
-    color: #999;
-    font-style: italic;
-    text-align: center;
-    padding: 1rem;
-    background: #f9fafb;
-    border-radius: 8px;
-    margin: 0;
-}
-
-/* Responsive etkinlikler */
-@media (max-width: 768px) {
-    .activity-item {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .activity-date {
-        align-self: center;
-        min-width: auto;
-        width: 80px;
-    }
-
-    .announcement-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-
-    .announcement-date {
-        white-space: normal;
-    }
+.confirmation-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
 }

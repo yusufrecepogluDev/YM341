@@ -1,4 +1,3 @@
-using KampusEtkinlik.Components;
 using KampusEtkinlik.Services;
 using Blazored.LocalStorage;
 
@@ -14,11 +13,37 @@ builder.Services.AddBlazoredLocalStorage();
 // Token servisi (ProtectedSessionStorage built-in olarak gelir)
 builder.Services.AddScoped<TokenService>();
 
+// Membership Cache servisi (SessionStorage için JavaScript interop kullanır)
+builder.Services.AddScoped<MembershipCacheService>();
+
+// Theme servisi (Dark/Light mode için)
+builder.Services.AddScoped<IThemeService, ThemeService>();
+
 // API servislerini DI konteynerine kaydet
-builder.Services.AddHttpClient<AnnouncementService>();
-builder.Services.AddHttpClient<ActivityService>();
-builder.Services.AddHttpClient<AuthenticationService>();
-builder.Services.AddHttpClient<CalendarApiService>();
+builder.Services.AddHttpClient<AnnouncementService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7077");
+});
+builder.Services.AddHttpClient<ActivityService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7077");
+});
+builder.Services.AddHttpClient<AuthenticationService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7077");
+});
+builder.Services.AddHttpClient<CalendarApiService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7077");
+});
+builder.Services.AddHttpClient<ClubService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7077");
+});
+builder.Services.AddHttpClient<ClubMembershipService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7077");
+});
 
 // Chat servisi - N8n chatbot entegrasyonu için (uses IHttpClientFactory)
 builder.Services.AddHttpClient("ChatClient", client =>
@@ -42,7 +67,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapRazorComponents<App>()
+app.MapRazorComponents<KampusEtkinlik.Components.App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();

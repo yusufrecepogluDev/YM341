@@ -421,6 +421,7 @@ FodyWeavers.xsd
 # Configuration files with sensitive data (API keys, connection strings, secrets)
 **/appsettings.json
 **/appsettings.*.json
+!**/appsettings.json.example
 !**/appsettings.Development.json.example
 !**/appsettings.Production.json.example
 

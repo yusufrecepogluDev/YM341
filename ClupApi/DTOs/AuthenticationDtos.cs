@@ -21,7 +21,8 @@ namespace ClupApi.DTOs
         public string StudentMail { get; set; } = string.Empty;
         public long StudentNumber { get; set; }
         public bool IsActive { get; set; }
-        public string Token { get; internal set; }
+        public string Token { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
     }
 
     public class StudentRegisterRequestDto
@@ -68,7 +69,8 @@ namespace ClupApi.DTOs
         public string ClubName { get; set; } = string.Empty;
         public long ClubNumber { get; set; }
         public bool IsActive { get; set; }
-        public string Token { get; internal set; }
+        public string Token { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
     }
 
     public class ClubRegisterRequestDto
@@ -89,5 +91,23 @@ namespace ClupApi.DTOs
         public string ClubName { get; set; } = string.Empty;
         public long ClubNumber { get; set; }
         public bool IsActive { get; set; }
+    }
+
+    public class LogoutRequestDto
+    {
+        public string? SessionId { get; set; }
+        public string? RefreshToken { get; set; }
+    }
+
+    public class RefreshTokenRequestDto
+    {
+        [Required(ErrorMessage = "Refresh token zorunludur")]
+        public string RefreshToken { get; set; } = string.Empty;
+    }
+
+    public class RefreshTokenResponseDto
+    {
+        public string Token { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
     }
 }

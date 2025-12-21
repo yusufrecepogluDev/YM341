@@ -3,8 +3,8 @@
 }
 
 .account-button {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: 2px solid #e8ecf1;
+    background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-secondary) 100%);
+    border: 2px solid var(--border-color);
     cursor: pointer;
     padding: 12px;
     border-radius: 50%;
@@ -12,7 +12,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
     position: relative;
     overflow: hidden;
 }
@@ -25,7 +25,7 @@
         width: 0;
         height: 0;
         border-radius: 50%;
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
         transform: translate(-50%, -50%);
         transition: width 0.3s ease, height 0.3s ease;
     }
@@ -36,7 +36,7 @@
     }
 
     .account-button:hover {
-        border-color: #dc3545;
+        border-color: var(--primary-color);
         transform: scale(1.1) rotate(5deg);
         box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
     }
@@ -62,6 +62,10 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z'/%3E%3Cpath fill-rule='evenodd' d='M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z'/%3E%3C/svg%3E");
 }
 
+:global([data-theme="dark"]) .bi-account-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e8e8e8' viewBox='0 0 16 16'%3E%3Cpath d='M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z'/%3E%3Cpath fill-rule='evenodd' d='M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z'/%3E%3C/svg%3E");
+}
+
 .bi-logout-icon {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23dc3545' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z'/%3E%3Cpath fill-rule='evenodd' d='M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z'/%3E%3C/svg%3E");
 }
@@ -71,14 +75,15 @@
     top: 100%;
     right: 0;
     margin-top: 12px;
-    background: white;
+    background: var(--card-bg);
     border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-lg);
     min-width: 200px;
     z-index: 1000;
     overflow: hidden;
-    border: 1px solid #e8ecf1;
+    border: 1px solid var(--border-color);
     animation: slideDown 0.2s ease;
+    transition: var(--theme-transition);
 }
 
 @keyframes slideDown {
@@ -96,7 +101,7 @@
     display: flex;
     align-items: center;
     padding: 14px 18px;
-    color: #333;
+    color: var(--text-primary);
     text-decoration: none;
     transition: all 0.2s ease;
     gap: 12px;
@@ -105,17 +110,17 @@
 }
 
     .dropdown-item:hover {
-        background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+        background: var(--hover-bg);
         padding-left: 24px;
     }
 
     .dropdown-item:last-child {
-        border-top: 1px solid #e8ecf1;
+        border-top: 1px solid var(--border-color);
     }
 
     .dropdown-item:last-child:hover {
         background: linear-gradient(90deg, #fee 0%, #fdd 100%);
-        color: #dc3545;
+        color: var(--primary-color);
     }
 
     .dropdown-item .bi {

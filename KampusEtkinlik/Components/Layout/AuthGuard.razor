@@ -30,9 +30,6 @@ else if (isChecking)
         {
             try
             {
-                // Küçük bir gecikme ekle - localStorage'ın hazır olmasını bekle
-                await Task.Delay(100);
-                
                 isAuthenticated = await TokenService.IsAuthenticatedAsync();
                 System.Diagnostics.Debug.WriteLine($"AuthGuard - isAuthenticated: {isAuthenticated}");
 

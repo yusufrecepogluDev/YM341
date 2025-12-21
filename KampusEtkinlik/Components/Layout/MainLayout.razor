@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject KampusEtkinlik.Services.IThemeService ThemeService
 
 <div class="page">
     <div class="sidebar">
@@ -7,6 +8,7 @@
 
     <div class="main-content">
         <div class="top-bar">
+            <ThemeToggle />
             <AccountMenu />
         </div>
 
@@ -28,3 +30,13 @@
         <ChatWidget />
     </Authorized>
 </AuthorizeView>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ThemeService.InitializeAsync();
+        }
+    }
+}

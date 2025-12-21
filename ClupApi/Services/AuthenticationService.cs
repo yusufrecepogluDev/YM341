@@ -14,11 +14,19 @@ namespace ClupApi.Services
     {
         private readonly IAuthenticationRepository _repository;
         private readonly IConfiguration _config;
+        private readonly ITokenService _tokenService;
+        private readonly ISecurityLogger _securityLogger;
 
-        public AuthenticationService(IAuthenticationRepository repository, IConfiguration config)
+        public AuthenticationService(
+            IAuthenticationRepository repository, 
+            IConfiguration config,
+            ITokenService tokenService,
+            ISecurityLogger securityLogger)
         {
             _repository = repository;
             _config = config;
+            _tokenService = tokenService;
+            _securityLogger = securityLogger;
         }
 
         public async Task<StudentLoginResponseDto?> AuthenticateStudentAsync(StudentLoginRequestDto request)
@@ -29,10 +37,15 @@ namespace ClupApi.Services
                 student.StudentPassword != request.StudentPassword ||
                 !student.IsActive)
             {
+                _securityLogger.LogFailedLogin(request.StudentNumber.ToString(), "unknown");
                 return null;
             }
 
-            var token = GenerateToken(student.StudentNumber, "student");
+            // Use TokenService for token generation
+            var accessToken = _tokenService.GenerateAccessToken(student.StudentID, "student", student.StudentNumber.ToString());
+            var refreshToken = await _tokenService.GenerateRefreshTokenAsync(student.StudentID, "student");
+
+            _securityLogger.LogSuccessfulLogin(student.StudentNumber.ToString(), "unknown", "student");
 
             return new StudentLoginResponseDto
             {
@@ -42,7 +55,8 @@ namespace ClupApi.Services
                 StudentMail = student.StudentMail,
                 StudentNumber = student.StudentNumber,
                 IsActive = student.IsActive,
-                Token = token
+                Token = accessToken,
+                RefreshToken = refreshToken.Token
             };
         }
 
@@ -54,10 +68,15 @@ namespace ClupApi.Services
                 club.ClubPassword != request.ClubPassword ||
                 !club.IsActive)
             {
+                _securityLogger.LogFailedLogin(request.ClubNumber.ToString(), "unknown");
                 return null;
             }
 
-            var token = GenerateToken(club.ClubNumber, "club");
+            // Use TokenService for token generation
+            var accessToken = _tokenService.GenerateAccessToken(club.ClubID, "club", club.ClubNumber.ToString());
+            var refreshToken = await _tokenService.GenerateRefreshTokenAsync(club.ClubID, "club");
+
+            _securityLogger.LogSuccessfulLogin(club.ClubNumber.ToString(), "unknown", "club");
 
             return new ClubLoginResponseDto
             {
@@ -65,7 +84,8 @@ namespace ClupApi.Services
                 ClubName = club.ClubName,
                 ClubNumber = club.ClubNumber,
                 IsActive = club.IsActive,
-                Token = token
+                Token = accessToken,
+                RefreshToken = refreshToken.Token
             };
         }
 

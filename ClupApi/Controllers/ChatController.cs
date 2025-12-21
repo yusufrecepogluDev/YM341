@@ -7,10 +7,6 @@ using System.Security.Claims;
 
 namespace ClupApi.Controllers
 {
-    /// <summary>
-    /// Controller for managing chat interactions with N8n chatbot
-    /// Requires authentication via JWT token
-    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
@@ -20,7 +16,7 @@ namespace ClupApi.Controllers
         private readonly ILogger<ChatController> _logger;
         private readonly IConfiguration _configuration;
         
-        // Static dictionary to track message counts per session (Requirement 10.1)
+        // Oturum başına mesaj sayısını takip et
         private static readonly Dictionary<string, int> _userMessageCounters = new();
         private static readonly object _counterLock = new();
 
@@ -31,26 +27,18 @@ namespace ClupApi.Controllers
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        /// <summary>
-        /// Sends a message to the N8n chatbot and returns the response
-        /// POST /api/chat/message
-        /// Requires: JWT authentication
-        /// </summary>
-        /// <param name="request">Chat request containing the user's message</param>
-        /// <returns>ApiResponse with bot's response</returns>
         [HttpPost("message")]
         public async Task<IActionResult> SendMessage([FromBody] ChatRequestDto request)
         {
             try
             {
-                // Validate model state (Requirement 4.5)
                 if (!ModelState.IsValid)
                 {
                     _logger.LogWarning("Invalid model state in SendMessage request");
                     return HandleValidationErrors(ModelState);
                 }
 
-                // Extract user ID from JWT token (Requirement 7.2, 7.3)
+                // JWT token'dan kullanıcı ID'sini al
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 
                 if (string.IsNullOrEmpty(userId))
@@ -63,13 +51,13 @@ namespace ClupApi.Controllers
 
                 _logger.LogInformation("Sending message to N8n chatbot for user {UserId}", userId);
 
-                // Increment message counter (Requirement 10.1)
+                // Mesaj sayacını artır
                 if (!string.IsNullOrWhiteSpace(request.SessionId))
                 {
                     IncrementMessageCounter(request.SessionId);
                 }
 
-                // Check if we should send context data (Requirement 10.1)
+                // Bağlam verisi gönderilmeli mi kontrol et
                 string? contextData = null;
                 if (!string.IsNullOrWhiteSpace(request.SessionId) && ShouldSendContext(request.SessionId))
                 {
@@ -86,23 +74,20 @@ namespace ClupApi.Controllers
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Failed to retrieve calendar context data, continuing without context");
-                        // Continue without context data if retrieval fails
                     }
                 }
 
-                // Call ChatService to send message to N8n webhook (Requirement 4.1, 4.3)
+                // N8n webhook'a mesaj gönder
                 var response = await _chatService.SendToN8nAsync(
                     request.Message, 
                     userId, 
                     request.SessionId,
                     contextData);
 
-                // Handle unsuccessful response (Requirement 4.4, 4.5)
                 if (!response.Success)
                 {
                     _logger.LogError("Failed to get response from N8n chatbot: {ErrorMessage}", response.ErrorMessage);
                     
-                    // Check if it's a timeout error
                     if (response.ErrorMessage?.Contains("timeout", StringComparison.OrdinalIgnoreCase) == true ||
                         response.ErrorMessage?.Contains("timed out", StringComparison.OrdinalIgnoreCase) == true)
                     {
@@ -111,7 +96,6 @@ namespace ClupApi.Controllers
                             new[] { "Chatbot yanıt vermedi. Lütfen tekrar deneyin." }));
                     }
                     
-                    // Check if it's a network error
                     if (response.ErrorMessage?.Contains("network", StringComparison.OrdinalIgnoreCase) == true ||
                         response.ErrorMessage?.Contains("connection", StringComparison.OrdinalIgnoreCase) == true ||
                         response.ErrorMessage?.Contains("communicate", StringComparison.OrdinalIgnoreCase) == true)
@@ -121,7 +105,6 @@ namespace ClupApi.Controllers
                             new[] { "Chatbot servisine ulaşılamıyor. Lütfen daha sonra tekrar deneyin." }));
                     }
 
-                    // Generic error
                     return StatusCode(500, ApiResponse.ErrorResponse(
                         "Chatbot yanıt veremedi",
                         new[] { response.ErrorMessage ?? "Bilinmeyen hata" }));
@@ -135,7 +118,6 @@ namespace ClupApi.Controllers
             }
             catch (ArgumentException ex)
             {
-                // Handle validation errors (Requirement 4.5)
                 _logger.LogWarning(ex, "Validation error in SendMessage endpoint");
                 return BadRequest(ApiResponse.ErrorResponse(
                     "Geçersiz istek",
@@ -143,7 +125,6 @@ namespace ClupApi.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                // Handle authorization errors (Requirement 7.2)
                 _logger.LogWarning(ex, "Unauthorized access in SendMessage endpoint");
                 return Unauthorized(ApiResponse.ErrorResponse(
                     "Yetkisiz erişim",
@@ -151,7 +132,6 @@ namespace ClupApi.Controllers
             }
             catch (TaskCanceledException ex)
             {
-                // Handle timeout errors (Requirement 4.4)
                 _logger.LogError(ex, "Timeout in SendMessage endpoint");
                 return StatusCode(504, ApiResponse.ErrorResponse(
                     "İstek zaman aşımına uğradı",
@@ -159,7 +139,6 @@ namespace ClupApi.Controllers
             }
             catch (HttpRequestException ex)
             {
-                // Handle network errors (Requirement 4.4)
                 _logger.LogError(ex, "Network error in SendMessage endpoint");
                 return StatusCode(503, ApiResponse.ErrorResponse(
                     "Bağlantı hatası",
@@ -167,19 +146,13 @@ namespace ClupApi.Controllers
             }
             catch (Exception ex)
             {
-                // Handle unexpected errors (Requirement 4.5)
                 _logger.LogError(ex, "Unexpected error in SendMessage endpoint");
                 return HandleInternalServerError("Mesaj gönderilirken bir hata oluştu");
             }
         }
 
-        /// <summary>
-        /// Health check endpoint to verify chat service availability
-        /// GET /api/chat/health
-        /// </summary>
-        /// <returns>ApiResponse indicating service health status</returns>
         [HttpGet("health")]
-        [AllowAnonymous] // Health check doesn't require authentication
+        [AllowAnonymous]
         public IActionResult HealthCheck()
         {
             try
@@ -207,19 +180,11 @@ namespace ClupApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Initializes chat session by sending calendar context to N8n
-        /// POST /api/chat/initialize
-        /// Requires: JWT authentication
-        /// </summary>
-        /// <param name="request">Chat request with session ID</param>
-        /// <returns>ApiResponse indicating initialization success</returns>
         [HttpPost("initialize")]
         public async Task<IActionResult> InitializeChat([FromBody] ChatRequestDto request)
         {
             try
             {
-                // Extract user ID from JWT token
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 
                 if (string.IsNullOrEmpty(userId))
@@ -232,14 +197,14 @@ namespace ClupApi.Controllers
 
                 _logger.LogInformation("Initializing chat session for user {UserId}", userId);
 
-                // Get calendar context data
+                // Takvim bağlam verisini al
                 var calendarContext = await _chatService.GetCalendarContextAsync();
                 var contextData = _chatService.FormatContextData(calendarContext);
                 
                 _logger.LogInformation("Calendar context prepared for initialization: {EventCount} events",
                     calendarContext.CalendarEvents.Count);
 
-                // Send initialization message to N8n with context data
+                // N8n'e başlatma mesajı gönder
                 var initMessage = "Sistem başlatılıyor. Takvim bilgileri yükleniyor.";
                 var response = await _chatService.SendToN8nAsync(
                     initMessage, 
@@ -268,12 +233,7 @@ namespace ClupApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Checks if context data should be sent based on message count
-        /// Requirement 10.1: Send context every 14 messages (and on first message)
-        /// </summary>
-        /// <param name="sessionId">The session ID to check</param>
-        /// <returns>True if context should be sent, false otherwise</returns>
+        // Her 14 mesajda bir bağlam gönder
         private bool ShouldSendContext(string sessionId)
         {
             if (string.IsNullOrWhiteSpace(sessionId))
@@ -296,11 +256,6 @@ namespace ClupApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Increments the message counter for a session
-        /// Requirement 10.1: Track message count per session
-        /// </summary>
-        /// <param name="sessionId">The session ID to increment</param>
         private void IncrementMessageCounter(string sessionId)
         {
             if (string.IsNullOrWhiteSpace(sessionId))
@@ -321,6 +276,20 @@ namespace ClupApi.Controllers
 
                 _logger.LogDebug("Message counter for session {SessionId}: {Count}", 
                     sessionId, _userMessageCounters[sessionId]);
+            }
+        }
+
+        // Oturum verilerini temizle
+        public static void ClearSessionData(string sessionId)
+        {
+            if (string.IsNullOrWhiteSpace(sessionId))
+            {
+                return;
+            }
+
+            lock (_counterLock)
+            {
+                _userMessageCounters.Remove(sessionId);
             }
         }
     }

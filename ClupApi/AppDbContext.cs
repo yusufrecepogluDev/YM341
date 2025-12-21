@@ -21,6 +21,8 @@ namespace ClupApi
 
         public DbSet<AcademicEvents> AcademicEvents { get; set; }
 
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
     
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,6 +34,20 @@ namespace ClupApi
             modelBuilder.Entity<Student>()
                 .HasIndex(e => e.StudentNumber)
                 .IsUnique();
+
+            // RefreshToken optimizations
+            modelBuilder.Entity<RefreshToken>()
+                .HasIndex(e => e.Token)
+                .IsUnique();
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasIndex(e => new { e.UserId, e.UserType });
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasIndex(e => e.ExpiresAt);
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasIndex(e => e.IsRevoked);
 
             // Configure relationships with corrected navigation property names
             modelBuilder.Entity<Activity>()

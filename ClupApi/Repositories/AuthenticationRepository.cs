@@ -26,12 +26,14 @@ namespace ClupApi.Repositories
         public async Task<Student?> GetStudentByNumberAsync(long studentNumber)
         {
             return await _context.Students
+                .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.StudentNumber == studentNumber);
         }
 
         public async Task<Club?> GetClubByNumberAsync(long clubNumber)
         {
             return await _context.Clubs
+                .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.ClubNumber == clubNumber);
         }
         public async Task<Student?> GetStudentByPasswordAsync(string studentPassword)
@@ -48,6 +50,7 @@ namespace ClupApi.Repositories
         public async Task<Student?> GetStudentByMailAsync(string studentMail)
         {
             return await _context.Students
+                .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.StudentMail == studentMail);
         }
 

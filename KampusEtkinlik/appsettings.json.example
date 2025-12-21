@@ -1,0 +1,20 @@
+{
+  "ApiSettings": {
+    "BaseUrl": "https://localhost:7077"
+  },
+
+  "JwtSettings": {
+    "SecretKey": "YOUR_SECRET_KEY_HERE_MINIMUM_32_CHARACTERS",
+    "Issuer": "KampusEtkinlik",
+    "Audience": "KampusEtkinlikUsers",
+    "ExpirationMinutes": 60
+  },
+
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}

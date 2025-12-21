@@ -10,6 +10,24 @@ namespace ClupApi.Repositories
         {
         }
 
+        public override async Task<IEnumerable<Club>> GetAllAsync()
+        {
+            return await _dbSet
+                .Include(c => c.ClubMemberships)
+                .Include(c => c.Activities)
+                .Include(c => c.Announcements)
+                .ToListAsync();
+        }
+
+        public override async Task<Club?> GetByIdAsync(int id)
+        {
+            return await _dbSet
+                .Include(c => c.ClubMemberships)
+                .Include(c => c.Activities)
+                .Include(c => c.Announcements)
+                .FirstOrDefaultAsync(c => c.ClubID == id);
+        }
+
         public async Task<Club?> GetByClubNumberAsync(long clubNumber)
         {
             return await _dbSet

@@ -6,10 +6,7 @@ using System.Text.Json;
 
 namespace ClupApi.Services
 {
-    /// <summary>
-    /// Service for managing chat communication with N8n webhook
-    /// Implements retry logic, timeout handling, and HTTPS protocol enforcement
-    /// </summary>
+
     public class ChatService : IChatService
     {
         private readonly HttpClient _httpClient;
@@ -32,22 +29,17 @@ namespace ClupApi.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _calendarRepository = calendarRepository ?? throw new ArgumentNullException(nameof(calendarRepository));
 
-            // Read N8n settings from configuration
             _webhookUrl = _configuration["N8nSettings:WebhookUrl"] ?? string.Empty;
             _timeoutSeconds = int.TryParse(_configuration["N8nSettings:TimeoutSeconds"], out var timeout) ? timeout : 120;
             _retryCount = int.TryParse(_configuration["N8nSettings:RetryCount"], out var retry) ? retry : 1;
             _apiKey = _configuration["N8nSettings:ApiKey"];
 
-            // Validate webhook URL
             ValidateWebhookUrl();
 
-            // Configure HttpClient timeout
             _httpClient.Timeout = TimeSpan.FromSeconds(_timeoutSeconds);
         }
 
-        /// <summary>
-        /// Validates that the webhook URL is configured and uses HTTPS protocol
-        /// </summary>
+
         private void ValidateWebhookUrl()
         {
             if (string.IsNullOrWhiteSpace(_webhookUrl))
@@ -56,7 +48,6 @@ namespace ClupApi.Services
                 return;
             }
 
-            // HTTPS protocol enforcement (Requirement 7.1)
             if (!_webhookUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
             {
                 _logger.LogError("N8n webhook URL must use HTTPS protocol. Current URL: {WebhookUrl}", _webhookUrl);
@@ -66,10 +57,7 @@ namespace ClupApi.Services
             _logger.LogInformation("N8n webhook URL validated successfully: {WebhookUrl}", _webhookUrl);
         }
 
-        /// <summary>
-        /// Sends a chat message to N8n webhook and returns the bot response
-        /// Implements retry logic and timeout handling
-        /// </summary>
+
         public async Task<ChatResponseDto> SendToN8nAsync(string message, string userId, string? sessionId = null, string? contextData = null)
         {
             if (string.IsNullOrWhiteSpace(message))
@@ -93,17 +81,15 @@ namespace ClupApi.Services
                 };
             }
 
-            // Prepare request payload (Requirement 4.2 - include user identity)
             var request = new N8nWebhookRequest
             {
                 ChatInput = message,
                 UserId = userId,
                 SessionId = sessionId,
                 Timestamp = DateTime.UtcNow,
-                ContextData = contextData // Include context data if provided (Requirement 10.1) // değişicek
+                ContextData = contextData 
             };
 
-            // Implement retry logic (Requirement 4.4)
             int attempt = 0;
             Exception? lastException = null;
 
@@ -132,7 +118,6 @@ namespace ClupApi.Services
                     
                     if (attempt <= _retryCount)
                     {
-                        // Exponential backoff: wait 2^attempt seconds
                         var delaySeconds = Math.Pow(2, attempt);
                         _logger.LogInformation("Retrying in {Delay} seconds...", delaySeconds);
                         await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
@@ -154,11 +139,10 @@ namespace ClupApi.Services
                 {
                     lastException = ex;
                     _logger.LogError(ex, "Unexpected error on attempt {Attempt}/{MaxAttempts}", attempt, _retryCount + 1);
-                    break; // Don't retry on unexpected errors
+                    break; 
                 }
             }
 
-            // All retries failed
             _logger.LogError(lastException, "Failed to send message to N8n webhook after {Attempts} attempts", attempt);
             
             return new ChatResponseDto
@@ -171,9 +155,6 @@ namespace ClupApi.Services
             };
         }
 
-        /// <summary>
-        /// Sends HTTP POST request to N8n webhook
-        /// </summary>
         private async Task<N8nWebhookResponse> SendRequestAsync(N8nWebhookRequest request)
         {
             var jsonContent = JsonSerializer.Serialize(request, new JsonSerializerOptions
@@ -181,7 +162,6 @@ namespace ClupApi.Services
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
 
-            // Log if context data is being sent
             if (!string.IsNullOrWhiteSpace(request.ContextData))
             {
                 _logger.LogInformation("Sending context data to N8n (length: {Length} chars)", request.ContextData.Length);
@@ -190,14 +170,12 @@ namespace ClupApi.Services
 
             var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            // Add API key header if configured
             if (!string.IsNullOrWhiteSpace(_apiKey))
             {
                 _httpClient.DefaultRequestHeaders.Clear();
                 _httpClient.DefaultRequestHeaders.Add("X-API-Key", _apiKey);
             }
 
-            // Send POST request to N8n webhook (Requirement 4.1)
             var httpResponse = await _httpClient.PostAsync(_webhookUrl, httpContent);
 
             if (!httpResponse.IsSuccessStatusCode)
@@ -210,19 +188,16 @@ namespace ClupApi.Services
 
             var responseContent = await httpResponse.Content.ReadAsStringAsync();
             
-            // Validate response format (Requirement 7.5)
             if (string.IsNullOrWhiteSpace(responseContent))
             {
                 _logger.LogError("N8n webhook returned empty response");
                 throw new InvalidOperationException("N8n webhook returned empty response");
             }
 
-            // Try to extract the AI response from various formats
             string? aiResponse = null;
             
             try
             {
-                // First try standard format
                 var webhookResponse = JsonSerializer.Deserialize<N8nWebhookResponse>(responseContent, new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -236,10 +211,9 @@ namespace ClupApi.Services
             }
             catch (JsonException)
             {
-                // Standard format didn't work, try other formats
+                
             }
 
-            // If standard format didn't work, try to extract from LangChain format
             if (string.IsNullOrWhiteSpace(aiResponse))
             {
                 try
@@ -247,22 +221,18 @@ namespace ClupApi.Services
                     using var doc = JsonDocument.Parse(responseContent);
                     var root = doc.RootElement;
                     
-                    // Try to find "output" field (common N8n AI response)
                     if (root.TryGetProperty("output", out var outputElement))
                     {
                         aiResponse = outputElement.GetString();
                     }
-                    // Try to find "text" field
                     else if (root.TryGetProperty("text", out var textElement))
                     {
                         aiResponse = textElement.GetString();
                     }
-                    // Try to find "content" field
                     else if (root.TryGetProperty("content", out var contentElement))
                     {
                         aiResponse = contentElement.GetString();
                     }
-                    // Try to find nested in "message" -> "content"
                     else if (root.TryGetProperty("message", out var messageElement) && 
                              messageElement.TryGetProperty("content", out var msgContentElement))
                     {
@@ -275,7 +245,6 @@ namespace ClupApi.Services
                 }
             }
 
-            // If still no response, check if it's an array (LangChain messages format)
             if (string.IsNullOrWhiteSpace(aiResponse))
             {
                 try
@@ -283,7 +252,6 @@ namespace ClupApi.Services
                     using var doc = JsonDocument.Parse(responseContent);
                     if (doc.RootElement.ValueKind == JsonValueKind.Array)
                     {
-                        // Get the last message (AI response)
                         var messages = doc.RootElement.EnumerateArray().ToList();
                         if (messages.Count > 0)
                         {
@@ -298,11 +266,10 @@ namespace ClupApi.Services
                 }
                 catch (JsonException)
                 {
-                    // Not an array format
+                    
                 }
             }
 
-            // Last resort: use raw content if it looks like text
             if (string.IsNullOrWhiteSpace(aiResponse) && !responseContent.TrimStart().StartsWith("{") && !responseContent.TrimStart().StartsWith("["))
             {
                 aiResponse = responseContent;
@@ -319,15 +286,10 @@ namespace ClupApi.Services
             return new N8nWebhookResponse { Response = aiResponse };
         }
 
-        /// <summary>
-        /// Gets calendar context data - uses CalendarRepository to get same data as calendar page
-        /// Includes: Activities, Announcements, and Academic Events
-        /// </summary>
         public async Task<CalendarContextDto> GetCalendarContextAsync()
         {
             try
             {
-                // Get events for the next 30 days (same approach as calendar page)
                 var startDate = DateTime.Now;
                 var endDate = DateTime.Now.AddDays(30);
                 
@@ -350,9 +312,6 @@ namespace ClupApi.Services
             }
         }
 
-        /// <summary>
-        /// Formats calendar context data into a readable text format for the chatbot
-        /// </summary>
         public string FormatContextData(CalendarContextDto context)
         {
             if (context == null || !context.CalendarEvents.Any())
@@ -369,7 +328,7 @@ namespace ClupApi.Services
             var announcements = context.CalendarEvents.Where(e => e.Categories == "Duyuru").ToList();
             var academicEvents = context.CalendarEvents.Where(e => e.Categories == "AkademikOlay").ToList();
 
-            // Format Activities (Kulüp Etkinlikleri)
+
             if (activities.Any())
             {
                 sb.AppendLine("📅 KULÜP ETKİNLİKLERİ:");
@@ -388,7 +347,7 @@ namespace ClupApi.Services
                 }
             }
 
-            // Format Announcements (Duyurular)
+
             if (announcements.Any())
             {
                 sb.AppendLine("📢 DUYURULAR:");
@@ -407,7 +366,7 @@ namespace ClupApi.Services
                 }
             }
 
-            // Format Academic Events (Akademik Olaylar)
+
             if (academicEvents.Any())
             {
                 sb.AppendLine("🎓 AKADEMİK TAKVİM:");

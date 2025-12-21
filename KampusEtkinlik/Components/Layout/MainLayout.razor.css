@@ -3,11 +3,13 @@
     height: 100vh;
     overflow: hidden;
     position: relative;
+    background: var(--bg-primary);
+    transition: var(--theme-transition);
 }
 
 .sidebar {
     width: 240px;
-    background: linear-gradient(180deg, #0f1419 0%, #1a1f3a 30%, #2d1b3d 60%, #3a0647 100%);
+    background: var(--sidebar-bg);
     height: 100vh;
     position: fixed;
     left: 0;
@@ -35,12 +37,14 @@
     flex-direction: column;
     height: 100vh;
     width: calc(100% - 240px);
+    background: var(--bg-primary);
+    transition: var(--theme-transition);
 }
 
 .top-bar {
     height: 70px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border-bottom: 2px solid #e8ecf1;
+    background: var(--topbar-bg);
+    border-bottom: 2px solid var(--topbar-border);
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -48,8 +52,9 @@
     position: sticky;
     top: 0;
     z-index: 50;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--topbar-shadow);
     flex-shrink: 0;
+    transition: var(--theme-transition);
 }
 
     .top-bar::before {
@@ -59,13 +64,15 @@
         left: 0;
         right: 0;
         height: 2px;
-        background: linear-gradient(90deg, transparent 0%, #dc3545 50%, transparent 100%);
+        background: linear-gradient(90deg, transparent 0%, var(--primary-color) 50%, transparent 100%);
     }
 
 main {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
+    background: var(--bg-secondary);
+    transition: var(--theme-transition);
 }
 
 .content {

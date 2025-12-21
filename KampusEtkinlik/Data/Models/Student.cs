@@ -13,21 +13,21 @@ namespace KampusEtkinlik.Models
 
         [Required]
         [MaxLength(50)]
-        public string StudentName { get; set; }
+        public string StudentName { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(50)]
-        public string StudentSurname { get; set; }
+        public string StudentSurname { get; set; } = string.Empty;
 
         public long StudentNumber { get; set; }
 
         [Required]
         [MaxLength(50)]
-        public string StudentMail { get; set; }
+        public string StudentMail { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(20)]
-        public string StudentPassword { get; set; }
+        public string StudentPassword { get; set; } = string.Empty;
 
         public string? StudentStatus { get; set; }
 

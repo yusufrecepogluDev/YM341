@@ -1,3 +1,173 @@
+/* ============================================
+   THEME VARIABLES - Light Mode (Default)
+   ============================================ */
+:root {
+    /* Primary Colors */
+    --primary-color: #dc3545;
+    --primary-hover: #c82333;
+    --primary-light: rgba(220, 53, 69, 0.1);
+    --secondary-color: #6a0080;
+    
+    /* Background Colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f7fa;
+    --bg-tertiary: #e8ecf1;
+    --bg-page: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    
+    /* Card & Surface Colors */
+    --card-bg: #ffffff;
+    --card-border: #f0f0f0;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --card-hover-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    
+    /* Text Colors */
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --text-tertiary: #888888;
+    --text-muted: #999999;
+    
+    /* Border Colors */
+    --border-color: #e8ecf1;
+    --border-light: #f0f0f0;
+    --border-dark: #d1d5db;
+    
+    /* Top Bar */
+    --topbar-bg: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    --topbar-border: #e8ecf1;
+    --topbar-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    
+    /* Sidebar - Keep dark in both modes */
+    --sidebar-bg: linear-gradient(180deg, #0f1419 0%, #1a1f3a 30%, #2d1b3d 60%, #3a0647 100%);
+    
+    /* Modal */
+    --modal-bg: #ffffff;
+    --modal-overlay: rgba(0, 0, 0, 0.5);
+    --modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    
+    /* Input & Form */
+    --input-bg: #f8f9fa;
+    --input-border: #e8ecf1;
+    --input-focus-border: #dc3545;
+    --input-text: #333333;
+    
+    /* Button */
+    --btn-secondary-bg: #f3f4f6;
+    --btn-secondary-text: #374151;
+    --btn-secondary-hover: #e5e7eb;
+    
+    /* Hover States */
+    --hover-bg: #f3f4f6;
+    --hover-light: rgba(255, 255, 255, 0.1);
+    
+    /* Shadow */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+    
+    /* Scrollbar */
+    --scrollbar-track: #f1f1f1;
+    --scrollbar-thumb: #dc3545;
+    
+    /* Chat Widget */
+    --chat-messages-bg: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    --chat-input-bg: #f8f9fa;
+    --chat-bot-msg-bg: #ffffff;
+    --chat-bot-msg-text: #2c3e50;
+    
+    /* Calendar */
+    --calendar-day-bg: #ffffff;
+    --calendar-today-bg: #f0f9ff;
+    --calendar-legend-bg: #f9fafb;
+    
+    /* Transitions */
+    --theme-transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ============================================
+   THEME VARIABLES - Dark Mode
+   ============================================ */
+[data-theme="dark"] {
+    /* Primary Colors - Keep accent colors */
+    --primary-color: #dc3545;
+    --primary-hover: #e04555;
+    --primary-light: rgba(220, 53, 69, 0.2);
+    --secondary-color: #9b4dca;
+    
+    /* Background Colors */
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --bg-tertiary: #0f3460;
+    --bg-page: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    
+    /* Card & Surface Colors */
+    --card-bg: #252538;
+    --card-border: #3d3d5c;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --card-hover-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    
+    /* Text Colors */
+    --text-primary: #e8e8e8;
+    --text-secondary: #b0b0b0;
+    --text-tertiary: #8a8a8a;
+    --text-muted: #6a6a6a;
+    
+    /* Border Colors */
+    --border-color: #2d3748;
+    --border-light: #374151;
+    --border-dark: #4a5568;
+    
+    /* Top Bar */
+    --topbar-bg: linear-gradient(135deg, #1a1a2e 0%, #1e1e2f 100%);
+    --topbar-border: #2d3748;
+    --topbar-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    
+    /* Sidebar - Keep same dark gradient */
+    --sidebar-bg: linear-gradient(180deg, #0f1419 0%, #1a1f3a 30%, #2d1b3d 60%, #3a0647 100%);
+    
+    /* Modal */
+    --modal-bg: #1e1e2f;
+    --modal-overlay: rgba(0, 0, 0, 0.7);
+    --modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    
+    /* Input & Form */
+    --input-bg: #2d3748;
+    --input-border: #4a5568;
+    --input-focus-border: #dc3545;
+    --input-text: #e8e8e8;
+    
+    /* Button */
+    --btn-secondary-bg: #2d3748;
+    --btn-secondary-text: #e8e8e8;
+    --btn-secondary-hover: #374151;
+    
+    /* Hover States */
+    --hover-bg: #2d3748;
+    --hover-light: rgba(255, 255, 255, 0.05);
+    
+    /* Shadow */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    
+    /* Scrollbar */
+    --scrollbar-track: #2d3748;
+    --scrollbar-thumb: #dc3545;
+    
+    /* Chat Widget */
+    --chat-messages-bg: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    --chat-input-bg: #2d3748;
+    --chat-bot-msg-bg: #1e1e2f;
+    --chat-bot-msg-text: #e8e8e8;
+    
+    /* Calendar */
+    --calendar-day-bg: #1e1e2f;
+    --calendar-today-bg: #1e3a5f;
+    --calendar-legend-bg: #16213e;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
 * {
     box-sizing: border-box;
 }
@@ -9,6 +179,9 @@ html, body {
     width: 100%;
     height: 100%;
     overflow-x: hidden;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: var(--theme-transition);
 }
 
 a, .btn-link {

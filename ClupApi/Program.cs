@@ -1,4 +1,5 @@
 using ClupApi;
+using ClupApi.Middleware;
 using ClupApi.Repositories;
 using ClupApi.Repositories.Interfaces;
 using ClupApi.Services;
@@ -12,7 +13,35 @@ var builder = WebApplication.CreateBuilder(args);
 
 // DbContext (SQL Server)
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlOptions =>
+    {
+        sqlOptions.CommandTimeout(30);
+        sqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorNumbersToAdd: null);
+    });
+    
+    // Performance optimizations
+    options.EnableSensitiveDataLogging(false);
+    options.EnableServiceProviderCaching();
+    
+    if (builder.Environment.IsDevelopment())
+    {
+        options.LogTo(Console.WriteLine, LogLevel.Information);
+    }
+});
+
+// Authorization policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("StudentOnly", policy =>
+        policy.RequireClaim("userType", "student"));
+
+    options.AddPolicy("ClubOnly", policy =>
+        policy.RequireClaim("userType", "club"));
+
+    options.AddPolicy("StudentOrClub", policy =>
+        policy.RequireClaim("userType", "student", "club"));
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -78,6 +107,13 @@ builder.Services.AddScoped<IActivityParticipationRepository, ActivityParticipati
 
 // Service dependency injection
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IValidationService, ValidationService>();
+builder.Services.AddSingleton<IRateLimitService, RateLimitService>();
+builder.Services.AddSingleton<ISecurityLogger, SecurityLogger>();
+
+// AutoMapper
+builder.Services.AddAutoMapper(typeof(Program));
 
 // ChatService with HttpClient configuration (Requirement 5.1, 5.2)
 builder.Services.AddHttpClient<IChatService, ChatService>((serviceProvider, client) =>
@@ -187,8 +223,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Security headers middleware (first in pipeline)
+app.UseSecurityHeaders();
+
 // CORS must be before Authentication and Authorization
 app.UseCors("AllowClient");
+
+// Rate limiting middleware (before authentication)
+app.UseRateLimiting();
 
 app.UseAuthentication();
 

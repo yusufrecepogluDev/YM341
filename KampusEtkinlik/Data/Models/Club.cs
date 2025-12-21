@@ -12,13 +12,16 @@ namespace KampusEtkinlik.Models
 
         [Required]
         [MaxLength(100)]
-        public string ClubName { get; set; }
+        public string ClubName { get; set; } = string.Empty;
+        [Required]
+        [MaxLength(500)]
+        public string _Description { get; set; } = string.Empty;
 
         public long ClubNumber { get; set; }
 
         [Required]
         [MaxLength(20)]
-        public string ClubPassword { get; set; }
+        public string ClubPassword { get; set; } = string.Empty;
 
         public bool IsActive { get; set; }
 

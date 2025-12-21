@@ -125,9 +125,6 @@
         .UseAdvancedExtensions()
         .Build();
 
-    /// <summary>
-    /// Renders markdown content to HTML for bot messages
-    /// </summary>
     private string RenderMarkdown(string content)
     {
         if (string.IsNullOrWhiteSpace(content))
@@ -170,7 +167,6 @@
         {
             _ = Task.Run(async () =>
             {
-                await Task.Delay(100);
                 await ScrollToBottom();
                 
                 // Initialize chat session with calendar context
