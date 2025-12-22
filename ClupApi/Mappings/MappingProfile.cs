@@ -65,6 +65,8 @@ namespace ClupApi.Mappings
                 .ForMember(dest => dest.NumberOfParticipants, opt => opt.Ignore())
                 .ForMember(dest => dest.CreationDate, opt => opt.Ignore())
                 .ForMember(dest => dest.IsActive, opt => opt.Ignore())
+                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+                .ForMember(dest => dest.DeletionDate, opt => opt.Ignore())
                 .ForMember(dest => dest.OrganizingClub, opt => opt.Ignore())
                 .ForMember(dest => dest.ActivityParticipations, opt => opt.Ignore());
 

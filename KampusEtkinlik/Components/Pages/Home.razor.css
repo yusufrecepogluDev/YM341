@@ -753,3 +753,113 @@
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
+
+
+/* --- 11. ÖNERİ BÖLÜMÜ --- */
+.oneri-bolumu {
+    position: relative;
+}
+
+.oneri-bolumu .baslik {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.recommendation-card {
+    position: relative;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.recommendation-card::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), #ffc107);
+    border-radius: 14px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.recommendation-card:hover::after {
+    opacity: 1;
+}
+
+.recommendation-badge {
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    color: #1a1a2e;
+    padding: 0.3rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    z-index: 3;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
+    animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.6);
+    }
+}
+
+.oneri-bolumu .slider-wrapper {
+    background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-secondary) 100%);
+    border: 1px solid var(--border-color);
+}
+
+.oneri-bolumu .empty-card {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    text-shadow: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.oneri-bolumu .empty-card h3 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.oneri-bolumu .empty-card p {
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+    margin: 0;
+}
+
+.oneri-bolumu .loading-card {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    text-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.oneri-bolumu .loading-card h3 {
+    color: var(--text-primary);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}

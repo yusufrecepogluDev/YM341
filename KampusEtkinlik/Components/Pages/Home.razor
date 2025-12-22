@@ -5,10 +5,61 @@
 @inject ActivityService ActivityService
 @inject AnnouncementService AnnouncementService
 @inject ActivityParticipationService ParticipationService
+@inject RecommendationService RecommendationService
 @inject TokenService TokenService
 @inject IJSRuntime JSRuntime
+@inject IConfiguration Configuration
 
 <main class="ana-icerik">
+
+    @* --- KİŞİSELLEŞTİRİLMİŞ ÖNERİLER BÖLÜMÜ --- *@
+    @if (isStudent && currentUserId > 0)
+    {
+        <section class="bolum-konteyner oneri-bolumu">
+            <h2 class="baslik">🎯 Senin İçin Öneriler</h2>
+
+            <div class="slider-wrapper">
+                <button class="kaydirma-butonu sol" @onclick="() => ScrollRecommendationsLeft()">←</button>
+
+                <div class="slider-track" @ref="oneriListesi">
+                    @if (isLoadingRecommendations)
+                    {
+                        <div class="slider-card loading-card recommendation-card">
+                            <h3>Öneriler yükleniyor...</h3>
+                        </div>
+                    }
+                    else if (recommendedActivities == null || !recommendedActivities.Any())
+                    {
+                        <div class="slider-card empty-card recommendation-card">
+                            <h3>Öneri Bulunamadı</h3>
+                            <p>Kulüplere üye olarak kişiselleştirilmiş öneriler alabilirsiniz.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var activity in recommendedActivities)
+                        {
+                            <div class="slider-card content-card recommendation-card"
+                                 style="background-image: url('@GetActivityImage(activity.ImagePath)');"
+                                 @onclick="() => OpenActivityPopup(activity)">
+                                <div class="card-content">
+                                    <div class="recommendation-badge">✨ Önerilen</div>
+                                    <h3>@activity.ActivityName</h3>
+                                    <div class="date-badge">
+                                        📅 @activity.StartDate.ToString("dd.MM")
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <button class="kaydirma-butonu sag" @onclick="() => ScrollRecommendationsRight()">→</button>
+            </div>
+        </section>
+
+        <div class="ayirici-cizgi"></div>
+    }
 
     <section class="bolum-konteyner etkinlik-bolumu">
         <h2 class="baslik">Etkinlikler</h2>
@@ -34,6 +85,7 @@
                     @foreach (var activity in activities)
                     {
                         <div class="slider-card content-card"
+                             style="background-image: url('@GetActivityImage(activity.ImagePath)');"
                              @onclick="() => OpenActivityPopup(activity)">
                             <div class="card-content">
                                 <h3>@activity.ActivityName</h3>
@@ -241,8 +293,10 @@
 
 @code {
     private List<Activity>? activities;
+    private List<Activity>? recommendedActivities;
     private List<Announcement>? announcements;
     private ElementReference etkinlikListesi;
+    private ElementReference oneriListesi;
     private ElementReference duyuruListesi;
     private bool isPopupVisible = false;
     private Activity? selectedActivity;
@@ -256,6 +310,9 @@
     private bool isProcessing = false;
     private string participationMessage = "";
     private bool participationSuccess = false;
+    
+    // Öneri sistemi için
+    private bool isLoadingRecommendations = false;
     
     // Rating için
     private int userRating = 0;
@@ -297,8 +354,32 @@
             isStudent = userType == "student";
             currentUserId = userId ?? 0;
             
+            // Öğrenci ise önerileri yükle
+            if (isStudent && currentUserId > 0)
+            {
+                await LoadRecommendations();
+            }
+            
             StateHasChanged();
         }
+    }
+
+    private async Task LoadRecommendations()
+    {
+        isLoadingRecommendations = true;
+        StateHasChanged();
+        
+        try
+        {
+            recommendedActivities = await RecommendationService.GetRecommendationsAsync(currentUserId);
+        }
+        catch (Exception)
+        {
+            recommendedActivities = new List<Activity>();
+        }
+        
+        isLoadingRecommendations = false;
+        StateHasChanged();
     }
 
     private async Task OpenActivityPopup(Activity activity)
@@ -457,8 +538,25 @@
     
     private string GetRandomGradient() => gradients[random.Next(gradients.Length)];
 
+    private string GetActivityImage(string? imagePath)
+    {
+        if (string.IsNullOrWhiteSpace(imagePath))
+            return "/Images/EtkinlikDefault.png";
+        
+        // API'den gelen resimler için tam URL oluştur
+        if (imagePath.StartsWith("/Images/ActivityImages/"))
+        {
+            var apiBaseUrl = Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7077";
+            return $"{apiBaseUrl}{imagePath}";
+        }
+        
+        return imagePath;
+    }
+
     private async Task ScrollActivityLeft() => await JSRuntime.InvokeVoidAsync("scrollElementByWidth", etkinlikListesi);
     private async Task ScrollActivityRight() => await JSRuntime.InvokeVoidAsync("scrollElementByWidth", etkinlikListesi, true);
+    private async Task ScrollRecommendationsLeft() => await JSRuntime.InvokeVoidAsync("scrollElementByWidth", oneriListesi);
+    private async Task ScrollRecommendationsRight() => await JSRuntime.InvokeVoidAsync("scrollElementByWidth", oneriListesi, true);
     private async Task ScrollLeft() => await JSRuntime.InvokeVoidAsync("scrollElement", duyuruListesi, -400);
     private async Task ScrollRight() => await JSRuntime.InvokeVoidAsync("scrollElement", duyuruListesi, 400);
 }

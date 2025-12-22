@@ -23,6 +23,19 @@ namespace ClupApi.Controllers
             _mapper = mapper;
         }
 
+        /// Öğrencinin tüm üyeliklerini getirir (n8n öneri sistemi için - public)
+ 
+        [HttpGet("student/{studentId}/public")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetByStudentIdPublic(int studentId)
+        {
+            var memberships = await _membershipRepository.GetByStudentIdAsync(studentId);
+            // Sadece onaylanmış üyelikleri döndür
+            var approvedMemberships = memberships.Where(m => m.IsApproved == true);
+            var membershipDtos = _mapper.Map<IEnumerable<ClubMembershipResponseDto>>(approvedMemberships);
+            return Ok(ApiResponse<IEnumerable<ClubMembershipResponseDto>>.SuccessResponse(membershipDtos));
+        }
+
  
         /// Öğrencinin tüm üyeliklerini getirir
  

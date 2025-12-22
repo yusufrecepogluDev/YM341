@@ -7,6 +7,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// SignalR hub options - dosya yükleme için mesaj boyutunu artır
+builder.Services.AddSignalR(options =>
+{
+    options.MaximumReceiveMessageSize = 10 * 1024 * 1024; // 10MB
+});
+
 // LocalStorage servisi (sadece "Beni Hatırla" özelliği için)
 builder.Services.AddBlazoredLocalStorage();
 
@@ -52,6 +58,9 @@ builder.Services.AddHttpClient<AnalyticsService>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7077");
 });
+
+// Recommendation servisi - n8n AI öneri sistemi için
+builder.Services.AddHttpClient<RecommendationService>();
 
 // Chat servisi - N8n chatbot entegrasyonu için (uses IHttpClientFactory)
 builder.Services.AddHttpClient("ChatClient", client =>

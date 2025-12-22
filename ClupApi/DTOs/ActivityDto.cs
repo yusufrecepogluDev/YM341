@@ -26,6 +26,9 @@ namespace ClupApi.DTOs
         public DateTime? EvaluationStartDate { get; set; }
 
         public DateTime? EvaluationEndDate { get; set; }
+
+        [MaxLength(200, ErrorMessage = "Resim yolu en fazla 200 karakter olabilir")]
+        public string? ImagePath { get; set; }
     }
 
     public class ActivityUpdateDto
@@ -49,6 +52,9 @@ namespace ClupApi.DTOs
         public DateTime? EvaluationStartDate { get; set; }
 
         public DateTime? EvaluationEndDate { get; set; }
+
+        [MaxLength(200, ErrorMessage = "Resim yolu en fazla 200 karakter olabilir")]
+        public string? ImagePath { get; set; }
     }
 
     public class ActivityResponseDto
@@ -66,5 +72,6 @@ namespace ClupApi.DTOs
         public DateTime? EvaluationEndDate { get; set; }
         public DateTime? CreationDate { get; set; }
         public bool IsActive { get; set; }
+        public string? ImagePath { get; set; }
     }
 }

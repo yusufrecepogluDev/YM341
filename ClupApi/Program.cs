@@ -227,11 +227,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Security headers middleware (first in pipeline)
-app.UseSecurityHeaders();
-
-// CORS must be before Authentication and Authorization
+// CORS must be before Static Files for cross-origin image requests
 app.UseCors("AllowClient");
+
+// Static files middleware (for serving uploaded images)
+app.UseStaticFiles();
+
+// Security headers middleware
+app.UseSecurityHeaders();
 
 // Rate limiting middleware (before authentication)
 app.UseRateLimiting();

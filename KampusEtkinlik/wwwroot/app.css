@@ -237,7 +237,6 @@ h1:focus {
    ETKİNLİK KARTI ARKA PLAN RESMİ
    ============================================ */
 .slider-card.content-card {
-    background-image: url('/Images/EtkinlikDefault.png') !important;
     background-size: cover !important;
     background-position: center !important;
     background-repeat: no-repeat !important;

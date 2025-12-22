@@ -9,5 +9,6 @@ namespace KampusEtkinlik.Data.DTOs
         public int? ParticipantLimit { get; set; }
         public DateTime? EvaluationStartDate { get; set; }
         public DateTime? EvaluationEndDate { get; set; }
+        public string? ImagePath { get; set; }
     }
 }

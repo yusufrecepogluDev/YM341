@@ -12,14 +12,15 @@
 @using KampusEtkinlik.Data.Models
 @using KampusEtkinlik.Services
 @using KampusEtkinlik.Components.Layout
+@using Microsoft.AspNetCore.Components.Forms
 
 <AuthGuard RequiredUserType="club">
 
     <div class="sayfa-container-container">
         <div class="tab-menu">
-            <button type="button" class="@(aktifSekme == 1 ? "active-tab" : "")" @onclick="() => aktifSekme = 1">Etkinlik Yönetimi</button>
-            <button type="button" class="@(aktifSekme == 2 ? "active-tab" : "")" @onclick="() => aktifSekme = 2">Duyuru Yönetimi</button>
-            <button type="button" class="@(aktifSekme == 3 ? "active-tab" : "")" @onclick="() => aktifSekme = 3">Üyelik Yönetimi</button>
+            <button type="button" class="@(aktifSekme == 1 ? "active-tab" : "")" @onclick="() => aktifSekme = 1">📣Etkinlik Yönetimi</button>
+            <button type="button" class="@(aktifSekme == 2 ? "active-tab" : "")" @onclick="() => aktifSekme = 2">🔔Duyuru Yönetimi</button>
+            <button type="button" class="@(aktifSekme == 3 ? "active-tab" : "")" @onclick="() => aktifSekme = 3">👥Üyelik Yönetimi</button>
             <button type="button" class="@(aktifSekme == 4 ? "active-tab" : "")" @onclick="() => { aktifSekme = 4; LoadAnalytics(); }">📊 İstatistikler</button>
         </div>
         @if (aktifSekme == 1)
@@ -71,6 +72,21 @@
                                 <label>Etkinlik Oylama Bitiş Tarihi</label>
                                 <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="model.EvaluationEndDate" class="form-control" />
                             </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Etkinlik Görseli</label>
+                            <InputFile OnChange="OnImageSelected" accept="image/*" class="form-control" />
+                            @if (!string.IsNullOrEmpty(selectedImagePreview))
+                            {
+                                <div class="image-preview">
+                                    <img src="@selectedImagePreview" alt="Önizleme" style="max-width: 200px; max-height: 150px; margin-top: 10px; border-radius: 8px;" />
+                                </div>
+                            }
+                            @if (isUploadingImage)
+                            {
+                                <span class="upload-status">📤 Resim yükleniyor...</span>
+                            }
                         </div>
 
                         <button type="submit" class="etk-btn">
@@ -453,6 +469,28 @@
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <label>Etkinlik Görseli</label>
+                            <InputFile OnChange="OnEditImageSelected" accept="image/*" class="form-control" />
+                            @if (!string.IsNullOrEmpty(editImagePreview))
+                            {
+                                <div class="image-preview">
+                                    <img src="@editImagePreview" alt="Önizleme" style="max-width: 200px; max-height: 150px; margin-top: 10px; border-radius: 8px;" />
+                                </div>
+                            }
+                            else if (!string.IsNullOrEmpty(editModel.ImagePath))
+                            {
+                                <div class="image-preview">
+                                    <img src="@editModel.ImagePath" alt="Mevcut Görsel" style="max-width: 200px; max-height: 150px; margin-top: 10px; border-radius: 8px;" />
+                                    <small style="display: block; color: var(--text-secondary);">Mevcut görsel</small>
+                                </div>
+                            }
+                            @if (isUploadingEditImage)
+                            {
+                                <span class="upload-status">📤 Resim yükleniyor...</span>
+                            }
+                        </div>
+
                         <div class="modal-buttons">
                             <button type="button" class="btn-cancel" @onclick="CloseEditModal">İptal</button>
                             <button type="submit" class="btn-save">Kaydet</button>
@@ -548,6 +586,14 @@
 
     // Dropdown için
     private int? openDropdownId = null;
+
+    // Resim yükleme için
+    private IBrowserFile? selectedImageFile;
+    private string? selectedImagePreview;
+    private bool isUploadingImage = false;
+    private IBrowserFile? editImageFile;
+    private string? editImagePreview;
+    private bool isUploadingEditImage = false;
 
     // Duyuru yönetimi için
     [SupplyParameterFromForm]
@@ -701,6 +747,39 @@
 
         try
         {
+            // Resim yükleme
+            if (selectedImageFile != null)
+            {
+                isUploadingImage = true;
+                StateHasChanged();
+
+                try
+                {
+                    var stream = selectedImageFile.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+                    var result = await ActivityService.UploadImageAsync(stream, selectedImageFile.Name);
+
+                    isUploadingImage = false;
+
+                    if (result.Success && !string.IsNullOrEmpty(result.ImagePath))
+                    {
+                        model.ImagePath = result.ImagePath;
+                    }
+                    else
+                    {
+                        mesaj = $"❌ Resim yüklenemedi: {result.ErrorMessage}";
+                        StateHasChanged();
+                        return;
+                    }
+                }
+                catch (Exception imgEx)
+                {
+                    isUploadingImage = false;
+                    mesaj = $"❌ Resim yükleme hatası: {imgEx.Message}";
+                    StateHasChanged();
+                    return;
+                }
+            }
+
             System.Diagnostics.Debug.WriteLine($"Etkinlik oluşturuluyor - ClubID: {model.OrganizingClubID}");
             var sonuc = await ActivityService.AddAsync(model);
 
@@ -717,6 +796,10 @@
                     EvaluationStartDate = DateTime.Now,
                     EvaluationEndDate = DateTime.Now.AddDays(7)
                 };
+
+                // Resim değişkenlerini temizle
+                selectedImageFile = null;
+                selectedImagePreview = null;
 
                 // Etkinlikleri yeniden yükle
                 await LoadActivities();
@@ -757,7 +840,8 @@
                     EndDate = editingActivity.EndDate,
                     ParticipantLimit = editingActivity.ParticipantLimit,
                     EvaluationStartDate = editingActivity.EvaluationStartDate,
-                    EvaluationEndDate = editingActivity.EvaluationEndDate
+                    EvaluationEndDate = editingActivity.EvaluationEndDate,
+                    ImagePath = editingActivity.ImagePath
                 };
 
                 showEditModal = true;
@@ -779,6 +863,39 @@
 
         try
         {
+            // Yeni resim seçildiyse yükle
+            if (editImageFile != null)
+            {
+                isUploadingEditImage = true;
+                StateHasChanged();
+
+                try
+                {
+                    var stream = editImageFile.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+                    var result = await ActivityService.UploadImageAsync(stream, editImageFile.Name);
+
+                    isUploadingEditImage = false;
+
+                    if (result.Success && !string.IsNullOrEmpty(result.ImagePath))
+                    {
+                        editModel.ImagePath = result.ImagePath;
+                    }
+                    else
+                    {
+                        mesaj = $"❌ Resim yüklenemedi: {result.ErrorMessage}";
+                        StateHasChanged();
+                        return;
+                    }
+                }
+                catch (Exception imgEx)
+                {
+                    isUploadingEditImage = false;
+                    mesaj = $"❌ Resim yükleme hatası: {imgEx.Message}";
+                    StateHasChanged();
+                    return;
+                }
+            }
+
             var sonuc = await ActivityService.UpdateAsync(editingActivity.ActivityID, editModel);
 
             if (sonuc)
@@ -786,6 +903,8 @@
                 mesaj = "✅ Etkinlik başarıyla güncellendi.";
                 showEditModal = false;
                 editingActivity = null;
+                editImageFile = null;
+                editImagePreview = null;
                 await LoadActivities();
                 StateHasChanged();
             }
@@ -804,6 +923,8 @@
     {
         showEditModal = false;
         editingActivity = null;
+        editImageFile = null;
+        editImagePreview = null;
     }
 
     private void DeleteActivity(int activityId)
@@ -1163,5 +1284,77 @@
             "tamamlandı" or "completed" => "status-completed",
             _ => "status-default"
         };
+    }
+
+    // Resim seçme metodları
+    private async Task OnImageSelected(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            selectedImageFile = e.File;
+
+            if (selectedImageFile != null)
+            {
+                // Dosya boyutu kontrolü (2MB önizleme için)
+                if (selectedImageFile.Size > 2 * 1024 * 1024)
+                {
+                    // Büyük dosyalar için önizleme gösterme
+                    selectedImagePreview = null;
+                    mesaj = "📷 Resim seçildi (önizleme büyük dosyalar için devre dışı)";
+                }
+                else
+                {
+                    // Önizleme için base64'e çevir
+                    using var stream = selectedImageFile.OpenReadStream(maxAllowedSize: 2 * 1024 * 1024);
+                    using var memoryStream = new MemoryStream();
+                    await stream.CopyToAsync(memoryStream);
+                    var base64 = Convert.ToBase64String(memoryStream.ToArray());
+                    var contentType = selectedImageFile.ContentType;
+                    selectedImagePreview = $"data:{contentType};base64,{base64}";
+                }
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            mesaj = $"❌ Resim seçme hatası: {ex.Message}";
+            selectedImageFile = null;
+            selectedImagePreview = null;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnEditImageSelected(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            editImageFile = e.File;
+
+            if (editImageFile != null)
+            {
+                // Dosya boyutu kontrolü (2MB önizleme için)
+                if (editImageFile.Size > 2 * 1024 * 1024)
+                {
+                    editImagePreview = null;
+                }
+                else
+                {
+                    using var stream = editImageFile.OpenReadStream(maxAllowedSize: 2 * 1024 * 1024);
+                    using var memoryStream = new MemoryStream();
+                    await stream.CopyToAsync(memoryStream);
+                    var base64 = Convert.ToBase64String(memoryStream.ToArray());
+                    var contentType = editImageFile.ContentType;
+                    editImagePreview = $"data:{contentType};base64,{base64}";
+                }
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            mesaj = $"❌ Resim seçme hatası: {ex.Message}";
+            editImageFile = null;
+            editImagePreview = null;
+            StateHasChanged();
+        }
     }
 }

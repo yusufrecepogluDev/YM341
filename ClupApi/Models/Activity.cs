@@ -38,6 +38,9 @@ namespace ClupApi.Models
 
         public bool IsActive { get; set; }
 
+        [MaxLength(200)]
+        public string? ImagePath { get; set; }
+
         public Club OrganizingClub { get; set; }
         public ICollection<ActivityParticipation> ActivityParticipations { get; set; } = new List<ActivityParticipation>();
 

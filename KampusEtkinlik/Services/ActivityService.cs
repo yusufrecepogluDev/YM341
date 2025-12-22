@@ -100,5 +100,55 @@ namespace KampusEtkinlik.Services
             var response = await _httpClient.DeleteAsync($"{_baseUrl}/{id}");
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<(bool Success, string? ImagePath, string? ErrorMessage)> UploadImageAsync(Stream fileStream, string fileName)
+        {
+            try
+            {
+                await SetAuthorizationHeaderAsync();
+
+                var content = new MultipartFormDataContent();
+                var memoryStream = new MemoryStream();
+                await fileStream.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+
+                var streamContent = new StreamContent(memoryStream);
+                var extension = Path.GetExtension(fileName).TrimStart('.').ToLower();
+                var mimeType = extension switch
+                {
+                    "jpg" or "jpeg" => "image/jpeg",
+                    "png" => "image/png",
+                    "gif" => "image/gif",
+                    "webp" => "image/webp",
+                    _ => "application/octet-stream"
+                };
+                streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mimeType);
+                content.Add(streamContent, "file", fileName);
+
+                var response = await _httpClient.PostAsync($"{_baseUrl}/upload-image", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<ImageUploadResponse>();
+                    return (true, result?.ImagePath, null);
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Upload hatası: {response.StatusCode} - {error}");
+                    return (false, null, error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Upload exception: {ex.Message}");
+                return (false, null, ex.Message);
+            }
+        }
+    }
+
+    public class ImageUploadResponse
+    {
+        public string? ImagePath { get; set; }
     }
 }
